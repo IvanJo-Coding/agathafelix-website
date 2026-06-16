@@ -1,0 +1,31 @@
+/* ============================================================
+   Agatha Felix — Base element defaults
+   ============================================================ */
+body {
+  font-family: var(--font-body);
+  background: var(--surface-page);
+  color: var(--text-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  color: var(--text-heading);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-display);
+  font-weight: var(--weight-display);
+  margin: 0;
+}
+
+a { color: var(--text-link); }
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--af-yellow-soft); color: var(--af-ink); }
+
+:focus-visible {
+  outline: 3px solid var(--af-blue);
+  outline-offset: 3px;
+  border-radius: 6px;
+}

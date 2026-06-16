@@ -1,0 +1,72 @@
+/* ============================================================
+   Agatha Felix — Color tokens
+   Derived from the rainbow wordmark + clownfish mascot logo.
+   Playful, colorful, education-friendly. Warm paper background,
+   white "sticker" cards, candy-bright accents.
+   ============================================================ */
+:root {
+  /* ---- Brand base (from logo letterforms) ---- */
+  --af-orange:       #E8542D;  /* clownfish + 'A' — PRIMARY brand color */
+  --af-orange-deep:  #C73E1D;
+  --af-orange-soft:  #FBDDD2;
+  --af-orange-tint:  #FDF0EA;
+
+  --af-green:        #2BA84A;  /* 'g' green */
+  --af-green-deep:   #1F8438;
+  --af-green-soft:   #D3F0DB;
+  --af-green-tint:   #EDF9F0;
+
+  --af-yellow:       #F5D920;  /* 'a' lemon yellow — decorative only, never text */
+  --af-yellow-deep:  #E3A812;  /* amber — usable for small text/stars */
+  --af-yellow-soft:  #FCF3C4;
+  --af-yellow-tint:  #FEFAE6;
+
+  --af-purple:       #5C3A9E;  /* 't' purple */
+  --af-purple-deep:  #46297E;
+  --af-purple-soft:  #E3DAF4;
+  --af-purple-tint:  #F3EFFA;
+
+  --af-blue:         #38AEE8;  /* 'h' sky blue */
+  --af-blue-deep:    #1D87BD;
+  --af-blue-soft:    #D2EDFA;
+  --af-blue-tint:    #EBF7FD;
+
+  /* ---- WhatsApp (primary conversion channel) ---- */
+  --af-wa:           #25D366;
+  --af-wa-deep:      #1AAB50;
+
+  /* ---- Ink & paper neutrals (warm) ---- */
+  --af-ink:          #2B2A28;  /* near-black from logo tagline */
+  --af-ink-2:        #5C574F;  /* secondary text */
+  --af-ink-3:        #8C857A;  /* muted text / captions */
+  --af-line:         #EADFD2;  /* hairline borders on paper */
+  --af-line-strong:  #2B2A28;  /* sticker outlines (use at 2px) */
+
+  --af-paper:        #FFF8EE;  /* page background — warm cream */
+  --af-paper-2:      #FBEFDD;  /* alt section band */
+  --af-card:         #FFFFFF;  /* card / sticker surface */
+
+  /* ---- Semantic aliases ---- */
+  --color-primary:          var(--af-orange);
+  --color-primary-hover:    var(--af-orange-deep);
+  --color-cta:              var(--af-wa);
+  --color-cta-hover:        var(--af-wa-deep);
+
+  --text-heading:    var(--af-ink);
+  --text-body:       var(--af-ink-2);
+  --text-muted:      var(--af-ink-3);
+  --text-on-color:   #FFFFFF;
+  --text-link:       var(--af-blue-deep);
+
+  --surface-page:    var(--af-paper);
+  --surface-band:    var(--af-paper-2);
+  --surface-card:    var(--af-card);
+
+  --border-hairline: 1px solid var(--af-line);
+  --border-sticker:  2px solid var(--af-ink);
+
+  --success:         var(--af-green);
+  --warning:         var(--af-yellow-deep);
+  --danger:          var(--af-orange-deep);
+  --info:            var(--af-blue);
+}

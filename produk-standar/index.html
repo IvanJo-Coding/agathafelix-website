@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Produk Standar — Katalog Map Siap Pakai · Agatha Felix</title>
+<meta name="description" content="Katalog map siap kirim: clear holder, business file, map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir. Chat untuk harga."/>
+<link rel="canonical" href="https://agatha-felix.com/produk-standar/"/>
+<meta name="theme-color" content="#E8542D"/>
+<link rel="icon" type="image/png" href="/assets/favicon.png"/>
+<!-- Open Graph (WhatsApp / Facebook / IG share preview) -->
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Agatha Felix"/>
+<meta property="og:locale" content="id_ID"/>
+<meta property="og:title" content="Produk Standar — Katalog Map Siap Pakai · Agatha Felix"/>
+<meta property="og:description" content="Katalog map siap kirim: clear holder, business file, map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir. Chat untuk harga."/>
+<meta property="og:url" content="https://agatha-felix.com/produk-standar/"/>
+<meta property="og:image" content="https://agatha-felix.com/assets/hero-products.png"/>
+<meta property="og:image:width" content="1080"/>
+<meta property="og:image:height" content="1080"/>
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Produk Standar — Katalog Map Siap Pakai · Agatha Felix"/>
+<meta name="twitter:description" content="Katalog map siap kirim: clear holder, business file, map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir. Chat untuk harga."/>
+<meta name="twitter:image" content="https://agatha-felix.com/assets/hero-products.png"/>
+<link rel="stylesheet" href="/styles.css"/>
+<style>
+  html { scroll-behavior: smooth; }
+  #af-loader { position: fixed; inset: 0; z-index: 9999; background: var(--af-paper, #FFF8EE); display: flex; align-items: center; justify-content: center; transition: opacity .45s ease; }
+  #af-loader.af-hide { opacity: 0; pointer-events: none; }
+  .af-loader-box { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .af-loader-fish { width: 88px; height: 88px; object-fit: contain; animation: af-bob 1s cubic-bezier(.34,1.56,.64,1) infinite; }
+  @keyframes af-bob { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-16px) rotate(7deg); } }
+  .af-loader-dots { display: flex; gap: 9px; }
+  .af-loader-dots span { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--af-ink, #2B2A28); animation: af-pulse 1s ease infinite; }
+  .af-loader-dots span:nth-child(1){ background: var(--af-orange, #E8542D); animation-delay: 0s; }
+  .af-loader-dots span:nth-child(2){ background: var(--af-green, #2BA84A); animation-delay: .1s; }
+  .af-loader-dots span:nth-child(3){ background: var(--af-yellow, #F5D920); animation-delay: .2s; }
+  .af-loader-dots span:nth-child(4){ background: var(--af-purple, #5C3A9E); animation-delay: .3s; }
+  .af-loader-dots span:nth-child(5){ background: var(--af-blue, #38AEE8); animation-delay: .4s; }
+  @keyframes af-pulse { 0%,100% { transform: scale(.55); opacity: .5; } 50% { transform: scale(1.1); opacity: 1; } }
+  .af-loader-text { font-family: var(--font-display, sans-serif); font-weight: 800; color: var(--af-ink, #2B2A28); font-size: 15px; }
+  @media (prefers-reduced-motion: reduce) { .af-loader-fish, .af-loader-dots span { animation: none; } }</style>
+</head>
+<body>
+<div id="af-loader" aria-hidden="true">
+  <div class="af-loader-box">
+    <img src="/assets/favicon.png" alt="" class="af-loader-fish"/>
+    <div class="af-loader-dots"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="af-loader-text">Memuat keceriaan…</div>
+  </div>
+</div>
+<script>
+(function () {
+  function hide() {
+    var l = document.getElementById('af-loader');
+    if (l && !l.classList.contains('af-hide')) {
+      l.classList.add('af-hide');
+      setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 600);
+    }
+  }
+  var t = setInterval(function () {
+    var r = document.getElementById('root');
+    if (r && r.children.length) { clearInterval(t); setTimeout(hide, 280); }
+  }, 80);
+  setTimeout(function () { clearInterval(t); hide(); }, 6000);
+})();
+</script>
+<div id="root"></div>
+<script src="/vendor/react.production.min.js"></script>
+<script src="/vendor/react-dom.production.min.js"></script>
+<script src="/_ds_bundle.js"></script>
+<script src="/js/Shell.js"></script>
+<script src="/js/ProdukStandarSections.js"></script>
+<script src="/js/page-produk-standar.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+/* ============================================================
+   Agatha Felix — Spacing, radius, borders, shadows, motion
+   "Sticker sheet" aesthetic: chunky rounded corners, 2px ink
+   outlines, flat offset shadows (like a die-cut sticker lifted
+   off the page). Press = push down; hover = lift up.
+   ============================================================ */
+:root {
+  /* Spacing scale — 4px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;   /* section padding */
+
+  /* Corner radii — generous and friendly */
+  --radius-sm:   10px;  /* inputs, pills-in-cards   */
+  --radius-md:   16px;  /* cards, panels            */
+  --radius-lg:   24px;  /* feature cards, images    */
+  --radius-xl:   32px;  /* hero panels              */
+  --radius-pill: 999px; /* buttons, badges, chips   */
+
+  /* Sticker shadows — flat ink offset + soft ambient */
+  --shadow-sticker:    0 3px 0 rgba(43, 42, 40, 0.16);
+  --shadow-sticker-lg: 0 5px 0 rgba(43, 42, 40, 0.16);
+  --shadow-soft:       0 6px 24px rgba(92, 58, 30, 0.08);
+  --shadow-pop:        0 12px 32px rgba(92, 58, 30, 0.14);
+
+  /* Buttons get a colored "candy edge" — pair color + its deep:
+     box-shadow: 0 4px 0 var(--af-orange-deep); */
+
+  /* Motion — springy and quick, never sluggish */
+  --ease-pop:    cubic-bezier(0.34, 1.56, 0.64, 1); /* @kind other */ /* slight overshoot */
+  --ease-smooth: cubic-bezier(0.25, 0.6, 0.3, 1); /* @kind other */
+  --duration-fast: 140ms; /* @kind other */
+  --duration-base: 220ms; /* @kind other */
+
+  /* Layout */
+  --container-max: 1180px;
+  --container-pad: 28px;
+}
