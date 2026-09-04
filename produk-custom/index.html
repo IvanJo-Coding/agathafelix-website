@@ -85,5 +85,14 @@
 <script src="/js/Portfolio.js"></script>
 <script src="/js/ProdukCustomSections.js"></script>
 <script src="/js/page-produk-custom.js"></script>
+<script>
+document.addEventListener('click', function (e) {
+  var a = e.target.closest('a[href*="wa.me"], a[href*="api.whatsapp.com"]');
+  if (!a) return;
+  gtag('event', 'conversion', {
+    'send_to': 'AW-18374325686/elV-CN2Bhe4cELbrx7lE'
+  });
+});
+</script>
 </body>
 </html>
