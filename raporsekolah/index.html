@@ -85,7 +85,31 @@ form.lead h3{font-size:22px}
 .trust-n{font-family:"Baloo 2",sans-serif;font-weight:800;font-size:29px;color:var(--yellow);line-height:1}
 .trust-l{font-size:13px;color:rgba(255,255,255,.78);margin-top:4px}
 .clients{border-bottom:1px solid var(--line);background:var(--paper2);padding:18px 0}
-.clients-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 22px;font-size:14px;font-weight:700;color:var(--ink)}
+/* --- Client logos: a text pill by default, swapped for a logo image only once
+   that logo file is confirmed to load (see the upgrade script near the bottom).
+   Drop files into img/klien/ to light them up; a missing file is never broken. */
+.clients-label{text-align:center;color:var(--ink3);font-weight:600;font-size:13.5px;margin-bottom:12px}
+.clients-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;font-size:14px;font-weight:700;color:var(--ink)}
+.klien{display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:var(--pill);padding:7px 15px;line-height:1.2}
+.klien.has-logo{background:transparent;border-color:transparent;padding:0}
+.klien.has-logo img{height:42px;width:auto;max-width:150px;object-fit:contain;filter:grayscale(1);opacity:.72;transition:filter .18s,opacity .18s}
+.klien.has-logo:hover img{filter:none;opacity:1}
+/* --- Instagram video testimonials -------------------------------------------
+   The gradient placeholder is what renders until a real clip exists; the upgrade
+   script injects <video> only after the MP4 has actually loaded. */
+.igvid-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:30px;max-width:720px}
+.igvid{position:relative;display:block;text-decoration:none;color:inherit;background:#fff;border:2px solid var(--ink);border-radius:20px;box-shadow:0 3px 0 rgba(43,42,40,.16);overflow:hidden;transition:transform .16s var(--pop),box-shadow .16s var(--pop)}
+.igvid:hover{transform:translateY(-3px);box-shadow:0 7px 0 rgba(43,42,40,.16)}
+.igvid-media{position:relative;aspect-ratio:4/5;background:linear-gradient(140deg,var(--purple),var(--orange));display:grid;place-items:center;border-bottom:2px solid var(--ink)}
+.igvid-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1}
+.igvid-glyph{width:46px;height:46px;stroke:rgba(255,255,255,.85);fill:none;stroke-width:1.6}
+.igvid.has-video .igvid-glyph{display:none}
+.igvid-play{position:absolute;z-index:2;right:12px;bottom:12px;width:44px;height:44px;border-radius:var(--pill);background:rgba(255,255,255,.95);border:2px solid var(--ink);display:grid;place-items:center;box-shadow:0 2px 0 rgba(43,42,40,.3)}
+.igvid-play svg{width:18px;height:18px;fill:var(--ink);margin-left:2px}
+.igvid-body{display:block;padding:15px 17px 17px}
+.igvid-name{display:block;font-family:"Baloo 2",sans-serif;font-weight:800;font-size:16px;color:var(--ink);line-height:1.25}
+.igvid-role{display:block;font-size:13px;color:var(--ink3);margin-top:2px}
+.igvid-cta{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:700;color:var(--purple)}
 .promo{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .promo>div{padding:22px 24px;display:flex;gap:16px;align-items:flex-start}
 .ic{width:46px;height:46px;flex:0 0 46px;border-radius:var(--pill);display:grid;place-items:center}
@@ -171,7 +195,9 @@ body.offer-on .wabubble{opacity:0;transform:scale(.7);pointer-events:none}
 .wabubble{position:fixed;right:20px;bottom:24px;z-index:65;width:60px;height:60px;border-radius:var(--pill);background:var(--wa);border:2px solid var(--ink);box-shadow:0 4px 0 var(--wa-deep);display:grid;place-items:center;color:#fff}
 .wabubble svg{width:30px;height:30px}
 @media (max-width:960px){.model{max-width:560px;justify-self:center}.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;gap:32px;padding:38px 0 48px}.models,.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}.trust-grid{grid-template-columns:1fr 1fr;gap:22px}}
-@media (max-width:700px){.sec{padding:42px 0}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}}
+@media (max-width:700px){.sec{padding:42px 0}.igvid-grid{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.clients-row{gap:8px}.klien{font-size:12.5px;padding:6px 12px}.klien.has-logo img{height:34px}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}
+/* 320px phones: the logo + WhatsApp button together still outrun the header. */
+@media (max-width:400px){header img{height:28px}.hdr-r .btn{font-size:13.5px;padding:9px 12px}header .wrap{gap:10px}}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://agatha-felix.com/#business","name":"Agatha Felix Stationery","description":"Pabrik sampul rapor custom logo sekolah dan map plastik custom.","telephone":"+6282219472613","url":"https://agatha-felix.com/raporsekolah","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","sameAs":["https://www.instagram.com/agathafelix_indonesia/"],"hasMap":"https://maps.app.goo.gl/GA1jHXYczEmmMN136","address":{"@type":"PostalAddress","streetAddress":"Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya","addressLocality":"Bekasi Timur","addressRegion":"Jawa Barat","postalCode":"17112","addressCountry":"ID"},"areaServed":["Jakarta","Bogor","Depok","Tangerang","Bekasi","Indonesia"],"openingHours":"Mo-Sa 08:00-17:00","priceRange":"$$"},{"@type":"Product","name":"Sampul Rapor Custom Logo Sekolah","brand":{"@type":"Brand","name":"Agatha Felix"},"description":"Sampul rapor custom cetak logo sekolah, model jahit atau press hot print. MOQ 100 pcs, produksi 5-14 hari kerja.","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","offers":{"@type":"AggregateOffer","priceCurrency":"IDR","highPrice":"50000","availability":"https://schema.org/InStock","seller":{"@id":"https://agatha-felix.com/#business"}}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Minimum ordernya berapa?","acceptedAnswer":{"@type":"Answer","text":"MOQ 100 pcs untuk semua produk custom. Makin banyak jumlahnya, makin murah per pcs."}},{"@type":"Question","name":"Berapa lama produksinya?","acceptedAnswer":{"@type":"Answer","text":"5-14 hari kerja setelah desain di-ACC dan DP masuk."}},{"@type":"Question","name":"Bisa untuk sekolah negeri dengan PO dan invoice?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kami melayani pesanan dengan surat pesanan resmi, invoice, dan kwitansi bermaterai."}},{"@type":"Question","name":"Harga per pcs berapa?","acceptedAnswer":{"@type":"Answer","text":"Rata-rata di bawah Rp 50.000 per pcs dengan MOQ 100 pcs. Makin banyak jumlahnya, makin murah."}}]}]}</script>
 </head>
@@ -234,9 +260,15 @@ Kirim &amp; Lanjut ke WhatsApp</button>
 <div><div class="trust-n">5–14</div><div class="trust-l">Hari kerja produksi</div></div>
 </div></div></div>
 
-<div class="clients"><div class="wrap"><div class="clients-row">
-<span style="color:var(--ink3);font-weight:600">Sudah dipercaya:</span>
-<span>BPK Penabur</span><span>·</span><span>Al-Azhar Kelapa Gading</span><span>·</span><span>SPH Lippo Cikarang</span><span>·</span><span>Sekolah Alam Cikeas</span><span>·</span><span>SDI Al Masnuniyah</span><span>·</span><span>Badan Pertanahan Nasional</span>
+<div class="clients"><div class="wrap">
+<p class="clients-label">Sudah dipercaya</p>
+<div class="clients-row">
+<span class="klien" data-logo="img/klien/bpk-penabur.png">BPK Penabur</span>
+<span class="klien" data-logo="img/klien/al-azhar-kelapa-gading.png">Al-Azhar Kelapa Gading</span>
+<span class="klien" data-logo="img/klien/sph-lippo-cikarang.png">SPH Lippo Cikarang</span>
+<span class="klien" data-logo="img/klien/sekolah-alam-cikeas.png">Sekolah Alam Cikeas</span>
+<span class="klien" data-logo="img/klien/sdi-al-masnuniyah.png">SDI Al Masnuniyah</span>
+<span class="klien" data-logo="img/klien/badan-pertanahan-nasional.png">Badan Pertanahan Nasional</span>
 </div></div></div>
 
 <section class="sec"><div class="wrap">
@@ -343,6 +375,22 @@ Kirim &amp; Lanjut ke WhatsApp</button>
 <span class="eyebrow">Kata Mereka</span>
 <h2 style="margin-top:10px">Dari Sekolah yang Sudah Pesan</h2>
 <p style="margin-top:12px;max-width:44em">Video unboxing dan testimoni langsung dari sekolah kami kumpulkan di Instagram <a href="https://www.instagram.com/agathafelix_indonesia/" target="_blank" rel="noopener" data-ig style="font-weight:700">@agathafelix_indonesia</a>.</p>
+<div class="igvid-grid">
+<a class="igvid" data-ig href="https://www.instagram.com/p/DdDqBuSStgs/" target="_blank" rel="noopener" data-video="img/testi-cikeas.mp4">
+<span class="igvid-media"><svg class="igvid-glyph" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="rgba(255,255,255,.85)" stroke="none"/></svg><span class="igvid-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></span>
+<span class="igvid-body">
+<span class="igvid-name">Sekolah Alam Cikeas</span>
+<span class="igvid-role">Sampul rapor custom &mdash; video testimoni</span>
+<span class="igvid-cta">Tonton di Instagram &rarr;</span>
+</span></a>
+<a class="igvid" data-ig href="https://www.instagram.com/p/Db1yolqSDIL/" target="_blank" rel="noopener" data-video="img/testi-nurulfikri.mp4">
+<span class="igvid-media"><svg class="igvid-glyph" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="rgba(255,255,255,.85)" stroke="none"/></svg><span class="igvid-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></span>
+<span class="igvid-body">
+<span class="igvid-name">Bimbel Nurul Fikri</span>
+<span class="igvid-role">Map custom logo &mdash; video testimoni</span>
+<span class="igvid-cta">Tonton di Instagram &rarr;</span>
+</span></a>
+</div>
 <div class="testi">
 <div class="card"><div class="stars">★★★★★</div><blockquote>“Mockup-nya dikirim cepat dan revisinya nggak dipersulit. Rapor datang sebelum tanggal pembagian, jahitannya rapi semua. Tahun depan kami pesan lagi.”</blockquote><cite>Kepala Sekolah<b>SD Islam Terpadu, Bekasi</b></cite></div>
 <div class="card"><div class="stars">★★★★★</div><blockquote>“Harga per pcs-nya jauh di bawah vendor lain yang kami survei, dan hot print emasnya bikin rapor kami kelihatan resmi.”</blockquote><cite>Kepala Tata Usaha<b>SMA Swasta, Tangerang</b></cite></div>
@@ -432,6 +480,36 @@ setTimeout(showOffer,30000);
 document.addEventListener('mouseout',function(e){if(!e.relatedTarget&&e.clientY<10)showOffer()});
 document.querySelectorAll('[data-maps]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_maps')})});
 document.querySelectorAll('[data-ig]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_instagram')})});
+
+/* Progressive media upgrade. Both of these probe a file before touching the DOM,
+   so a logo or clip that has not been added yet simply leaves the placeholder in
+   place instead of rendering a broken image or an empty black video box. */
+document.querySelectorAll('.klien[data-logo]').forEach(function(el){
+  var probe=new Image();
+  probe.onload=function(){
+    var img=document.createElement('img');
+    img.src=probe.src;img.alt=el.textContent.trim();img.loading='lazy';
+    el.textContent='';el.appendChild(img);el.classList.add('has-logo');
+  };
+  probe.src=el.dataset.logo;
+});
+
+document.querySelectorAll('.igvid[data-video]').forEach(function(card){
+  var v=document.createElement('video');
+  v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';
+  v.setAttribute('playsinline','');v.setAttribute('muted','');
+  v.onloadeddata=function(){
+    card.querySelector('.igvid-media').appendChild(v);
+    card.classList.add('has-video');
+    if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var io=new IntersectionObserver(function(es){
+        es.forEach(function(e){ e.isIntersecting ? v.play().catch(function(){}) : v.pause(); });
+      },{threshold:.4});
+      io.observe(card);
+    }
+  };
+  v.src=card.dataset.video;
+});
 document.querySelectorAll('[data-tel]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_telepon')})});
 var f=document.getElementById('leadForm');
 f.addEventListener('submit',function(e){e.preventDefault();
