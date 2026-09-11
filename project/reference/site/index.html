@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Agatha Felix — Produsen Map Plastik ATK Langsung dari Pabrik</title>
+  <meta name="description" content="Produsen map plastik ATK langsung dari pabrik. Clear Holder, Map L, Map Executive, dan map custom untuk sekolah & tempat les. Harga langsung produsen!"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── DARK INDUSTRIAL PROFESSIONAL THEME ──── */
+    :root {
+      --bg:      #111828;
+      --bg-1:    #18202e;
+      --bg-2:    #1e2a3e;
+      --bg-3:    #253347;
+      --bg-dark: #0c1018;
+
+      --blue-700: #1a4a9e;
+      --blue-600: #1e5cbf;
+      --blue-500: #2060c0;
+      --blue-300: #6ea0e0;
+      --blue-dim: rgba(32,96,192,.14);
+      --blue-bdr: rgba(32,96,192,.3);
+
+      --amber-600: #b45309;
+      --amber-500: #d97706;
+      --amber-400: #f59e0b;
+      --amber-dim: rgba(217,119,6,.12);
+      --amber-bdr: rgba(217,119,6,.3);
+
+      --wa:       #25D366;
+      --wa-dark:  #1faa53;
+
+      --text-1:   #ddeaff;
+      --text-2:   #7a94c0;
+      --text-3:   #3d5070;
+
+      --border:   rgba(255,255,255,.07);
+      --bdr-blue: rgba(32,96,192,.25);
+
+      --shadow-sm: 0 1px 4px rgba(0,0,0,.35);
+      --shadow-md: 0 4px 20px rgba(0,0,0,.45);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,.55);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{overflow-x:hidden;max-width:100%}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text-2);-webkit-font-smoothing:antialiased;line-height:1.65}
+    img{max-width:100%;display:block} a{text-decoration:none;color:inherit}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .container{max-width:1180px;margin:0 auto;padding:0 28px}
+    .section{padding:88px 0}
+
+    h1,h2,h3,h4{color:var(--text-1);line-height:1.2}
+    h1{font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;letter-spacing:-.03em}
+    h2{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;letter-spacing:-.025em}
+    h3{font-size:1.05rem;font-weight:700} h4{font-size:.9rem;font-weight:700}
+
+    .badge{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:5px 14px;border-radius:6px}
+    .badge-navy{background:var(--blue-dim);color:var(--blue-300);border:1px solid var(--bdr-blue)}
+    .badge-amber{background:var(--amber-dim);color:var(--amber-400);border:1px solid var(--amber-bdr)}
+    .badge-green{background:rgba(37,211,102,.1);color:#4ade80;border:1px solid rgba(37,211,102,.2)}
+
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.9rem;border-radius:8px;cursor:pointer;transition:all .18s ease;border:none;padding:12px 22px;white-space:nowrap;font-family:inherit}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-wa{background:var(--wa);color:#fff;box-shadow:0 3px 14px rgba(37,211,102,.25)} .btn-wa:hover{background:var(--wa-dark)}
+    .btn-amber{background:var(--amber-500);color:#fff;box-shadow:0 3px 14px rgba(217,119,6,.3)} .btn-amber:hover{background:var(--amber-600)}
+    .btn-blue{background:var(--blue-500);color:#fff;box-shadow:0 3px 14px rgba(32,96,192,.3)} .btn-blue:hover{background:var(--blue-700)}
+    .btn-ghost{background:transparent;color:var(--text-2);border:1.5px solid var(--border)} .btn-ghost:hover{border-color:var(--bdr-blue);color:var(--text-1);background:var(--blue-dim)}
+    .btn-lg{padding:14px 28px;font-size:.95rem;border-radius:10px} .btn-full{width:100%}
+
+    .card{background:var(--bg-2);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-sm);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+    .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--bdr-blue)}
+    .divider{height:1px;background:var(--border)}
+
+    .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+    .reveal.vis{opacity:1;transform:translateY(0)}
+    @media(prefers-reduced-motion:reduce){.reveal{transition:none;opacity:1;transform:none}}
+
+    /* HEADER */
+    #header{position:fixed;top:0;left:0;right:0;z-index:100;height:66px;background:rgba(17,24,40,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;transition:background .3s}
+    #header.scrolled{background:rgba(17,24,40,.99)}
+    #header .container{display:flex;align-items:center;justify-content:space-between;width:100%;gap:16px}
+    .nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .nav-logo img{height:36px;width:36px;border-radius:8px;object-fit:cover}
+    .logo-fb{width:36px;height:36px;border-radius:8px;background:var(--blue-500);display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:.78rem;flex-shrink:0}
+    .nav-brand{font-weight:900;color:var(--text-1);font-size:1.05rem;letter-spacing:-.02em}
+    .nav-links{display:flex;align-items:center;gap:2px}
+    .nav-links a{font-size:.84rem;font-weight:600;color:var(--text-2);padding:6px 12px;border-radius:7px;transition:all .15s}
+    .nav-links a:hover{color:var(--text-1);background:var(--blue-dim)}
+    .nav-links a.active{color:var(--text-1);background:var(--blue-dim);border-bottom:2px solid var(--amber-500)}
+    .nav-links a.nav-amber{color:var(--amber-400)}
+    .nav-links a.nav-amber:hover{background:var(--amber-dim);color:var(--amber-400)}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text-2)}
+
+    /* MOBILE MENU */
+    #mmenu{position:fixed;inset:0;z-index:200;pointer-events:none}
+    #mov{position:absolute;inset:0;background:rgba(12,16,24,.7);opacity:0;transition:opacity .3s}
+    #mpanel{position:absolute;right:0;top:0;bottom:0;width:300px;background:var(--bg-1);border-left:1px solid var(--border);padding:24px;transform:translateX(100%);transition:transform .3s ease;overflow-y:auto}
+    #mmenu.open{pointer-events:auto} #mmenu.open #mov{opacity:1} #mmenu.open #mpanel{transform:translateX(0)}
+    .mnav-link{display:block;padding:13px 0;font-size:.95rem;font-weight:600;color:var(--text-2);border-bottom:1px solid var(--border);transition:color .15s}
+    .mnav-link:hover,.mnav-link.active{color:var(--text-1)}
+    .mnav-link.mnav-amber{color:var(--amber-400)!important}
+
+    /* HERO */
+    #hero{background:var(--bg);padding:108px 0 72px;overflow:hidden;position:relative;border-bottom:3px solid var(--amber-500)}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+    .hero-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+    .hero-dot{width:8px;height:8px;border-radius:50%;background:var(--amber-500);flex-shrink:0}
+    .hero-eyebrow-text{font-size:.75rem;font-weight:700;color:var(--amber-400);letter-spacing:.07em;text-transform:uppercase}
+    h1 .accent{color:var(--amber-400)}
+    .hero-desc{font-size:1rem;color:var(--text-2);margin-top:16px;max-width:520px;line-height:1.8}
+    .hero-desc strong{color:var(--text-1)}
+    .hero-ctas{display:flex;align-items:center;gap:12px;margin-top:28px;flex-wrap:wrap}
+    .hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:36px}
+    .stat-box{background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+    .stat-box strong{display:block;font-size:1.7rem;font-weight:900;color:var(--text-1);letter-spacing:-.03em;line-height:1}
+    .stat-box span{font-size:.72rem;color:var(--text-3);margin-top:4px;display:block}
+    .hero-img-wrap{position:relative}
+    .hero-img-inner{border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+    .hero-img-inner img{width:100%;height:400px;object-fit:cover;display:block}
+    .hero-badge-float{position:absolute;background:var(--bg-2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.78rem;font-weight:700;color:var(--text-1);box-shadow:var(--shadow-md);display:flex;align-items:center;gap:8px}
+    .hero-badge-float .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .hbf-1{top:-18px;left:-20px} .hbf-2{bottom:-18px;right:-20px}
+
+    /* TRUST BAR */
+    #trust{background:var(--bg-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:22px 0}
+    .trust-inner{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+    .trust-item{display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:.82rem;font-weight:500}
+    .trust-item svg{width:18px;height:18px;color:var(--amber-400);flex-shrink:0}
+
+    /* PATH SPLIT */
+    #path{background:var(--bg-1);border-bottom:1px solid var(--border)}
+    .sec-hdr{text-align:center;max-width:640px;margin:0 auto 48px}
+    .sec-hdr .badge{margin-bottom:12px} .sec-hdr h2{margin-bottom:10px} .sec-hdr p{font-size:.93rem}
+    .path-inner{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .path-card{padding:32px;border-radius:14px;border:1.5px solid var(--border);background:var(--bg-2);transition:all .22s;display:block;cursor:pointer}
+    .path-card:hover{border-color:var(--bdr-blue);box-shadow:var(--shadow-md);transform:translateY(-3px)}
+    .path-card.amber-path:hover{border-color:var(--amber-bdr)}
+    .path-icon{font-size:2.2rem;margin-bottom:14px}
+    .path-card h3{font-size:1.15rem;margin-bottom:8px}
+    .path-card p{font-size:.84rem;color:var(--text-3);line-height:1.65}
+    .path-link{margin-top:18px;font-size:.84rem;font-weight:700;display:flex;align-items:center;gap:5px}
+    .path-link-blue{color:var(--blue-300)} .path-link-amber{color:var(--amber-400)}
+
+    /* PRODUCTS */
+    #produk{background:var(--bg)}
+    .prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .prod-card{overflow:hidden}
+    .prod-card-icon{height:140px;background:var(--bg-1);display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid var(--border)}
+    .prod-card-body{padding:20px}
+    .prod-tag{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;display:block}
+    .prod-card-body h3{margin-bottom:6px}
+    .prod-card-body p{font-size:.8rem;line-height:1.6;color:var(--text-2)}
+    .prod-card-footer{padding:14px 20px;border-top:1px solid var(--border)}
+    .prod-tag-pill{font-size:.68rem;padding:3px 10px;border-radius:99px;background:var(--blue-dim);color:var(--blue-300);font-weight:600;border:1px solid var(--bdr-blue)}
+    .prod-featured{border-color:var(--amber-bdr)!important}
+    .prod-featured .prod-card-icon{background:var(--amber-dim)}
+
+    /* SCHOOL */
+    #sekolah{background:var(--bg-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .school-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+    .school-benefit{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .school-check{width:22px;height:22px;border-radius:50%;background:var(--blue-dim);border:1px solid var(--bdr-blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:.7rem;color:var(--blue-300)}
+    .school-benefit p{font-size:.86rem;line-height:1.65}
+    .school-highlight{background:var(--amber-dim);border:1px solid var(--amber-bdr);border-radius:12px;padding:18px 20px;margin-top:24px;display:flex;align-items:flex-start;gap:12px}
+    .school-highlight p{font-size:.84rem;line-height:1.7}
+    .school-highlight strong{color:var(--amber-400)}
+    .school-feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .sfc{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:18px;transition:border-color .2s}
+    .sfc:hover{border-color:var(--bdr-blue)}
+    .sfc:last-child{grid-column:span 2}
+    .sfc .emoji{font-size:1.5rem;margin-bottom:8px}
+    .sfc h4{margin-bottom:4px} .sfc p{font-size:.76rem;color:var(--text-3)}
+
+    /* FEATURES */
+    #keunggulan{background:var(--bg)}
+    .feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:48px}
+    .feat-card{padding:26px}
+    .feat-icon{width:48px;height:48px;border-radius:10px;background:var(--amber-dim);border:1px solid var(--amber-bdr);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .feat-icon svg{width:22px;height:22px;color:var(--amber-400)}
+    .feat-card p{font-size:.83rem;margin-top:8px;line-height:1.65}
+
+    /* HOW TO ORDER */
+    #cara-pesan{background:var(--bg-1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;position:relative}
+    .steps::before{content:'';position:absolute;top:32px;left:calc(100%/6 + 32px);right:calc(100%/6 + 32px);height:2px;background:linear-gradient(90deg,var(--amber-500),var(--amber-400),transparent)}
+    .step{text-align:center;padding:0 8px}
+    .step-num{width:64px;height:64px;border-radius:50%;background:var(--amber-500);color:#fff;font-size:1.3rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 4px 16px rgba(217,119,6,.4)}
+    .step h3{margin-bottom:8px} .step p{font-size:.83rem}
+
+    /* TESTIMONIALS */
+    #testimoni{background:var(--bg)}
+    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+    .testi-card{padding:26px}
+    .testi-stars{color:var(--amber-400);font-size:.9rem;letter-spacing:2px;margin-bottom:12px}
+    .testi-quote{font-size:.85rem;line-height:1.75;font-style:italic;margin-bottom:18px;color:var(--text-2)}
+    .testi-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);padding-top:14px}
+    .testi-avatar{width:38px;height:38px;border-radius:50%;background:var(--blue-600);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.72rem;flex-shrink:0}
+    .testi-name{font-size:.84rem;font-weight:700;color:var(--text-1)}
+    .testi-role{font-size:.72rem;color:var(--text-3)}
+
+    /* FAQ */
+    #faq{background:var(--bg-1);border-top:1px solid var(--border)}
+    .faq-inner{display:grid;grid-template-columns:1fr 2fr;gap:60px;align-items:start}
+    details.fi{background:var(--bg-2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+    details.fi[open]{border-color:var(--bdr-blue)}
+    details.fi summary{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;cursor:pointer;font-weight:600;font-size:.88rem;color:var(--text-1);list-style:none;gap:12px}
+    details.fi summary::-webkit-details-marker{display:none}
+    .fi-icon{flex-shrink:0;width:24px;height:24px;border-radius:6px;background:var(--bg-3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .25s;font-size:.9rem;color:var(--text-3)}
+    details.fi[open] .fi-icon{background:var(--blue-dim);border-color:var(--bdr-blue);transform:rotate(45deg);color:var(--blue-300)}
+    .fi-body{padding:0 20px 16px;font-size:.84rem;line-height:1.75;color:var(--text-2)}
+
+    /* CTA SECTION */
+    #kontak{background:var(--bg-2);border-top:3px solid var(--amber-500)}
+    .cta-inner{text-align:center;max-width:600px;margin:0 auto}
+    .cta-inner h2{color:var(--text-1);margin-bottom:12px}
+    .cta-inner p{color:var(--text-2);font-size:.95rem;margin-bottom:32px}
+    .cta-btns{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+    .cta-note{font-size:.75rem;color:var(--text-3);margin-top:14px}
+
+    /* FOOTER */
+    #footer{background:var(--bg-dark);border-top:1px solid var(--border);padding:52px 0 0}
+    .footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:44px;padding-bottom:44px}
+    .footer-brand p{font-size:.82rem;margin-top:10px;max-width:230px;line-height:1.7;color:var(--text-3)}
+    .footer-col h5{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-3);margin-bottom:14px}
+    .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+    .footer-col ul li a{font-size:.83rem;color:var(--text-3);transition:color .15s}
+    .footer-col ul li a:hover{color:var(--text-1)}
+    .footer-bottom{border-top:1px solid var(--border);padding:18px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+    .footer-bottom p{font-size:.78rem;color:var(--text-3)}
+
+    /* FLOATING WA */
+    #wa-float{position:fixed;bottom:28px;right:28px;z-index:90;width:54px;height:54px;border-radius:50%;background:var(--wa);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:transform .2s}
+    #wa-float:hover{transform:scale(1.1)} #wa-float svg{width:26px;height:26px}
+
+    /* === UI/UX PRO MAX UPGRADES === */
+    /* Icon System (Lucide-style: 24px stroke, currentColor inherits) */
+    .ico { display:inline-block; vertical-align:middle; flex-shrink:0; }
+    .ico-sm { width:18px; height:18px; }
+    .ico-md { width:24px; height:24px; }
+    .ico-lg { width:32px; height:32px; }
+    .ico-xl { width:42px; height:42px; }
+
+    /* Image with graceful SVG fallback (Phase 4) */
+    .img-fb { position:relative; width:100%; height:100%; display:block; }
+    .img-fb img { width:100%; height:100%; object-fit:cover; display:block; }
+    .img-fb .fb-icon { position:absolute; inset:0; display:none; align-items:center; justify-content:center; color:var(--blue-300); background:linear-gradient(135deg,var(--bg-1),var(--bg-2)); }
+    .img-fb img.broken { display:none; } .img-fb img.broken + .fb-icon, .img-fb img[src=""] + .fb-icon { display:flex; }
+
+    /* Premium product card upgrades */
+    .prod-card { cursor:default; transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+    .prod-card:hover { transform:translateY(-6px) scale(1.015); box-shadow:0 24px 56px rgba(0,0,0,.5); }
+    .prod-card .prod-card-icon { position:relative; overflow:hidden; }
+    .prod-card .prod-card-icon::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, rgba(0,0,0,.25)); pointer-events:none; }
+    .prod-card-icon .ico-xl { color:var(--blue-300); }
+    .prod-featured { box-shadow:0 0 0 1px var(--amber-bdr), 0 8px 30px rgba(217,119,6,.15); }
+    .prod-featured .prod-card-icon .ico-xl { color:var(--amber-400); }
+    .prod-featured .prod-card-icon::after { background:linear-gradient(180deg, transparent 60%, rgba(217,119,6,.15)); }
+    .prod-card-footer { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+    .prod-price-hint { font-size:.72rem; color:var(--text-3); }
+    .prod-price-hint strong { color:var(--amber-400); }
+
+    /* Feature card icon refresh */
+    .feat-icon { transition:transform .25s ease, background .25s ease; }
+    .feat-card:hover .feat-icon { transform:rotate(-6deg) scale(1.06); background:var(--amber-dim); }
+
+    /* Stat box pulse + counter */
+    .stat-box { position:relative; overflow:hidden; }
+    .stat-box::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:2px; background:linear-gradient(90deg, transparent, var(--amber-400), transparent); animation:stat-shimmer 3s ease-in-out infinite; }
+    @keyframes stat-shimmer { 0%,100%{left:-100%} 50%{left:100%} }
+    .stat-box strong[data-count] { display:inline-block; min-width:1ch; }
+
+    /* Hero badges pulse */
+    .hero-badge-float .dot { animation:dot-pulse 2s ease-in-out infinite; }
+    @keyframes dot-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.4);opacity:.6} }
+
+    /* === TRUST MARQUEE === */
+    #trust { overflow:hidden; padding:18px 0; }
+    .marquee { display:flex; overflow:hidden; mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+    .marquee-track { display:flex; flex-shrink:0; gap:48px; align-items:center; padding-right:48px; animation:marquee 28s linear infinite; }
+    .marquee:hover .marquee-track { animation-play-state:paused; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-100%)} }
+    .trust-item { white-space:nowrap; }
+
+    /* === SCHOOL SECTION UPGRADE === */
+    .school-mini-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0 24px; }
+    .school-mini-stat { background:var(--bg-2); border:1px solid var(--border); border-radius:10px; padding:12px 10px; text-align:center; transition:border-color .2s; }
+    .school-mini-stat:hover { border-color:var(--amber-bdr); }
+    .school-mini-stat strong { display:block; font-size:1.15rem; font-weight:900; color:var(--amber-400); line-height:1; }
+    .school-mini-stat span { font-size:.68rem; color:var(--text-3); margin-top:4px; display:block; line-height:1.3; }
+    /* 2x2 grid for school benefits */
+    .school-benefit-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px; }
+    .school-benefit { margin-bottom:0; padding:12px; background:var(--bg-2); border:1px solid var(--border); border-radius:10px; transition:border-color .2s; }
+    .school-benefit:hover { border-color:var(--bdr-blue); }
+    /* Highlight pull-quote */
+    .school-highlight { border-left:4px solid var(--amber-500); border-top:none; border-right:none; border-bottom:none; border-radius:0; background:transparent; padding:14px 18px; }
+
+    /* === GLOBAL POLISH === */
+    button, a, [role="button"], .card { cursor:pointer; }
+    .prod-card, .feat-card, .testi-card, .card { cursor:default; }
+    *:focus-visible { outline:2px solid var(--amber-400); outline-offset:3px; border-radius:6px; }
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track, .stat-box::before, .hero-badge-float .dot { animation:none !important; }
+      * { transition-duration:0.01ms !important; animation-duration:0.01ms !important; }
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:1024px){.prod-grid{grid-template-columns:repeat(2,1fr)}.feat-grid{grid-template-columns:repeat(2,1fr)}.footer-grid{grid-template-columns:1fr 1fr;gap:32px}}
+    @media(max-width:768px){
+      .section{padding:60px 0} .hero-grid{grid-template-columns:1fr;gap:40px} .hero-img-wrap{display:none}
+      .hero-stats{grid-template-columns:repeat(3,1fr);gap:8px}
+      .hero-ctas{flex-direction:column;align-items:stretch} .hero-ctas .btn{justify-content:center}
+      .school-grid{grid-template-columns:1fr;gap:36px} .school-feat-grid{grid-template-columns:1fr 1fr}
+      .sfc:last-child{grid-column:span 2}
+      .testi-grid{grid-template-columns:1fr} .steps{grid-template-columns:1fr;gap:24px} .steps::before{display:none}
+      .faq-inner{grid-template-columns:1fr;gap:28px} .footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+      .footer-bottom{flex-direction:column;align-items:flex-start} .nav-links{display:none} .hamburger{display:flex}
+      .nav-cta-d{display:none} .path-inner{grid-template-columns:1fr;gap:16px}
+      .cta-btns{flex-direction:column;width:100%} .cta-btns .btn{width:100%;justify-content:center}
+      .trust-inner{gap:18px;justify-content:flex-start} #wa-float{width:50px;height:50px;bottom:20px;right:18px}
+      .school-benefit-grid{grid-template-columns:1fr}
+      .marquee-track{animation-duration:35s;gap:32px;padding-right:32px}
+    }
+    @media(max-width:480px){
+      html,body{overflow-x:hidden} .container{padding:0 18px} .section{padding:48px 0}
+      h1{font-size:1.8rem} h2{font-size:1.45rem}
+      .hero-stats{gap:6px} .stat-box{padding:10px 8px} .stat-box strong{font-size:1.35rem}
+      .prod-grid{grid-template-columns:1fr} .feat-grid{grid-template-columns:1fr}
+      .school-feat-grid{grid-template-columns:1fr} .sfc:last-child{grid-column:span 1}
+      .school-highlight{flex-direction:column;gap:6px} .footer-grid{grid-template-columns:1fr;gap:24px}
+      .school-mini-stats{grid-template-columns:1fr 1fr}
+      .school-mini-stat:last-child{grid-column:span 2}
+      #wa-float{width:48px;height:48px;bottom:16px;right:14px}
+    }
+  </style>
+</head>
+<body>
+
+<header id="header">
+  <div class="container">
+    <a href="index.html" class="nav-logo" aria-label="Agatha Felix">
+      <img src="images/Logo.png" alt="Logo" onerror="this.style.display='none';document.getElementById('lfb').style.display='flex'"/>
+      <div class="logo-fb" id="lfb" style="display:none">AF</div>
+      <span class="nav-brand">Agatha Felix</span>
+    </a>
+    <nav class="nav-links" aria-label="Navigasi">
+      <a href="index.html" class="active">Home</a>
+      <a href="produk-standar.html">Produk Standar</a>
+      <a href="produk-custom.html" class="nav-amber">Produk Custom</a>
+      <a href="#cara-pesan">Cara Pesan</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="https://wa.me/6282219472613?text=Halo%20Agatha%20Felix%2C%20saya%20mau%20tanya%20tentang%20produk%20map%20plastik" target="_blank" rel="noopener noreferrer" class="btn btn-wa nav-cta-d" style="padding:9px 18px;font-size:.82rem;border-radius:8px">
+        Hubungi Kami
+      </a>
+      <button class="hamburger" id="hbg" aria-label="Menu" aria-expanded="false">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mmenu" aria-hidden="true">
+  <div id="mov"></div>
+  <div id="mpanel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+      <span style="font-weight:900;color:var(--text-1)">Agatha Felix</span>
+      <button id="mcls" style="background:none;border:none;cursor:pointer;color:var(--text-2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <nav>
+      <a href="index.html" class="mnav-link active">Home</a>
+      <a href="produk-standar.html" class="mnav-link">Produk Standar</a>
+      <a href="produk-custom.html" class="mnav-link mnav-amber">Produk Custom</a>
+      <a href="#cara-pesan" class="mnav-link">Cara Pesan</a>
+      <a href="#faq" class="mnav-link">FAQ</a>
+    </nav>
+    <a href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-lg" style="margin-top:24px;width:100%;justify-content:center">Chat WhatsApp</a>
+  </div>
+</div>
+
+<main>
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="reveal">
+        <div class="hero-eyebrow"><div class="hero-dot"></div><span class="hero-eyebrow-text">🏭 Produsen Langsung — Bukan Reseller</span></div>
+        <h1>Spesialis <span class="accent">Map Plastik ATK</span> untuk Kantor, Sekolah &amp; Lebih</h1>
+        <p class="hero-desc">Kami pabriknya langsung. <strong>Clear Holder, Map L, Map Executive</strong>, hingga <strong>rapor custom untuk sekolah &amp; tempat les</strong>. Tidak ada perantara — harga langsung dari sumbernya.</p>
+        <div class="hero-ctas">
+          <a href="https://wa.me/6282219472613?text=Halo%20Agatha%20Felix%2C%20saya%20mau%20minta%20penawaran%20harga%20map%20plastik" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-lg">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width:19px;height:19px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Minta Penawaran Gratis
+          </a>
+          <a href="#produk" class="btn btn-ghost btn-lg">Lihat Produk ↓</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-box"><strong data-count="20" data-suffix="M+">0</strong><span>Unit Diproduksi</span></div>
+          <div class="stat-box"><strong data-count="500" data-suffix="+">0</strong><span>Institusi Dilayani</span></div>
+          <div class="stat-box"><strong data-count="4" data-suffix="">0</strong><span>Varian Utama</span></div>
+        </div>
+      </div>
+      <div class="hero-img-wrap reveal" data-delay="120">
+        <div class="hero-img-inner"><img src="images/hero-image.png" alt="Produk Map Plastik Agatha Felix" loading="lazy"/></div>
+        <div class="hero-badge-float hbf-1"><div class="dot" style="background:var(--wa)"></div>Langsung dari Pabrik</div>
+        <div class="hero-badge-float hbf-2"><div class="dot" style="background:var(--amber-400)"></div>Custom Sekolah &amp; Corporate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="trust">
+  <div class="marquee" aria-label="Trust signals">
+    <div class="marquee-track" aria-hidden="false">
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Produsen Bersertifikat</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v6a3 3 0 01-3 3v0a3 3 0 01-3-3V3M9 3v6a3 3 0 01-3 3v0a3 3 0 01-3-3V3m6 0v6a3 3 0 003 3v0a3 3 0 003-3V3M5 21V12m14 9V12M5 21h14"/></svg>Harga Langsung Pabrik</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17h6m-3-4v4M5 17H3a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v3m0 6h6a1 1 0 001-1v-4l-3-3h-4v8z"/></svg>Kirim Seluruh Indonesia</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Custom Logo &amp; Desain</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Produksi Cepat</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>MOQ Mulai 100 pcs</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>Bayar Transfer / QRIS</div>
+    </div>
+    <div class="marquee-track" aria-hidden="true">
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Produsen Bersertifikat</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v6a3 3 0 01-3 3v0a3 3 0 01-3-3V3M9 3v6a3 3 0 01-3 3v0a3 3 0 01-3-3V3m6 0v6a3 3 0 003 3v0a3 3 0 003-3V3M5 21V12m14 9V12M5 21h14"/></svg>Harga Langsung Pabrik</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17h6m-3-4v4M5 17H3a1 1 0 01-1-1V8a1 1 0 011-1h11a1 1 0 011 1v3m0 6h6a1 1 0 001-1v-4l-3-3h-4v8z"/></svg>Kirim Seluruh Indonesia</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Custom Logo &amp; Desain</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Produksi Cepat</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>MOQ Mulai 100 pcs</div>
+      <div class="trust-item"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>Bayar Transfer / QRIS</div>
+    </div>
+  </div>
+</div>
+
+<section id="path" class="section">
+  <div class="container">
+    <div class="sec-hdr reveal"><span class="badge badge-navy">Pilih Kebutuhan Anda</span><h2>Kami Melayani Dua Jenis Pelanggan</h2><p>Pilih kategori yang sesuai untuk melihat produk dan harga yang relevan.</p></div>
+    <div class="path-inner reveal" data-delay="80">
+      <a href="produk-standar.html" class="path-card">
+        <div class="path-icon" style="color:var(--blue-300)"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg></div>
+        <h3>Produk Standar</h3>
+        <p>Beli eceran di Shopee atau grosir langsung ke kami. Cocok untuk <strong style="color:var(--text-1)">toko ATK, reseller</strong>, dan kebutuhan kantor/pribadi.</p>
+        <div class="path-link path-link-blue">Lihat Produk Standar &amp; Harga →</div>
+      </a>
+      <a href="produk-custom.html" class="path-card amber-path">
+        <div class="path-icon" style="color:var(--amber-400)"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div>
+        <h3>Produk Custom</h3>
+        <p>Order map dengan cetak logo &amp; desain penuh. Ideal untuk <strong style="color:var(--text-1)">sekolah, bimbel, universitas, corporate</strong>, dan pemerintah.</p>
+        <div class="path-link path-link-amber">Lihat Portofolio &amp; Order Custom →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="produk" class="section">
+  <div class="container">
+    <div class="sec-hdr reveal"><span class="badge badge-navy">Produk Kami</span><h2>Empat Produk Utama</h2><p>Semua diproduksi in-house dengan kontrol kualitas langsung dari lantai produksi.</p></div>
+    <div class="prod-grid">
+      <div class="card prod-card reveal" data-delay="60">
+        <div class="prod-card-icon">
+          <div class="img-fb"><img src="images/produk/clear-holder.jpg" alt="Clear Holder" loading="lazy" onerror="this.classList.add('broken')"/><div class="fb-icon"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div></div>
+        </div>
+        <div class="prod-card-body"><span class="prod-tag">Standar</span><h3>Clear Holder</h3><p>Map plastik transparan. Berbagai ukuran dan ketebalan, cocok untuk dokumen kantor dan sekolah.</p></div>
+        <div class="prod-card-footer"><span class="prod-tag-pill">Kantor · Sekolah</span><span class="prod-price-hint">Mulai <strong>Rp [TBD]</strong>/pcs</span></div>
+      </div>
+      <div class="card prod-card reveal" data-delay="130">
+        <div class="prod-card-icon">
+          <div class="img-fb"><img src="images/produk/map-l.jpg" alt="Map L" loading="lazy" onerror="this.classList.add('broken')"/><div class="fb-icon"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg></div></div>
+        </div>
+        <div class="prod-card-body"><span class="prod-tag">Standar</span><h3>Map L</h3><p>Ringan dan praktis berbentuk L. Ideal untuk simpan berkas harian tanpa kerumitan pengarsipan.</p></div>
+        <div class="prod-card-footer"><span class="prod-tag-pill">ATK Umum</span><span class="prod-price-hint">Mulai <strong>Rp [TBD]</strong>/pcs</span></div>
+      </div>
+      <div class="card prod-card reveal" data-delay="200">
+        <div class="prod-card-icon">
+          <div class="img-fb"><img src="images/produk/map-executive.jpg" alt="Map Executive" loading="lazy" onerror="this.classList.add('broken')"/><div class="fb-icon"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div></div>
+        </div>
+        <div class="prod-card-body"><span class="prod-tag">Premium</span><h3>Map Executive</h3><p>Tampilan elegan dan material tebal. Untuk presentasi, tender, dan rapat korporat.</p></div>
+        <div class="prod-card-footer"><span class="prod-tag-pill">Korporat · Tender</span><span class="prod-price-hint">Mulai <strong>Rp [TBD]</strong>/pcs</span></div>
+      </div>
+      <div class="card prod-card prod-featured reveal" data-delay="270">
+        <div class="prod-card-icon">
+          <div class="img-fb"><img src="images/produk/map-custom.jpg" alt="Map Custom" loading="lazy" onerror="this.classList.add('broken')"/><div class="fb-icon" style="color:var(--amber-400)"><svg class="ico ico-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></div></div>
+        </div>
+        <div class="prod-card-body"><span class="prod-tag" style="color:var(--amber-400);display:inline-flex;align-items:center;gap:5px"><svg class="ico ico-sm" fill="currentColor" viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg> Best Seller</span><h3>Map Custom</h3><p>Cetak logo, warna, ukuran bebas pilih. Solusi untuk sekolah, les, instansi, dan corporate.</p></div>
+        <div class="prod-card-footer"><span class="prod-tag-pill" style="background:var(--amber-dim);color:var(--amber-400);border-color:var(--amber-bdr)">Sekolah · Les · Korporat</span><span class="prod-price-hint">Mulai <strong>Rp [TBD]</strong>/pcs</span></div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px">
+      <a href="https://wa.me/6282219472613?text=Halo%2C%20saya%20mau%20tanya%20katalog%20lengkap%20dan%20harga%20map%20plastik%20Agatha%20Felix" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-lg">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Tanya Katalog &amp; Harga
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="sekolah" class="section">
+  <div class="container">
+    <div class="school-grid">
+      <div class="reveal">
+        <span class="badge badge-amber" style="margin-bottom:14px;display:inline-flex;align-items:center;gap:6px"><svg class="ico ico-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg> Khusus Institusi Pendidikan</span>
+        <h2>Rapor &amp; Map Custom untuk Sekolah dan Tempat Les</h2>
+        <!-- Mini stats menggantikan paragraph wall -->
+        <div class="school-mini-stats">
+          <div class="school-mini-stat"><strong>500+</strong><span>Sekolah dilayani</span></div>
+          <div class="school-mini-stat"><strong>30 pcs</strong><span>MOQ minimal (1 kelas)</span></div>
+          <div class="school-mini-stat"><strong>5–14<small style="font-weight:600">hari</small></strong><span>Lead time produksi</span></div>
+        </div>
+        <!-- Benefits 2x2 grid -->
+        <div class="school-benefit-grid">
+          <div class="school-benefit"><div style="display:flex;align-items:flex-start;gap:10px"><div class="school-check"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div><p style="font-size:.83rem"><strong style="color:var(--text-1)">Cetak logo &amp; nama sekolah</strong> langsung di permukaan plastik</p></div></div>
+          <div class="school-benefit"><div style="display:flex;align-items:flex-start;gap:10px"><div class="school-check"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div><p style="font-size:.83rem">Sampul rapor custom <strong style="color:var(--text-1)">sesuai desain dan warna</strong> institusi</p></div></div>
+          <div class="school-benefit"><div style="display:flex;align-items:flex-start;gap:10px"><div class="school-check"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div><p style="font-size:.83rem">Melayani dari <strong style="color:var(--text-1)">1 kelas hingga seluruh sekolah</strong></p></div></div>
+          <div class="school-benefit"><div style="display:flex;align-items:flex-start;gap:10px"><div class="school-check"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div><p style="font-size:.83rem"><strong style="color:var(--text-1)">Repeat order tiap semester</strong> dengan harga stabil</p></div></div>
+        </div>
+        <!-- Pull-quote highlight -->
+        <div class="school-highlight"><p style="margin:0"><strong>Kenapa lebih murah?</strong> Karena Anda beli langsung dari pabriknya. <strong>Tidak ada margin distributor atau reseller.</strong></p></div>
+        <a href="https://wa.me/6282219472613?text=Halo%2C%20saya%20mau%20tanya%20rapor%20custom%20untuk%20sekolah%20dan%20tempat%20les" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-lg" style="margin-top:24px">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Konsultasi untuk Sekolah / Les
+        </a>
+      </div>
+      <div class="school-feat-grid reveal" data-delay="120">
+        <div class="sfc"><div class="emoji" style="color:var(--blue-300)"><svg class="ico ico-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><h4>Rapor Sekolah</h4><p>Custom dengan logo &amp; nama institusi</p></div>
+        <div class="sfc"><div class="emoji" style="color:var(--blue-300)"><svg class="ico ico-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg></div><h4>Map Identitas</h4><p>Logo resmi dicetak di map plastik</p></div>
+        <div class="sfc"><div class="emoji" style="color:var(--blue-300)"><svg class="ico ico-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg></div><h4>Desain Bebas</h4><p>Warna &amp; motif sesuai kebutuhan</p></div>
+        <div class="sfc" style="border-color:var(--amber-bdr)"><div class="emoji" style="color:var(--amber-400)"><svg class="ico ico-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h4 style="color:var(--amber-400)">Harga Pabrik</h4><p>Tidak ada markup reseller atau distributor</p></div>
+        <div class="sfc"><div class="emoji" style="color:var(--blue-300)"><svg class="ico ico-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg></div><h4>SD · SMP · SMA · Bimbel · Les Privat</h4><p>500+ institusi pendidikan sudah mempercayakan kebutuhan mapnya kepada kami.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="keunggulan" class="section">
+  <div class="container">
+    <div class="sec-hdr reveal"><span class="badge badge-navy">Mengapa Pilih Kami</span><h2>Keunggulan Agatha Felix</h2><p>Bukan sekadar klaim — ini yang membedakan kami dari penjual biasa.</p></div>
+    <div class="feat-grid">
+      <div class="card feat-card reveal" data-delay="60"><div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg></div><h3>Langsung dari Pabrik</h3><p>Kami bukan reseller. Harga yang Anda dapat adalah harga produsen sesungguhnya.</p></div>
+      <div class="card feat-card reveal" data-delay="130"><div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3>Kualitas Terjamin</h3><p>Kontrol kualitas langsung di lantai produksi. Material plastik pilihan — tidak mudah robek, tahan lama.</p></div>
+      <div class="card feat-card reveal" data-delay="200"><div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></div><h3>Kustomisasi Penuh</h3><p>Cetak logo, pilih warna, tentukan ukuran dan ketebalan — semua bisa disesuaikan.</p></div>
+      <div class="card feat-card reveal" data-delay="270"><div class="feat-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><h3>Proses Cepat</h3><p>Produksi in-house berarti lead time singkat. Untuk kebutuhan mendesak, kami siap bantu.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="cara-pesan" class="section">
+  <div class="container">
+    <div class="sec-hdr reveal"><span class="badge badge-navy">Mudah &amp; Cepat</span><h2>Pesan dalam 3 Langkah</h2><p>Chat kami, diskusikan kebutuhan, dan produk siap dikirim ke seluruh Indonesia.</p></div>
+    <div class="steps reveal" data-delay="60">
+      <div class="step"><div class="step-num">1</div><h3>Chat &amp; Konsultasi</h3><p>Hubungi via WhatsApp. Ceritakan produk apa, berapa jumlah, dan apakah butuh custom logo.</p></div>
+      <div class="step"><div class="step-num">2</div><h3>Penawaran &amp; Sampel</h3><p>Kami kirim penawaran harga. Jika perlu, kami buatkan sampel sebelum produksi massal.</p></div>
+      <div class="step"><div class="step-num">3</div><h3>Produksi &amp; Kirim</h3><p>Setelah disetujui, produksi langsung jalan dan produk dikirim ke alamat Anda.</p></div>
+    </div>
+    <div style="text-align:center;margin-top:40px"><a href="https://wa.me/6282219472613?text=Halo%20Agatha%20Felix%2C%20saya%20ingin%20mulai%20pesan%20map%20plastik" target="_blank" rel="noopener noreferrer" class="btn btn-amber btn-lg">Mulai Chat Sekarang →</a></div>
+  </div>
+</section>
+
+<section id="testimoni" class="section" style="background:var(--bg-1);border-top:1px solid var(--border)">
+  <div class="container">
+    <div class="sec-hdr reveal"><span class="badge badge-navy">Testimoni</span><h2>Yang Mereka Katakan</h2></div>
+    <div class="testi-grid">
+      <div class="card testi-card reveal" data-delay="60"><div class="testi-stars">★★★★★</div><p class="testi-quote">"Map custom dengan logo sekolah kami hasilnya sangat rapi. Harganya jauh lebih murah dari yang kami beli di toko ATK biasanya. Pasti order lagi semester depan!"</p><div class="testi-author"><div class="testi-avatar">BU</div><div><div class="testi-name">Bu Rahma Susanti</div><div class="testi-role">Kepala Sekolah, SDN 04 Bekasi</div></div></div></div>
+      <div class="card testi-card reveal" data-delay="150"><div class="testi-stars">★★★★★</div><p class="testi-quote">"Bimbel kami sudah 3 tahun pesan rapor custom di Agatha Felix. Selalu konsisten kualitasnya dan pengiriman tepat waktu sebelum pembagian rapor."</p><div class="testi-author"><div class="testi-avatar">PA</div><div><div class="testi-name">Pak Andri Setiawan</div><div class="testi-role">Owner, Bimbel Cerdas Mandiri</div></div></div></div>
+      <div class="card testi-card reveal" data-delay="240"><div class="testi-stars">★★★★★</div><p class="testi-quote">"Clear holder dan Map Executive untuk kebutuhan tender sangat memuaskan. Langsung dari pabrik jadi bisa hemat budget pengadaan kami secara signifikan."</p><div class="testi-author"><div class="testi-avatar">DI</div><div><div class="testi-name">Dian Fitri Maharani</div><div class="testi-role">Admin Pengadaan, PT Maju Sejahtera</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="section">
+  <div class="container">
+    <div class="faq-inner">
+      <div class="reveal">
+        <span class="badge badge-navy" style="margin-bottom:14px">FAQ</span>
+        <h2>Pertanyaan yang Sering Ditanyakan</h2>
+        <p style="margin-top:12px;margin-bottom:24px;font-size:.88rem">Masih ada pertanyaan lain? Langsung chat kami via WhatsApp.</p>
+        <a href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Tanya Langsung →</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px" class="reveal" data-delay="80">
+        <details class="fi"><summary>Berapa minimum order untuk produk custom?<div class="fi-icon">+</div></summary><div class="fi-body">Untuk produk tanpa cetak bisa pesan satuan. Untuk custom dengan cetak logo, MOQ mulai 100 pcs. Untuk rapor sekolah bisa mulai 30–40 pcs (1 kelas).</div></details>
+        <details class="fi"><summary>Bisakah pesan rapor sekolah dalam jumlah kecil?<div class="fi-icon">+</div></summary><div class="fi-body">Bisa! Kami melayani dari skala 1 kelas (~30–40 pcs) hingga seluruh sekolah. Semakin banyak, semakin hemat per satuannya.</div></details>
+        <details class="fi"><summary>Berapa lama waktu produksi order custom?<div class="fi-icon">+</div></summary><div class="fi-body">Umumnya 5–14 hari kerja setelah desain disetujui. Untuk kebutuhan mendesak tersedia jalur ekspres.</div></details>
+        <details class="fi"><summary>Apakah melayani pengiriman ke seluruh Indonesia?<div class="fi-icon">+</div></summary><div class="fi-body">Ya! Kami kirim ke seluruh Indonesia via ekspedisi rekanan. Untuk order besar ada kemungkinan gratis ongkir.</div></details>
+        <details class="fi"><summary>Bagaimana cara mengirim desain untuk cetak?<div class="fi-icon">+</div></summary><div class="fi-body">Kirim file logo/desain via WhatsApp (PNG, JPG, PDF resolusi tinggi). Tim kami bantu proses dan kirimkan preview digital sebelum produksi.</div></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kontak" class="section">
+  <div class="container">
+    <div class="cta-inner reveal">
+      <span class="badge badge-amber" style="margin-bottom:18px">Siap Memulai?</span>
+      <h2>Dapatkan Penawaran Langsung dari Pabrik</h2>
+      <p>Ceritakan kebutuhan Anda dan kami buatkan penawaran terbaik — gratis, tanpa komitmen.</p>
+      <div class="cta-btns">
+        <a href="https://wa.me/6282219472613?text=Halo%20Agatha%20Felix%2C%20saya%20ingin%20tanya%20harga%20map%20plastik" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-lg">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Chat WhatsApp Sekarang
+        </a>
+        <a href="mailto:info@agathafelix.com" class="btn btn-ghost btn-lg">Kirim Email</a>
+      </div>
+      <p class="cta-note">Senin–Sabtu 08.00–17.00 WIB · +62 822-1947-2613</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer id="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="display:flex;align-items:center;gap:10px"><div class="logo-fb" style="display:flex">AF</div><span style="font-weight:900;color:var(--text-1)">Agatha Felix</span></div>
+        <p>Produsen map plastik ATK langsung dari pabrik. Clear Holder, Map L, Map Executive, dan Custom Sekolah.</p>
+      </div>
+      <div class="footer-col"><h5>Halaman</h5><ul><li><a href="index.html">Home</a></li><li><a href="produk-standar.html">Produk Standar</a></li><li><a href="produk-custom.html">Produk Custom</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+      <div class="footer-col"><h5>Produk</h5><ul><li><a href="produk-standar.html">Clear Holder</a></li><li><a href="produk-standar.html">Map L</a></li><li><a href="produk-standar.html">Map Executive</a></li><li><a href="produk-custom.html">Map Custom</a></li></ul></div>
+      <div class="footer-col"><h5>Kontak</h5><ul><li><a href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer">+62 822-1947-2613</a></li><li><a href="mailto:info@agathafelix.com">info@agathafelix.com</a></li><li><a href="https://maps.app.goo.gl/oQRnGYP1jqhtZZHr7" target="_blank" rel="noopener noreferrer">Lihat Lokasi</a></li><li><a href="https://shopee.co.id/agatha_felix" target="_blank" rel="noopener noreferrer">Shopee Store</a></li></ul></div>
+    </div>
+    <div class="divider"></div>
+    <div class="footer-bottom"><p>© <span id="yr"></span> Agatha Felix. All rights reserved.</p><p>Produsen Map Plastik ATK — Langsung dari Pabrik</p></div>
+  </div>
+</footer>
+
+<a id="wa-float" href="https://wa.me/6282219472613?text=Halo%20Agatha%20Felix" target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const hbg=document.getElementById('hbg'),mm=document.getElementById('mmenu'),mcls=document.getElementById('mcls'),mov=document.getElementById('mov');
+  function oM(){mm.classList.add('open');mm.setAttribute('aria-hidden','false');hbg.setAttribute('aria-expanded','true');document.body.style.overflow='hidden'}
+  function cM(){mm.classList.remove('open');mm.setAttribute('aria-hidden','true');hbg.setAttribute('aria-expanded','false');document.body.style.overflow=''}
+  hbg.addEventListener('click',oM);mcls.addEventListener('click',cM);mov.addEventListener('click',cM);
+  document.querySelectorAll('.mnav-link').forEach(a=>a.addEventListener('click',cM));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')cM()});
+  const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const d=parseInt(e.target.dataset.delay||0);setTimeout(()=>e.target.classList.add('vis'),d);io.unobserve(e.target)}})},{threshold:0.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>10)},{passive:true});
+
+  // Animated counter for stat numbers
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const counters = document.querySelectorAll('[data-count]');
+  const counterIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count, 10);
+      const suffix = el.dataset.suffix || '';
+      counterIO.unobserve(el);
+      if (reduced) { el.textContent = target + suffix; return; }
+      const duration = 1200;
+      const startTime = performance.now();
+      function tick(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(target * eased);
+        el.textContent = current + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.3 });
+  counters.forEach(c => counterIO.observe(c));
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!-- @dsCard group="Spacing" viewport="700x190" name="Sticker shadows" subtitle="Flat die-cut offsets for stickers & buttons; warm soft ambient for panels" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="../styles.css"/>
+<style>
+  body { background: var(--surface-page); padding: 24px 26px; display: flex; gap: 20px; }
+  .item { flex: 1; text-align: center; }
+  .box { background: #fff; border-radius: var(--radius-md); height: 84px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-heading); }
+  .item code { font-size: 9px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="item"><div class="box" style="border:2px solid var(--af-ink);box-shadow:var(--shadow-sticker)">sticker</div><code>2px ink + --shadow-sticker</code></div>
+  <div class="item"><div class="box" style="border:2px solid var(--af-orange);box-shadow:var(--shadow-sticker)">featured</div><code>2px accent + --shadow-sticker</code></div>
+  <div class="item"><div class="box" style="border:1px solid var(--af-line);box-shadow:var(--shadow-soft)">soft</div><code>hairline + --shadow-soft</code></div>
+  <div class="item"><div class="box" style="border:1px solid var(--af-line);box-shadow:var(--shadow-pop)">hover pop</div><code>--shadow-pop</code></div>
+  <div class="item"><div class="box" style="background:var(--af-wa);color:#fff;border-radius:var(--radius-pill);box-shadow:0 4px 0 var(--af-wa-deep)">candy edge</div><code>0 4px 0 var(--*-deep)</code></div>
+</body>
+</html>

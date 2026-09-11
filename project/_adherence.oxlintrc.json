@@ -1,0 +1,381 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/content/**",
+              "components/core/**",
+              "components/forms/**",
+              "ui_kits/website/**",
+              "ui_kits/website_v2/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Baloo 2|Plus Jakarta Sans))/i]",
+        "message": "Font not provided by the design system. Available: Baloo 2, Plus Jakarta Sans."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Badge'] > JSXAttribute > JSXIdentifier[name!=/^(?:color|dot|children|style|key|ref|className|style|children)$/]",
+        "message": "<Badge> doesn't accept that prop. Declared props: color, dot, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Badge'] > JSXAttribute[name.name='color'] > Literal[value!=/^(?:orange|green|yellow|purple|blue|ink)$/]",
+        "message": "<Badge> color must be one of 'orange' | 'green' | 'yellow' | 'purple' | 'blue' | 'ink'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute > JSXIdentifier[name!=/^(?:variant|color|size|href|disabled|children|onClick|style|key|ref|className|style|children)$/]",
+        "message": "<Button> doesn't accept that prop. Declared props: variant, color, size, href, disabled, children, onClick, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:solid|ghost)$/]",
+        "message": "<Button> variant must be one of 'solid' | 'ghost'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='color'] > Literal[value!=/^(?:orange|wa|green|purple|blue)$/]",
+        "message": "<Button> color must be one of 'orange' | 'wa' | 'green' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md|lg)$/]",
+        "message": "<Button> size must be one of 'sm' | 'md' | 'lg'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Card'] > JSXAttribute > JSXIdentifier[name!=/^(?:variant|accent|hover|padding|children|style|onClick|key|ref|className|style|children)$/]",
+        "message": "<Card> doesn't accept that prop. Declared props: variant, accent, hover, padding, children, style, onClick."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Card'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:soft|sticker)$/]",
+        "message": "<Card> variant must be one of 'soft' | 'sticker'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Card'] > JSXAttribute[name.name='accent'] > Literal[value!=/^(?:ink|orange|green|yellow|purple|blue)$/]",
+        "message": "<Card> accent must be one of 'ink' | 'orange' | 'green' | 'yellow' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Chip'] > JSXAttribute > JSXIdentifier[name!=/^(?:color|children|style|key|ref|className|style|children)$/]",
+        "message": "<Chip> doesn't accept that prop. Declared props: color, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Chip'] > JSXAttribute[name.name='color'] > Literal[value!=/^(?:orange|green|yellow|purple|blue)$/]",
+        "message": "<Chip> color must be one of 'orange' | 'green' | 'yellow' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='FAQItem'] > JSXAttribute > JSXIdentifier[name!=/^(?:question|children|defaultOpen|style|key|ref|className|style|children)$/]",
+        "message": "<FAQItem> doesn't accept that prop. Declared props: question, children, defaultOpen, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Input'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|hint|error|placeholder|value|onChange|type|style|key|ref|className|style|children)$/]",
+        "message": "<Input> doesn't accept that prop. Declared props: label, hint, error, placeholder, value, onChange, type, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:tag|title|description|image|icon|chip|price|accent|featured|style|key|ref|className|style|children)$/]",
+        "message": "<ProductCard> doesn't accept that prop. Declared props: tag, title, description, image, icon, chip, price, accent, featured, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProductCard'] > JSXAttribute[name.name='accent'] > Literal[value!=/^(?:orange|green|purple|blue)$/]",
+        "message": "<ProductCard> accent must be one of 'orange' | 'green' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SectionHeader'] > JSXAttribute > JSXIdentifier[name!=/^(?:eyebrow|eyebrowColor|title|highlight|highlightColor|description|align|style|key|ref|className|style|children)$/]",
+        "message": "<SectionHeader> doesn't accept that prop. Declared props: eyebrow, eyebrowColor, title, highlight, highlightColor, description, align, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SectionHeader'] > JSXAttribute[name.name='eyebrowColor'] > Literal[value!=/^(?:orange|green|yellow|purple|blue|ink)$/]",
+        "message": "<SectionHeader> eyebrowColor must be one of 'orange' | 'green' | 'yellow' | 'purple' | 'blue' | 'ink'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SectionHeader'] > JSXAttribute[name.name='highlightColor'] > Literal[value!=/^(?:orange|green|yellow|purple|blue)$/]",
+        "message": "<SectionHeader> highlightColor must be one of 'orange' | 'green' | 'yellow' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='SectionHeader'] > JSXAttribute[name.name='align'] > Literal[value!=/^(?:center|left)$/]",
+        "message": "<SectionHeader> align must be one of 'center' | 'left'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Stat'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|label|color|style|key|ref|className|style|children)$/]",
+        "message": "<Stat> doesn't accept that prop. Declared props: value, label, color, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Stat'] > JSXAttribute[name.name='color'] > Literal[value!=/^(?:orange|green|yellow|purple|blue|ink)$/]",
+        "message": "<Stat> color must be one of 'orange' | 'green' | 'yellow' | 'purple' | 'blue' | 'ink'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Step'] > JSXAttribute > JSXIdentifier[name!=/^(?:num|title|children|color|style|key|ref|className|style|children)$/]",
+        "message": "<Step> doesn't accept that prop. Declared props: num, title, children, color, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Step'] > JSXAttribute[name.name='color'] > Literal[value!=/^(?:orange|green|purple|blue)$/]",
+        "message": "<Step> color must be one of 'orange' | 'green' | 'purple' | 'blue'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='TestimonialCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:quote|name|role|avatarColor|style|key|ref|className|style|children)$/]",
+        "message": "<TestimonialCard> doesn't accept that prop. Declared props: quote, name, role, avatarColor, style."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "Badge": {
+        "replaces": []
+      },
+      "Button": {
+        "replaces": []
+      },
+      "Card": {
+        "replaces": []
+      },
+      "Chip": {
+        "replaces": []
+      },
+      "FAQItem": {
+        "replaces": []
+      },
+      "Input": {
+        "replaces": []
+      },
+      "ProductCard": {
+        "replaces": []
+      },
+      "SectionHeader": {
+        "replaces": []
+      },
+      "Stat": {
+        "replaces": []
+      },
+      "Step": {
+        "replaces": []
+      },
+      "TestimonialCard": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--af-blue",
+      "--af-blue-deep",
+      "--af-blue-soft",
+      "--af-blue-tint",
+      "--af-card",
+      "--af-green",
+      "--af-green-deep",
+      "--af-green-soft",
+      "--af-green-tint",
+      "--af-ink",
+      "--af-ink-2",
+      "--af-ink-3",
+      "--af-line",
+      "--af-line-strong",
+      "--af-orange",
+      "--af-orange-deep",
+      "--af-orange-soft",
+      "--af-orange-tint",
+      "--af-paper",
+      "--af-paper-2",
+      "--af-purple",
+      "--af-purple-deep",
+      "--af-purple-soft",
+      "--af-purple-tint",
+      "--af-wa",
+      "--af-wa-deep",
+      "--af-yellow",
+      "--af-yellow-deep",
+      "--af-yellow-soft",
+      "--af-yellow-tint",
+      "--border-hairline",
+      "--border-sticker",
+      "--color-cta",
+      "--color-cta-hover",
+      "--color-primary",
+      "--color-primary-hover",
+      "--container-max",
+      "--container-pad",
+      "--danger",
+      "--duration-base",
+      "--duration-fast",
+      "--ease-pop",
+      "--ease-smooth",
+      "--font-body",
+      "--font-display",
+      "--info",
+      "--leading-body",
+      "--leading-snug",
+      "--leading-tight",
+      "--radius-lg",
+      "--radius-md",
+      "--radius-pill",
+      "--radius-sm",
+      "--radius-xl",
+      "--shadow-pop",
+      "--shadow-soft",
+      "--shadow-sticker",
+      "--shadow-sticker-lg",
+      "--space-1",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--space-9",
+      "--success",
+      "--surface-band",
+      "--surface-card",
+      "--surface-page",
+      "--text-2xl",
+      "--text-3xl",
+      "--text-base",
+      "--text-body",
+      "--text-heading",
+      "--text-lg",
+      "--text-link",
+      "--text-md",
+      "--text-muted",
+      "--text-on-color",
+      "--text-sm",
+      "--text-xl",
+      "--text-xs",
+      "--tracking-caps",
+      "--tracking-display",
+      "--warning",
+      "--weight-body",
+      "--weight-bold",
+      "--weight-display",
+      "--weight-medium",
+      "--weight-semibold"
+    ],
+    "tokenKinds": {
+      "--af-orange": "color",
+      "--af-orange-deep": "color",
+      "--af-orange-soft": "color",
+      "--af-orange-tint": "color",
+      "--af-green": "color",
+      "--af-green-deep": "color",
+      "--af-green-soft": "color",
+      "--af-green-tint": "color",
+      "--af-yellow": "color",
+      "--af-yellow-deep": "color",
+      "--af-yellow-soft": "color",
+      "--af-yellow-tint": "color",
+      "--af-purple": "color",
+      "--af-purple-deep": "color",
+      "--af-purple-soft": "color",
+      "--af-purple-tint": "color",
+      "--af-blue": "color",
+      "--af-blue-deep": "color",
+      "--af-blue-soft": "color",
+      "--af-blue-tint": "color",
+      "--af-wa": "color",
+      "--af-wa-deep": "color",
+      "--af-ink": "color",
+      "--af-ink-2": "color",
+      "--af-ink-3": "color",
+      "--af-line": "color",
+      "--af-line-strong": "color",
+      "--af-paper": "color",
+      "--af-paper-2": "color",
+      "--af-card": "color",
+      "--color-primary": "color",
+      "--color-primary-hover": "color",
+      "--color-cta": "color",
+      "--color-cta-hover": "color",
+      "--text-heading": "font",
+      "--text-body": "font",
+      "--text-muted": "font",
+      "--text-on-color": "font",
+      "--text-link": "font",
+      "--surface-page": "color",
+      "--surface-band": "color",
+      "--surface-card": "color",
+      "--border-hairline": "color",
+      "--border-sticker": "color",
+      "--success": "color",
+      "--warning": "color",
+      "--danger": "color",
+      "--info": "color",
+      "--font-display": "font",
+      "--font-body": "font",
+      "--text-xs": "font",
+      "--text-sm": "font",
+      "--text-base": "font",
+      "--text-md": "font",
+      "--text-lg": "font",
+      "--text-xl": "font",
+      "--text-2xl": "font",
+      "--text-3xl": "font",
+      "--weight-body": "font",
+      "--weight-medium": "font",
+      "--weight-semibold": "font",
+      "--weight-bold": "font",
+      "--weight-display": "font",
+      "--leading-tight": "font",
+      "--leading-snug": "font",
+      "--leading-body": "font",
+      "--tracking-display": "font",
+      "--tracking-caps": "font",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--space-9": "spacing",
+      "--radius-sm": "radius",
+      "--radius-md": "radius",
+      "--radius-lg": "radius",
+      "--radius-xl": "radius",
+      "--radius-pill": "radius",
+      "--shadow-sticker": "shadow",
+      "--shadow-sticker-lg": "shadow",
+      "--shadow-soft": "shadow",
+      "--shadow-pop": "shadow",
+      "--ease-pop": "other",
+      "--ease-smooth": "other",
+      "--duration-fast": "other",
+      "--duration-base": "other",
+      "--container-max": "spacing",
+      "--container-pad": "spacing"
+    },
+    "fontFamilies": [
+      "Baloo 2",
+      "Plus Jakarta Sans"
+    ]
+  }
+}

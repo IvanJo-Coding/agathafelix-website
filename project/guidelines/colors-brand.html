@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Brand palette" subtitle="The five logo colors — rainbow order: orange, green, yellow, purple, blue" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="../styles.css"/>
+<style>
+  body { background: var(--surface-page); padding: 18px; }
+  .row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .sw { border-radius: var(--radius-md); border: 2px solid var(--af-ink); box-shadow: var(--shadow-sticker); overflow: hidden; background: #fff; }
+  .sw .chip { height: 64px; }
+  .sw .meta { padding: 8px 12px; font-size: 11px; line-height: 1.5; }
+  .sw .meta b { display: block; font-family: var(--font-display); font-size: 13px; color: var(--text-heading); }
+  .sw .meta code { color: var(--text-muted); font-size: 10px; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--af-orange)"></div><div class="meta"><b>Orange</b><code>--af-orange #E8542D</code></div></div>
+    <div class="sw"><div class="chip" style="background:var(--af-green)"></div><div class="meta"><b>Green</b><code>--af-green #2BA84A</code></div></div>
+    <div class="sw"><div class="chip" style="background:var(--af-yellow)"></div><div class="meta"><b>Yellow</b><code>--af-yellow #F5D920</code></div></div>
+    <div class="sw"><div class="chip" style="background:var(--af-purple)"></div><div class="meta"><b>Purple</b><code>--af-purple #5C3A9E</code></div></div>
+    <div class="sw"><div class="chip" style="background:var(--af-blue)"></div><div class="meta"><b>Blue</b><code>--af-blue #38AEE8</code></div></div>
+  </div>
+</body>
+</html>

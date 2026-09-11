@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://agatha-felix.com/sitemap.xml

@@ -1,0 +1,64 @@
+<!-- @dsCard group="Website v2" viewport="1280x800" name="Produk Standar" subtitle="Katalog playful dengan filter audiens" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Produk Standar · Agatha Felix</title>
+<link rel="icon" type="image/png" href="../../assets/favicon.png"/>
+<link rel="stylesheet" href="../../styles.css"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  #af-loader { position: fixed; inset: 0; z-index: 9999; background: var(--af-paper, #FFF8EE); display: flex; align-items: center; justify-content: center; transition: opacity .45s ease; }
+  #af-loader.af-hide { opacity: 0; pointer-events: none; }
+  .af-loader-box { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .af-loader-fish { width: 88px; height: 88px; object-fit: contain; animation: af-bob 1s cubic-bezier(.34,1.56,.64,1) infinite; }
+  @keyframes af-bob { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-16px) rotate(7deg); } }
+  .af-loader-dots { display: flex; gap: 9px; }
+  .af-loader-dots span { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--af-ink, #2B2A28); animation: af-pulse 1s ease infinite; }
+  .af-loader-dots span:nth-child(1){ background: var(--af-orange, #E8542D); animation-delay: 0s; }
+  .af-loader-dots span:nth-child(2){ background: var(--af-green, #2BA84A); animation-delay: .1s; }
+  .af-loader-dots span:nth-child(3){ background: var(--af-yellow, #F5D920); animation-delay: .2s; }
+  .af-loader-dots span:nth-child(4){ background: var(--af-purple, #5C3A9E); animation-delay: .3s; }
+  .af-loader-dots span:nth-child(5){ background: var(--af-blue, #38AEE8); animation-delay: .4s; }
+  @keyframes af-pulse { 0%,100% { transform: scale(.55); opacity: .5; } 50% { transform: scale(1.1); opacity: 1; } }
+  .af-loader-text { font-family: var(--font-display, sans-serif); font-weight: 800; color: var(--af-ink, #2B2A28); font-size: 15px; }
+  @media (prefers-reduced-motion: reduce) { .af-loader-fish, .af-loader-dots span { animation: none; } }
+</style>
+</head>
+<body>
+<div id="af-loader" aria-hidden="true">
+  <div class="af-loader-box">
+    <img src="../../assets/favicon.png" alt="" class="af-loader-fish"/>
+    <div class="af-loader-dots"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="af-loader-text">Memuat keceriaan…</div>
+  </div>
+</div>
+<script>
+(function () {
+  function hide() {
+    var l = document.getElementById('af-loader');
+    if (l && !l.classList.contains('af-hide')) {
+      l.classList.add('af-hide');
+      setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 600);
+    }
+  }
+  var t = setInterval(function () {
+    var r = document.getElementById('root');
+    if (r && r.children.length) { clearInterval(t); setTimeout(hide, 280); }
+  }, 80);
+  setTimeout(function () { clearInterval(t); hide(); }, 6000);
+})();
+</script>
+<div id="root"></div>
+<script type="text/babel" src="Shell.jsx"></script>
+<script type="text/babel" src="ProdukStandarSections.jsx"></script>
+<script type="text/babel">
+ReactDOM.createRoot(document.getElementById('root')).render(<window.ProdukStandarPage/>);
+</script>
+</body>
+</html>

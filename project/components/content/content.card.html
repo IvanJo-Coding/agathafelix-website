@@ -1,0 +1,66 @@
+<!-- @dsCard group="Components" viewport="700x400" name="Content blocks" subtitle="SectionHeader, Stat, Step, FAQItem, TestimonialCard, ProductCard" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="../../styles.css"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { background: var(--surface-page); padding: 20px 24px; }
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .statrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { SectionHeader, Stat, Step, FAQItem, TestimonialCard } = window.AgathaFelixDesignSystem_3557c1;
+function Demo() {
+  return (
+    <div>
+      <SectionHeader
+        eyebrow="Kenapa Agatha Felix?"
+        eyebrowColor="green"
+        title="Langsung dari Pabrik, Bukan Reseller"
+        highlight="Pabrik"
+        highlightColor="orange"
+        description="Tidak ada margin distributor — harga langsung dari sumbernya."
+        style={{ marginBottom: 24 }}
+      />
+      <div className="cols">
+        <div className="stack">
+          <div className="statrow">
+            <Stat value="20M+" label="Unit Diproduksi" color="orange" />
+            <Stat value="500+" label="Institusi Dilayani" color="green" />
+            <Stat value="5–14" label="Hari Kerja" color="purple" />
+          </div>
+          <FAQItem question="Berapa minimum order produk custom?" defaultOpen>
+            MOQ mulai 100 pcs. Untuk rapor sekolah bisa mulai 30–40 pcs (1 kelas).
+          </FAQItem>
+          <FAQItem question="Apakah bisa kirim ke luar kota?">
+            Bisa — kami mengirim ke seluruh Indonesia via ekspedisi.
+          </FAQItem>
+        </div>
+        <div className="stack">
+          <Step num={1} title="Chat & Konsultasi" color="orange">
+            Hubungi via WhatsApp, ceritakan kebutuhan Anda.
+          </Step>
+          <TestimonialCard
+            quote="Map rapor custom dengan logo sekolah kami hasilnya sangat rapi. Anak-anak senang!"
+            name="Bu Rahma Susanti"
+            role="Kepala Sekolah, SDN 04 Bekasi"
+            avatarColor={1}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+</script>
+</body>
+</html>

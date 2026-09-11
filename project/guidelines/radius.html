@@ -1,0 +1,22 @@
+<!-- @dsCard group="Spacing" viewport="700x170" name="Corner radii" subtitle="Nothing sharp — 10px minimum, pills for buttons" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="../styles.css"/>
+<style>
+  body { background: var(--surface-page); padding: 20px 26px; display: flex; gap: 16px; align-items: flex-end; }
+  .item { text-align: center; }
+  .box { background: #fff; border: 2px solid var(--af-ink); width: 92px; height: 72px; margin-bottom: 8px; box-shadow: var(--shadow-sticker); }
+  .item code { font-size: 9px; color: var(--text-muted); display: block; }
+  .item b { font-size: 11px; color: var(--text-heading); }
+</style>
+</head>
+<body>
+  <div class="item"><div class="box" style="border-radius:var(--radius-sm)"></div><b>10 · inputs</b><code>--radius-sm</code></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-md)"></div><b>16 · cards</b><code>--radius-md</code></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-lg)"></div><b>24 · features</b><code>--radius-lg</code></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-xl)"></div><b>32 · hero panels</b><code>--radius-xl</code></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-pill);height:48px"></div><b>pill · buttons</b><code>--radius-pill</code></div>
+</body>
+</html>

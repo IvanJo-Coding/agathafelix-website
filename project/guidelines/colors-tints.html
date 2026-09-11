@@ -1,0 +1,49 @@
+<!-- @dsCard group="Colors" viewport="700x190" name="Tint scales" subtitle="Each hue ships deep / base / soft / tint — edges, fills, chips, washes" -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="../styles.css"/>
+<style>
+  body { background: var(--surface-page); padding: 18px; }
+  .grid { display: flex; flex-direction: column; gap: 8px; }
+  .ramp { display: grid; grid-template-columns: 70px repeat(4, 1fr); gap: 8px; align-items: center; }
+  .ramp .name { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--text-heading); }
+  .cell { height: 26px; border-radius: 8px; border: 1px solid var(--af-line); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="grid">
+    <div class="ramp"><span class="name">orange</span>
+      <div class="cell" style="background:var(--af-orange-deep);color:#fff">deep</div>
+      <div class="cell" style="background:var(--af-orange);color:#fff">base</div>
+      <div class="cell" style="background:var(--af-orange-soft);color:var(--af-orange-deep)">soft</div>
+      <div class="cell" style="background:var(--af-orange-tint);color:var(--af-orange-deep)">tint</div>
+    </div>
+    <div class="ramp"><span class="name">green</span>
+      <div class="cell" style="background:var(--af-green-deep);color:#fff">deep</div>
+      <div class="cell" style="background:var(--af-green);color:#fff">base</div>
+      <div class="cell" style="background:var(--af-green-soft);color:var(--af-green-deep)">soft</div>
+      <div class="cell" style="background:var(--af-green-tint);color:var(--af-green-deep)">tint</div>
+    </div>
+    <div class="ramp"><span class="name">yellow</span>
+      <div class="cell" style="background:var(--af-yellow-deep);color:#fff">deep</div>
+      <div class="cell" style="background:var(--af-yellow);color:var(--af-ink)">base</div>
+      <div class="cell" style="background:var(--af-yellow-soft);color:var(--af-yellow-deep)">soft</div>
+      <div class="cell" style="background:var(--af-yellow-tint);color:var(--af-yellow-deep)">tint</div>
+    </div>
+    <div class="ramp"><span class="name">purple</span>
+      <div class="cell" style="background:var(--af-purple-deep);color:#fff">deep</div>
+      <div class="cell" style="background:var(--af-purple);color:#fff">base</div>
+      <div class="cell" style="background:var(--af-purple-soft);color:var(--af-purple-deep)">soft</div>
+      <div class="cell" style="background:var(--af-purple-tint);color:var(--af-purple-deep)">tint</div>
+    </div>
+    <div class="ramp"><span class="name">blue</span>
+      <div class="cell" style="background:var(--af-blue-deep);color:#fff">deep</div>
+      <div class="cell" style="background:var(--af-blue);color:#fff">base</div>
+      <div class="cell" style="background:var(--af-blue-soft);color:var(--af-blue-deep)">soft</div>
+      <div class="cell" style="background:var(--af-blue-tint);color:var(--af-blue-deep)">tint</div>
+    </div>
+  </div>
+</body>
+</html>
