@@ -1,4 +1,4 @@
 (function(){
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(window.ProdukStandarPage,null));
+ReactDOM.hydrateRoot(document.getElementById("root"),React.createElement(window.ProdukStandarPage,null));
 
 })();
