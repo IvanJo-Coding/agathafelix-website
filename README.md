@@ -2,11 +2,10 @@
 
 One repository, one folder. `project/` holds the design-system source you edit.
 `build.mjs` reads it and produces a self-contained `dist/`, which is published to
-the **`gh-pages`** branch intended for GitHub Pages after migration.
+the **`gh-pages`** branch served by GitHub Pages.
 
-Migration is not complete until Settings → Pages points to `gh-pages` / root.
-Push `gh-pages` first, switch Pages, verify the live domain, then push `main`.
-The remote `main` still contains the old published site until that final step.
+GitHub Pages is configured to publish `gh-pages` / root at https://agatha-felix.com.
+The `main` branch holds the editable source and is safe to push independently.
 
 | Branch | Holds | You touch it? |
 |---|---|---|
