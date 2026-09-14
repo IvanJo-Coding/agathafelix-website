@@ -2,7 +2,11 @@
 
 One repository, one folder. `project/` holds the design-system source you edit.
 `build.mjs` reads it and produces a self-contained `dist/`, which is published to
-the **`gh-pages`** branch that GitHub Pages serves.
+the **`gh-pages`** branch intended for GitHub Pages after migration.
+
+Migration is not complete until Settings → Pages points to `gh-pages` / root.
+Push `gh-pages` first, switch Pages, verify the live domain, then push `main`.
+The remote `main` still contains the old published site until that final step.
 
 | Branch | Holds | You touch it? |
 |---|---|---|
@@ -15,8 +19,13 @@ the branch that gets published. It is gitignored on `main` and never tracked the
 ## What the build does
 
 - **Pre-transpiles JSX → JS at build time** — no Babel in the browser.
-- **Vendors React + ReactDOM _production_ builds** locally — no CDN dev build,
-  no white-screen, fast first paint (the loader still shows briefly).
+- **Prerenders the three React pages to HTML** and hydrates them in the browser.
+  Text, links, and responsive styles are available before JavaScript runs.
+- **Builds components from `project/components/`**, rather than copying the old
+  design-tool `_ds_bundle.js`. Changes to component source now reach production.
+- **Vendors React + ReactDOM production builds** locally.
+- **Creates WebP copies of 29 product, portfolio, and factory photos**, capped
+  at 1200 × 1200. Original PNG URLs remain available; page photos use WebP.
 - **Copies all assets in** and rewrites every `../../` path → root-relative
   (`/assets/...`) so nothing depends on the design-system folder layout.
 - **Clean URLs via folders** — `/produk-standar/`, `/produk-custom/` work on any
@@ -33,7 +42,10 @@ npm install        # once
 npm run build      # -> dist/
 npm run preview    # build + serve at http://localhost:4173 (clean URLs work)
 npm run serve      # serve existing dist/ without rebuilding
+npm test           # run after build: SEO, image, tracking and handoff checks
 ```
+
+Use Node.js 22 or later. If PowerShell blocks `npm.ps1`, use `npm.cmd` instead.
 
 ## Configuration
 
@@ -46,16 +58,38 @@ Edit the `SITE` object at the top of [`build.mjs`](build.mjs):
 | `ogImage`    | `/assets/hero-products.png`    | share preview (ideal 1200×630)         |
 | `themeColor` | `#E8542D`                      | browser UI tint                        |
 
-The WhatsApp number lives in **one place**: `WA_NUMBER` in
-`project/ui_kits/website_v2/Shell.jsx`. Change it there and rebuild.
+The WhatsApp number is used in `Shell.jsx`, `build.mjs`, and the handwritten
+landing/handoff pages. Update all references together if the number changes.
 
 Google Ads conversion tracking lives in `SITE.googleAdsId` and
-`SITE.waConversionLabel`. The build injects the gtag snippet into every
-generated page, so it never has to be pasted in by hand.
+`SITE.waConversionLabel`. The build injects the same configuration into the
+three React pages and both landing pages. The shared click handler is
+`project/static/js/tracking.js`; it never loads Google tags on localhost.
+
+The form prepares a WhatsApp message; it does **not** save a lead to a backend
+or confirm that a WhatsApp message was sent. Contact details travel between
+pages in session storage (30-minute expiry), with a cleaned fragment fallback
+when storage is unavailable. They are no longer placed in the thank-you query.
+Only a fresh form handoff loads the thank-you Google tag, reducing false page-load
+conversions from direct visits and refreshes. The existing Google Ads URL-based
+conversion handles the form; its WhatsApp retry button does not add a second
+WhatsApp conversion for the same prepared lead. The URL-based
+conversion rule was verified in Ads: URL starts with
+`agatha-felix.com/raporsekolah/terima-kasih.html`. End-to-end delivery still needs
+verification after deployment; local tests never send real conversions.
+No form conversion label or GA4 measurement ID has been invented.
+
+Owner-confirmed pricing: custom from **1 pcs**; **100 pcs recommended**, around
+**Rp50,000/pcs** depending on model, materials, and printing. Keep visible copy
+and FAQ structured data consistent. The landing uses `Service` schema without
+an exact offer price; the old incomplete `AggregateOffer` has been removed.
+Sitemap dates are omitted until a reliable content-change date is available.
 
 ## Hand-written pages (`project/static/`)
 
-Everything under `project/static/` is copied into `dist/` verbatim. The Google
+Everything under `project/static/` is copied into `dist/`. The build replaces
+`<!-- AF_GOOGLE_TAG -->` in the two landing HTML files with shared tracking and
+removes media slots whose files do not exist yet. The Google
 Ads landing page `/raporsekolah/` lives there: plain HTML on purpose, no React
 and no shared shell, so it loads fast and can be iterated on separately.
 
@@ -90,7 +124,8 @@ permission before publishing their logo.
 
 ## Deploy — GitHub Pages
 
-The live site is the **`gh-pages`** branch. `main` is never published.
+After the one-time migration, the live site uses **`gh-pages`**. Source `main`
+must not be selected as the Pages publishing branch.
 
 ### Update the live site (the normal workflow)
 

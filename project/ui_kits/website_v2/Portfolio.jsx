@@ -25,7 +25,7 @@ function PortfolioCard({ p, rot }) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = `rotate(${rot}deg)`; }}
     >
       <div style={{ background: '#f4ede1', borderBottom: '2px solid var(--af-ink)', position: 'relative' }}>
-        <img src={p.img} alt={'Map custom ' + p.client} style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
+        <img src={p.img} alt={'Map custom ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
         <span
           style={{
             position: 'absolute', top: 10, left: 10, background: `var(--af-${p.color})`, color: '#fff',
@@ -99,13 +99,13 @@ function FactoryBand() {
             Press, jahit, sablon, sampai packing — semua satu atap. Itu kenapa harga kami harga pabrik,
             dan kualitasnya kami pegang dari awal sampai akhir.
           </p>
-          <Button color="wa" size="lg"><window.WaGlyph2 /> Tanya Kapasitas Produksi</Button>
+          <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bertanya tentang kapasitas produksi map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Kapasitas Produksi</Button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {FACTORY.map((f, i) => (
             <figure key={f.cap} style={{ margin: 0, transform: `rotate(${(i - 1) * 1.5}deg)` }}>
               <div style={{ border: '2px solid rgba(255,255,255,.3)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: '0 5px 0 rgba(0,0,0,.4)' }}>
-                <img src={f.img} alt={f.cap} style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                <img src={f.img} alt={f.cap} loading="lazy" decoding="async" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
               </div>
               <figcaption style={{ color: 'rgba(255,255,255,.7)', fontSize: '0.74rem', fontWeight: 600, textAlign: 'center', marginTop: 8 }}>{f.cap}</figcaption>
             </figure>

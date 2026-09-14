@@ -1,7 +1,7 @@
 // ============================================================================
 // Agatha Felix — static site builder
 // ----------------------------------------------------------------------------
-// Reads the "Website v2" UI kit from the design system (../project) and emits a
+// Reads the "Website v2" UI kit from project/ and emits a
 // fully self-contained, deployable `dist/` folder:
 //   - JSX is transpiled to plain JS at BUILD time (no Babel in the browser)
 //   - React/ReactDOM are vendored as PRODUCTION builds (no CDN dev build)
@@ -15,6 +15,7 @@ import esbuild from 'esbuild';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { buildComponents, optimizePhotos, prerender } from './build-tools.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;                              // repo root
@@ -93,7 +94,7 @@ const PAGES = [
           </div>
         );
       }
-      ReactDOM.createRoot(document.getElementById('root')).render(<BerandaPage/>);
+      ReactDOM.hydrateRoot(document.getElementById('root'), <BerandaPage/>);
     `,
   },
   {
@@ -104,7 +105,7 @@ const PAGES = [
       'Jual map plastik grosir langsung dari pabrik: clear holder, map kancing, business file, ' +
       'map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir, siap kirim.',
     sections: ['Shell', 'ProdukStandarSections'],
-    glue: `ReactDOM.createRoot(document.getElementById('root')).render(<window.ProdukStandarPage/>);`,
+    glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukStandarPage/>);`,
   },
   {
     out: 'produk-custom/index.html',
@@ -112,9 +113,9 @@ const PAGES = [
     title: 'Custom Rapor Sekolah & Map Cetak Logo | Agatha Felix',
     description:
       'Custom rapor sekolah dengan logo & warna sekolahmu, plus map cetak logo untuk les, kantor & instansi. ' +
-      'Coba simulator rapor interaktif. Desain dibantu gratis, mulai 30 pcs.',
+      'Custom mulai 1 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
     sections: ['Shell', 'Simulator', 'Portfolio', 'ProdukCustomSections'],
-    glue: `ReactDOM.createRoot(document.getElementById('root')).render(<window.ProdukCustomPage/>);`,
+    glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
 ];
 
@@ -124,9 +125,10 @@ const ALL_SECTIONS = [...new Set(PAGES.flatMap((p) => p.sections))];
 // ---------------------------------------------------------------------------
 //  Path rewriting: kit-relative -> root-relative + clean URLs
 // ---------------------------------------------------------------------------
+let rewritePhotos = (code) => code;
 function rewriteAssets(code) {
   // ../../assets/x  ->  /assets/x   (kit lived two levels deep in the DS)
-  return code.split('../../').join('/');
+  return rewritePhotos(code.split('../../').join('/'));
 }
 function rewriteLinks(code) {
   // internal page links -> clean URLs (order matters: specific first)
@@ -156,74 +158,9 @@ async function transpileSource(code) {
   return `(function(){\n${body}\n})();\n`;
 }
 
-// ---------------------------------------------------------------------------
-//  Loader markup + styles (lifted verbatim from the original kit)
-// ---------------------------------------------------------------------------
-const LOADER_STYLE = `
-  html { scroll-behavior: smooth; }
-  #af-loader { position: fixed; inset: 0; z-index: 9999; background: var(--af-paper, #FFF8EE); display: flex; align-items: center; justify-content: center; transition: opacity .45s ease; }
-  #af-loader.af-hide { opacity: 0; pointer-events: none; }
-  .af-loader-box { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-  .af-loader-fish { width: 88px; height: 88px; object-fit: contain; animation: af-bob 1s cubic-bezier(.34,1.56,.64,1) infinite; }
-  @keyframes af-bob { 0%,100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-16px) rotate(7deg); } }
-  .af-loader-dots { display: flex; gap: 9px; }
-  .af-loader-dots span { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--af-ink, #2B2A28); animation: af-pulse 1s ease infinite; }
-  .af-loader-dots span:nth-child(1){ background: var(--af-orange, #E8542D); animation-delay: 0s; }
-  .af-loader-dots span:nth-child(2){ background: var(--af-green, #2BA84A); animation-delay: .1s; }
-  .af-loader-dots span:nth-child(3){ background: var(--af-yellow, #F5D920); animation-delay: .2s; }
-  .af-loader-dots span:nth-child(4){ background: var(--af-purple, #5C3A9E); animation-delay: .3s; }
-  .af-loader-dots span:nth-child(5){ background: var(--af-blue, #38AEE8); animation-delay: .4s; }
-  @keyframes af-pulse { 0%,100% { transform: scale(.55); opacity: .5; } 50% { transform: scale(1.1); opacity: 1; } }
-  .af-loader-text { font-family: var(--font-display, sans-serif); font-weight: 800; color: var(--af-ink, #2B2A28); font-size: 15px; }
-  @media (prefers-reduced-motion: reduce) { .af-loader-fish, .af-loader-dots span { animation: none; } }`;
-
-const LOADER_MARKUP = `<div id="af-loader" aria-hidden="true">
-  <div class="af-loader-box">
-    <img src="/assets/favicon.png" alt="" class="af-loader-fish"/>
-    <div class="af-loader-dots"><span></span><span></span><span></span><span></span><span></span></div>
-    <div class="af-loader-text">Memuat keceriaan…</div>
-  </div>
-</div>
-<script>
-(function () {
-  function hide() {
-    var l = document.getElementById('af-loader');
-    if (l && !l.classList.contains('af-hide')) {
-      l.classList.add('af-hide');
-      setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 600);
-    }
-  }
-  var t = setInterval(function () {
-    var r = document.getElementById('root');
-    if (r && r.children.length) { clearInterval(t); setTimeout(hide, 280); }
-  }, 80);
-  setTimeout(function () { clearInterval(t); hide(); }, 6000);
-})();
-</script>`;
-
-// ---------------------------------------------------------------------------
-//  Google Ads tag (gtag.js)
-// ---------------------------------------------------------------------------
-const GTAG_HEAD = `<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=${SITE.googleAdsId}"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', '${SITE.googleAdsId}');
-</script>`;
-
-// Every WhatsApp link is a conversion. Delegated from document so it also covers
-// the links React mounts after this script has already run.
-const GTAG_WA_CLICK = `<script>
-document.addEventListener('click', function (e) {
-  var a = e.target.closest('a[href*="wa.me"], a[href*="api.whatsapp.com"]');
-  if (!a) return;
-  gtag('event', 'conversion', {
-    'send_to': '${SITE.waConversionLabel}'
-  });
-});
-</script>`;
+// Shared Google Ads configuration for React and handwritten pages.
+const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
+<script src="/js/tracking.js"></script>`;
 
 // ---------------------------------------------------------------------------
 //  HTML document template (with SEO + Open Graph)
@@ -253,7 +190,7 @@ async function imageSize(absPath) {
 // FAQ copy MUST match what's visible in FAQV2 (BerandaSections.jsx) — Google
 // requires FAQPage schema to mirror on-page content.
 const FAQ_ITEMS = [
-  ['Minimal pesan berapa, sih?', 'Custom print mulai 100 pcs. Khusus rapor sekolah & tempat les bisa mulai 30–40 pcs — cukup untuk satu kelas.'],
+  ['Minimal pesan berapa, sih?', 'Custom bisa mulai 1 pcs, tetapi biaya per pcs lebih tinggi untuk pesanan sedikit. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
   ['Berapa lama jadinya?', '5–14 hari kerja setelah desain kamu setujui, tergantung jumlah dan tingkat kerumitan.'],
   ['Aku nggak bisa desain. Gimana dong?', 'Tenang! Kirim logo dan warna kesukaanmu, tim kami yang buatkan mockup — gratis, revisi sampai cocok.'],
   ['Kirim ke luar pulau bisa?', 'Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.'],
@@ -272,6 +209,8 @@ function organizationSchema() {
     telephone: '+' + SITE.whatsapp,
     address: {
       '@type': 'PostalAddress',
+      streetAddress: 'Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya',
+      postalCode: '17112',
       addressLocality: SITE.city, addressRegion: SITE.region, addressCountry: SITE.country,
     },
     areaServed: { '@type': 'Country', name: 'Indonesia' },
@@ -321,7 +260,7 @@ function ldScript(obj) {
   return `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 }
 
-function pageHtml(page, ogDim, mediaManifest = []) {
+function pageHtml(page, ogDim, mediaManifest, rendered) {
   const url = SITE.domain + page.canonical;
   const ogImage = SITE.domain + SITE.ogImage;
   const scripts = [
@@ -358,15 +297,14 @@ function pageHtml(page, ogDim, mediaManifest = []) {
 <meta name="twitter:image" content="${ogImage}"/>
 ${jsonLdFor(page).map(ldScript).join('\n')}
 <link rel="stylesheet" href="/styles.css"/>
-<style>${LOADER_STYLE}</style>
+<style>html { scroll-behavior: smooth; }</style>
+${rendered.css}
 <script>window.AF_MEDIA=${JSON.stringify(mediaManifest)};</script>
 ${GTAG_HEAD}
 </head>
 <body>
-${LOADER_MARKUP}
-<div id="root"></div>
-${scripts.map((s) => `<script src="${s}"></script>`).join('\n')}
-${GTAG_WA_CLICK}
+<div id="root">${rendered.html}</div>
+${scripts.map((s) => `<script defer src="${s}"></script>`).join('\n')}
 </body>
 </html>
 `;
@@ -435,6 +373,7 @@ async function build() {
   // 1. Static assets, styles, tokens
   await fs.cp(path.join(SRC, 'assets'), path.join(DIST, 'assets'), { recursive: true });
   await fs.cp(path.join(SRC, 'images'), path.join(DIST, 'images'), { recursive: true });
+  rewritePhotos = await optimizePhotos(DIST);
   await fs.cp(path.join(SRC, 'tokens'), path.join(DIST, 'tokens'), { recursive: true });
   await fs.copyFile(path.join(SRC, 'styles.css'), path.join(DIST, 'styles.css'));
 
@@ -444,9 +383,16 @@ async function build() {
     await fs.cp(staticDir, DIST, { recursive: true });
   }
 
-  // 2. Design-system bundle (rewrite kit-relative asset paths only)
-  const bundle = await fs.readFile(path.join(SRC, '_ds_bundle.js'), 'utf8');
-  await fs.writeFile(path.join(DIST, '_ds_bundle.js'), rewriteAssets(bundle));
+  // Inject one shared tag configuration into each handwritten page.
+  for (const name of ['index.html', 'terima-kasih.html']) {
+    const file = path.join(DIST, 'raporsekolah', name);
+    const html = await fs.readFile(file, 'utf8');
+    await fs.writeFile(file, html.replace('<!-- AF_GOOGLE_TAG -->', GTAG_HEAD));
+  }
+
+  // 2. Build the shared design-system components from source.
+  const bundle = rewriteAssets(await buildComponents(SRC));
+  await fs.writeFile(path.join(DIST, '_ds_bundle.js'), bundle);
 
   // 3. Vendor React + ReactDOM PRODUCTION builds
   const reactDir = path.dirname(fileURLToPath(import.meta.resolve('react/package.json')));
@@ -455,9 +401,11 @@ async function build() {
   await fs.copyFile(path.join(reactDomDir, 'umd/react-dom.production.min.js'), path.join(DIST, 'vendor/react-dom.production.min.js'));
 
   // 4. Transpile shared section modules
+  const sections = {};
   for (const name of ALL_SECTIONS) {
     const src = await fs.readFile(path.join(KIT, `${name}.jsx`), 'utf8');
-    await fs.writeFile(path.join(DIST, 'js', `${name}.js`), await transpileSource(src));
+    sections[name] = await transpileSource(src);
+    await fs.writeFile(path.join(DIST, 'js', `${name}.js`), sections[name]);
   }
 
   // 5. Per-page glue + HTML
@@ -465,10 +413,12 @@ async function build() {
   const mediaManifest = await testimoniManifest();
   for (const page of PAGES) {
     const key = page.canonical === '/' ? 'index' : page.canonical.replace(/\//g, '');
-    await fs.writeFile(path.join(DIST, 'js', `page-${key}.js`), await transpileSource(page.glue));
+    const glue = await transpileSource(page.glue);
+    await fs.writeFile(path.join(DIST, 'js', `page-${key}.js`), glue);
+    const rendered = prerender({ bundle, sections: page.sections.map((name) => sections[name]), glue, media: mediaManifest });
     const outPath = path.join(DIST, page.out);
     await fs.mkdir(path.dirname(outPath), { recursive: true });
-    await fs.writeFile(outPath, pageHtml(page, ogDim, mediaManifest));
+    await fs.writeFile(outPath, pageHtml(page, ogDim, mediaManifest, rendered));
   }
 
   // 5b. Turn off media slots whose file has not been added yet.
@@ -483,13 +433,12 @@ async function build() {
   await fs.writeFile(path.join(DIST, 'robots.txt'),
     `User-agent: *\nAllow: /\n\nSitemap: ${SITE.domain}/sitemap.xml\n`);
 
-  const today = new Date().toISOString().slice(0, 10);
   const sitemapPaths = [
     ...PAGES.map((p) => p.canonical),
     ...STATIC_PAGES.filter((p) => p.inSitemap).map((p) => p.canonical),
   ];
   const urls = sitemapPaths.map((canonical) =>
-    `  <url>\n    <loc>${SITE.domain}${canonical}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`).join('\n');
+    `  <url>\n    <loc>${SITE.domain}${canonical}</loc>\n  </url>`).join('\n');
   await fs.writeFile(path.join(DIST, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
 
@@ -521,6 +470,7 @@ function html404() {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Halaman tidak ditemukan · ${SITE.brand}</title>
+<meta name="robots" content="noindex,follow"/>
 <link rel="icon" type="image/png" href="/assets/favicon.png"/>
 <link rel="stylesheet" href="/styles.css"/>
 </head>

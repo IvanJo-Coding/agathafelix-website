@@ -8,11 +8,7 @@ function waLink(text) {
 }
 
 // --- Responsive layer (inline-styled components → overridden via !important) ---
-// _ds_bundle.js ships its own older copy of this same layer under the id
-// 'af-v2-responsive' and is loaded first, so guarding on that id used to make
-// every edit below dead code — the bundle won and this never injected at all.
-// Own id, and Shell loads after the bundle, so at equal specificity these rules
-// come later in the document and win.
+// This layer is included in prerendered HTML and reused during hydration.
 const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
 
 (function injectV2Responsive() {
@@ -95,7 +91,10 @@ const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
   }`;
   const tag = document.createElement('style');
   tag.id = V2_RESPONSIVE_ID;
-  tag.textContent = css;
+  // React's server renderer omits the space after a style property colon;
+  // browser style updates add it. Match both serializations at every breakpoint.
+  tag.textContent = css.replace(/\[style\*="([^":]+): ([^"]+)"\]/g,
+    (_, property, value) => `:is([style*="${property}: ${value}"], [style*="${property}:${value}"])`);
   document.head.appendChild(tag);
 })();
 
@@ -307,6 +306,7 @@ function FooterV2() {
           <div style={head}>Jelajahi</div>
           <a href="index.html" style={link}>Beranda</a>
           <a href="produk-custom.html#simulator" style={link}>Simulator Rapor</a>
+          <a href="/raporsekolah/" style={link}>Rapor Sekolah</a>
           <a href="index.html#cara-pesan" style={link}>Cara Pesan</a>
           <a href="index.html#faq" style={link}>FAQ</a>
         </div>

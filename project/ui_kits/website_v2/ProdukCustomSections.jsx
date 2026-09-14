@@ -22,7 +22,7 @@ function ProdukCustomPage() {
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 540 }}>
               Custom rapor sekolah, map les, sampai file kantor notaris — kami cetak sesuai identitasmu.
-              Desain dibantu gratis, mulai dari 30 pcs.
+              Custom bisa mulai 1 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>
@@ -48,7 +48,7 @@ function ProdukCustomPage() {
                 overflow: 'hidden', transform: 'rotate(-1.2deg)', boxShadow: '0 8px 0 rgba(0,0,0,.35)',
               }}
             >
-              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" style={{ width: '100%', display: 'block' }} />
+              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" loading="lazy" decoding="async" style={{ width: '100%', display: 'block' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
               <Badge color="yellow" dot>Untuk yang Serius-Serius</Badge>
@@ -61,7 +61,7 @@ function ProdukCustomPage() {
                 sertifikat klien tersimpan rapi — dan terlihat semahal isinya.
               </p>
               <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.88rem', color: 'rgba(255,255,255,.85)' }}>
-                {['Foil emas / perak nama & logo firma', 'Pilihan warna formal: hijau, hitam, maroon, navy', 'Kapasitas 20–100 dokumen', 'MOQ mulai 100 pcs'].map((t) => (
+                {['Foil emas / perak nama & logo firma', 'Pilihan warna formal: hijau, hitam, maroon, navy', 'Kapasitas 20–100 dokumen', 'Custom mulai 1 pcs; disarankan 100 pcs'].map((t) => (
                   <li key={t} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--af-yellow)', color: 'var(--af-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>✓</span>
                     {t}

@@ -53,7 +53,7 @@ function KatalogCard({ p }) {
         }}
       >
         {p.img ? (
-          <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={p.img} alt={p.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : null}
         {p.badge ? (
           <span style={{ position: 'absolute', top: 8, right: 8, background: 'var(--af-yellow)', border: '2px solid var(--af-ink)', borderRadius: 999, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 10, padding: '2px 9px', color: 'var(--af-ink)' }}>{p.badge}</span>
