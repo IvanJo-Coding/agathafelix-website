@@ -151,7 +151,7 @@ function HeroV2() {
             <Button color="purple" size="lg" href="produk-custom.html#simulator">🎨 Coba Simulator Rapor</Button>
           </div>
           <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', marginTop: 4 }}>
-            {[['20 juta+', 'map sudah kami buat'], ['500+', 'sekolah & kantor'], ['1 pcs', 'custom juga bisa']].map(([v, l]) => (
+            {[['20 juta+', 'map sudah kami buat'], ['500+', 'sekolah & kantor'], ['50 pcs', 'minimal custom']].map(([v, l]) => (
               <div key={l} style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
                 <strong style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.45rem', color: 'var(--text-heading)' }}>{v}</strong>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{l}</span>

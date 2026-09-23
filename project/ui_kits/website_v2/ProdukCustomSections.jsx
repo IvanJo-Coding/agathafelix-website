@@ -22,7 +22,7 @@ function ProdukCustomPage() {
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 540 }}>
               Custom rapor sekolah, map les, sampai file kantor notaris — kami cetak sesuai identitasmu.
-              Custom bisa mulai 1 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
+              Custom mulai 50 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>

@@ -116,7 +116,7 @@ function SekolahV2() {
           </h2>
           <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.92)', maxWidth: 440 }}>
             Sampul rapor dengan logo dan warna khas sekolahmu — bahan tebal, jilid rapi, awet sampai lulus.
-            Custom bisa mulai <strong style={{ color: 'var(--af-yellow)' }}>1 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
+            Custom mulai <strong style={{ color: 'var(--af-yellow)' }}>50 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom untuk sekolah / les.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Gratis</Button>
@@ -274,7 +274,7 @@ function FAQV2() {
           <Button variant="ghost" href={window.waLink('Halo Agatha Felix! Saya ada beberapa pertanyaan.')} target="_blank" rel="noopener noreferrer">Tanya via WhatsApp →</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <FAQItem question="Minimal pesan berapa, sih?" defaultOpen>Custom bisa mulai 1 pcs, tetapi biaya per pcs lebih tinggi untuk pesanan sedikit. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</FAQItem>
+          <FAQItem question="Minimal pesan berapa, sih?" defaultOpen>Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</FAQItem>
           <FAQItem question="Berapa lama jadinya?">5–14 hari kerja setelah desain kamu setujui, tergantung jumlah dan tingkat kerumitan.</FAQItem>
           <FAQItem question="Aku nggak bisa desain. Gimana dong?">Tenang! Kirim logo dan warna kesukaanmu, tim kami yang buatkan mockup — gratis, revisi sampai cocok.</FAQItem>
           <FAQItem question="Kirim ke luar pulau bisa?">Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.</FAQItem>

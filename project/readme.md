@@ -2,10 +2,10 @@
 
 **Agatha Felix Stationery** — "Spesialist Product Custom Stationery." An Indonesian stationery **manufacturer (pabrik, bukan reseller)** specializing in plastic folders/maps: Clear Holder, Map L, Map Kancing (snap-button), Map Executive, and Business File. Two core customer segments:
 
-1. **Education** — custom report-card covers (sampul rapor) and branded folders for schools, bimbel (tutoring centers), les privat, universities. Custom from 1 pcs; 100 pcs recommended for economical pricing. This is the heart of the brand.
+1. **Education** — custom report-card covers (sampul rapor) and branded folders for schools, bimbel (tutoring centers), les privat, universities. Custom from 50 pcs; 100 pcs recommended for economical pricing. This is the heart of the brand.
 2. **Document-heavy professionals** — lawyers, notaris, pengacara, government, corporate procurement — custom-branded files for their practice.
 
-Key facts used in copy: 20M+ units produced · 500+ institutions served · custom from 1 pcs / 100 pcs recommended, around Rp50,000 per pcs depending on specifications · lead time 5–14 working days · ships across Indonesia · WhatsApp +62 822-1947-2613 is THE conversion channel · Shopee store for retail · Mon–Sat 08.00–17.00 WIB.
+Key facts used in copy: 20M+ units produced · 500+ institutions served · custom from 50 pcs / 100 pcs recommended, around Rp50,000 per pcs depending on specifications · lead time 5–14 working days · ships across Indonesia · WhatsApp +62 822-1947-2613 is THE conversion channel · Shopee store for retail · Mon–Sat 08.00–17.00 WIB.
 
 ## Sources
 
@@ -16,7 +16,7 @@ Key facts used in copy: 20M+ units produced · 500+ institutions served · custo
 ## CONTENT FUNDAMENTALS
 
 - **Language:** Bahasa Indonesia. Address the customer as **"Anda"** (capital A, respectful); the company is **"kami"**. Warm-professional, never stiff.
-- **Tone:** confident factory-direct pitch, friendly and concrete. Sentences are short and benefit-led. Numbers are everywhere: "Custom mulai 1 pcs; disarankan 100 pcs", "5–14 hari kerja", "500+ institusi".
+- **Tone:** confident factory-direct pitch, friendly and concrete. Sentences are short and benefit-led. Numbers are everywhere: "Custom mulai 50 pcs; disarankan 100 pcs", "5–14 hari kerja", "500+ institusi".
 - **Signature claims (reuse verbatim):**
   - "Langsung dari Pabrik — Bukan Reseller"
   - "Tidak ada margin distributor atau reseller."

@@ -113,7 +113,7 @@ const PAGES = [
     title: 'Custom Rapor Sekolah & Map Cetak Logo | Agatha Felix',
     description:
       'Custom rapor sekolah dengan logo & warna sekolahmu, plus map cetak logo untuk les, kantor & instansi. ' +
-      'Custom mulai 1 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
+      'Custom mulai 50 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
     sections: ['Shell', 'Simulator', 'Portfolio', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
@@ -190,7 +190,7 @@ async function imageSize(absPath) {
 // FAQ copy MUST match what's visible in FAQV2 (BerandaSections.jsx) — Google
 // requires FAQPage schema to mirror on-page content.
 const FAQ_ITEMS = [
-  ['Minimal pesan berapa, sih?', 'Custom bisa mulai 1 pcs, tetapi biaya per pcs lebih tinggi untuk pesanan sedikit. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
+  ['Minimal pesan berapa, sih?', 'Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
   ['Berapa lama jadinya?', '5–14 hari kerja setelah desain kamu setujui, tergantung jumlah dan tingkat kerumitan.'],
   ['Aku nggak bisa desain. Gimana dong?', 'Tenang! Kirim logo dan warna kesukaanmu, tim kami yang buatkan mockup — gratis, revisi sampai cocok.'],
   ['Kirim ke luar pulau bisa?', 'Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.'],
