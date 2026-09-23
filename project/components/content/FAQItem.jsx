@@ -14,9 +14,10 @@ function injectFaqCss() {
     .af-faq summary { display:flex; justify-content:space-between; align-items:center; gap:12px;
       padding:17px 20px; cursor:pointer; font-weight:700; font-size:0.92rem; color:var(--text-heading); list-style:none; }
     .af-faq summary::-webkit-details-marker { display:none; }
-    .af-faq-icon { flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--af-blue-soft);
+    .af-faq-icon { flex:0 0 26px; width:26px; height:26px; border-radius:50%; background:var(--af-blue-soft);
       color:var(--af-blue-deep); display:flex; align-items:center; justify-content:center;
-      font-weight:800; transition:transform 250ms var(--ease-pop,ease); }
+      transition:transform 250ms var(--ease-pop,ease); }
+    .af-faq-icon svg { width:12px; height:12px; display:block; }
     .af-faq[open] .af-faq-icon { transform:rotate(45deg); background:var(--af-blue); color:#fff; }
     .af-faq-body { padding:0 20px 18px; font-size:0.86rem; line-height:1.75; color:var(--text-body); }
   `;
@@ -32,7 +33,10 @@ export function FAQItem({ question, children, defaultOpen = false, style }) {
     <details className="af-faq" open={defaultOpen} style={style}>
       <summary>
         {question}
-        <span className="af-faq-icon">+</span>
+        {/* SVG, not a "+" character: font metrics pushed the glyph off-centre. */}
+        <span className="af-faq-icon" aria-hidden="true">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 1.5v9M1.5 6h9" /></svg>
+        </span>
       </summary>
       <div className="af-faq-body">{children}</div>
     </details>
