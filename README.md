@@ -63,7 +63,8 @@ landing/handoff pages. Update all references together if the number changes.
 Google Ads conversion tracking lives in `SITE.googleAdsId` and
 `SITE.waConversionLabel`. The build injects the same configuration into the
 three React pages and both landing pages. The shared click handler is
-`project/static/js/tracking.js`; it never loads Google tags on localhost.
+`project/static/js/af-site.js` (deliberately not named tracking.js, which
+antivirus and adblock lists block); it never loads Google tags on localhost.
 
 The form prepares a WhatsApp message; it does **not** save a lead to a backend
 or confirm that a WhatsApp message was sent. Contact details travel between
@@ -78,8 +79,11 @@ conversion rule was verified in Ads: URL starts with
 verification after deployment; local tests never send real conversions.
 No form conversion label or GA4 measurement ID has been invented.
 
-Owner-confirmed pricing: custom from **1 pcs**; **100 pcs recommended**, around
-**Rp50,000/pcs** depending on model, materials, and printing. Keep visible copy
+Owner-confirmed pricing (2026-09-24): minimum order **50 pcs** for every custom
+product, including logo printing on a Produk Standar item; **100 pcs
+recommended**, around **Rp50,000/pcs** depending on model, materials, and
+printing. The product cards' "MOQ mulai 100 pcs" is patched to 50 pcs when the
+WebP copies are made. Keep visible copy
 and FAQ structured data consistent. The landing uses `Service` schema without
 an exact offer price; the old incomplete `AggregateOffer` has been removed.
 Sitemap dates are omitted until a reliable content-change date is available.

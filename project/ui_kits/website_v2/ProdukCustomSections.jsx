@@ -22,7 +22,7 @@ function ProdukCustomPage() {
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 540 }}>
               Custom rapor sekolah, map les, sampai file kantor notaris — kami cetak sesuai identitasmu.
-              Custom bisa mulai 1 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
+              Custom mulai 50 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
             </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>
@@ -60,10 +60,13 @@ function ProdukCustomPage() {
                 <strong style={{ color: '#fff' }}> emboss foil emas nama firma Anda</strong>. Akta, kontrak, dan
                 sertifikat klien tersimpan rapi — dan terlihat semahal isinya.
               </p>
-              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.88rem', color: 'rgba(255,255,255,.85)' }}>
-                {['Foil emas / perak nama & logo firma', 'Pilihan warna formal: hijau, hitam, maroon, navy', 'Kapasitas 20–100 dokumen', 'Custom mulai 1 pcs; disarankan 100 pcs'].map((t) => (
-                  <li key={t} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--af-yellow)', color: 'var(--af-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, flexShrink: 0 }}>✓</span>
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, fontSize: '0.88rem', lineHeight: '22px', color: 'rgba(255,255,255,.85)' }}>
+                {['Foil emas / perak nama & logo firma', 'Pilihan warna formal: hijau, hitam, maroon, navy', 'Kapasitas 20–100 dokumen', 'Custom mulai 50 pcs; disarankan 100 pcs'].map((t) => (
+                  <li key={t} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    {/* Top-aligned to the first text line (22px), so wrapped items keep the tick beside line one. */}
+                    <span aria-hidden="true" style={{ marginTop: 2, width: 18, height: 18, borderRadius: '50%', background: 'var(--af-yellow)', color: 'var(--af-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10 }}><path d="M2.5 6.2l2.3 2.3 4.7-5" /></svg>
+                    </span>
                     {t}
                   </li>
                 ))}

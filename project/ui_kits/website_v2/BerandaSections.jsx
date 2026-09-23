@@ -7,10 +7,12 @@ const wrapV2 = (extra = {}) => ({
 });
 
 // --- Produk teaser: 4 chunky tilted cards -------------------------------
+// `slug` opens that product's detail on the catalogue page. clear-holder-spread
+// is the Business File photo (business-file.png actually shows Map Kancing).
 const TEASERS = [
-  { title: 'Clear Holder', desc: 'Buku display isi 20–80 kantong bening. Dokumen langsung rapi.', color: 'blue', emoji: null, rot: -2, img: '../../assets/products/clear-holder.png' },
-  { title: 'Business File', desc: 'Map kancing PP tebal, banyak warna. Klik, simpan, bawa.', color: 'orange', rot: 1.5, img: '../../assets/products/business-file.png' },
-  { title: 'Map Executive', desc: 'Document keeper premium, gagah buat proposal & kontrak.', color: 'purple', rot: -1, img: '../../assets/products/map-executive.png' },
+  { title: 'Clear Holder', slug: 'clear-holder', desc: 'Buku display isi 20–60 kantong bening. Dokumen langsung rapi.', color: 'blue', emoji: null, rot: -2, img: '../../assets/products/clear-holder.png' },
+  { title: 'Business File', slug: 'business-file', desc: 'Map dengan kantong depan dan label di punggung. Banyak warna, bisa cetak logo.', color: 'orange', rot: 1.5, img: '../../assets/products/clear-holder-spread.png' },
+  { title: 'Map Executive', slug: 'dokumen-keeper', desc: 'Document keeper premium, gagah buat proposal & kontrak.', color: 'purple', rot: -1, img: '../../assets/products/map-executive.png' },
   { title: 'Rapor & Map Custom', desc: 'Logo sekolahmu, warna pilihanmu. Paling laris!', color: 'orange', rot: 2, img: null, featured: true },
 ];
 
@@ -24,7 +26,7 @@ function TeaserCard({ t }) {
   const deep = `var(--af-${t.color}-deep)`;
   return (
     <a
-      href={t.featured ? 'produk-custom.html' : 'produk-standar.html'}
+      href={t.featured ? 'produk-custom.html' : 'produk-standar.html#' + t.slug}
       style={{
         display: 'flex', flexDirection: 'column', gap: 0, textDecoration: 'none',
         background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)',
@@ -85,14 +87,15 @@ function SekolahV2() {
       <window.Wave fill="var(--af-paper)" flip />
       <div style={wrapV2({ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' })}>
         <div>
-          {/* stack of mini rapor covers */}
-          <div style={{ position: 'relative', height: 320 }}>
+          {/* Stack of mini rapor covers, laid out in % of a 380×330 box so it
+              scales with the column and stays centred (16px clear on each side). */}
+          <div style={{ position: 'relative', width: 'min(100%, 380px)', aspectRatio: '380 / 330', margin: '0 auto' }}>
             {colors.map((c, i) => (
               <div
                 key={c}
                 style={{
-                  position: 'absolute', left: 40 + i * 56, top: 30 + (i % 2) * 26,
-                  width: 180, height: 250, background: c,
+                  position: 'absolute', left: `${((16 + i * 56) / 380) * 100}%`, top: `${((34 + (i % 2) * 26) / 330) * 100}%`,
+                  width: `${(180 / 380) * 100}%`, height: `${(250 / 330) * 100}%`, background: c,
                   border: '2px solid var(--af-ink)', borderRadius: 14,
                   boxShadow: '0 5px 0 var(--af-ink)', transform: `rotate(${(i - 1.5) * 5}deg)`,
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -113,7 +116,7 @@ function SekolahV2() {
           </h2>
           <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.92)', maxWidth: 440 }}>
             Sampul rapor dengan logo dan warna khas sekolahmu — bahan tebal, jilid rapi, awet sampai lulus.
-            Custom bisa mulai <strong style={{ color: 'var(--af-yellow)' }}>1 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
+            Custom mulai <strong style={{ color: 'var(--af-yellow)' }}>50 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom untuk sekolah / les.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Gratis</Button>
@@ -271,7 +274,7 @@ function FAQV2() {
           <Button variant="ghost" href={window.waLink('Halo Agatha Felix! Saya ada beberapa pertanyaan.')} target="_blank" rel="noopener noreferrer">Tanya via WhatsApp →</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <FAQItem question="Minimal pesan berapa, sih?" defaultOpen>Custom bisa mulai 1 pcs, tetapi biaya per pcs lebih tinggi untuk pesanan sedikit. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</FAQItem>
+          <FAQItem question="Minimal pesan berapa, sih?" defaultOpen>Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</FAQItem>
           <FAQItem question="Berapa lama jadinya?">5–14 hari kerja setelah desain kamu setujui, tergantung jumlah dan tingkat kerumitan.</FAQItem>
           <FAQItem question="Aku nggak bisa desain. Gimana dong?">Tenang! Kirim logo dan warna kesukaanmu, tim kami yang buatkan mockup — gratis, revisi sampai cocok.</FAQItem>
           <FAQItem question="Kirim ke luar pulau bisa?">Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.</FAQItem>

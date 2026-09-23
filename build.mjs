@@ -113,7 +113,7 @@ const PAGES = [
     title: 'Custom Rapor Sekolah & Map Cetak Logo | Agatha Felix',
     description:
       'Custom rapor sekolah dengan logo & warna sekolahmu, plus map cetak logo untuk les, kantor & instansi. ' +
-      'Custom mulai 1 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
+      'Custom mulai 50 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
     sections: ['Shell', 'Simulator', 'Portfolio', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
@@ -160,7 +160,7 @@ async function transpileSource(code) {
 
 // Shared Google Ads configuration for React and handwritten pages.
 const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
-<script src="/js/tracking.js"></script>`;
+<script src="/js/af-site.js"></script>`;
 
 // ---------------------------------------------------------------------------
 //  HTML document template (with SEO + Open Graph)
@@ -190,7 +190,7 @@ async function imageSize(absPath) {
 // FAQ copy MUST match what's visible in FAQV2 (BerandaSections.jsx) — Google
 // requires FAQPage schema to mirror on-page content.
 const FAQ_ITEMS = [
-  ['Minimal pesan berapa, sih?', 'Custom bisa mulai 1 pcs, tetapi biaya per pcs lebih tinggi untuk pesanan sedikit. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
+  ['Minimal pesan berapa, sih?', 'Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
   ['Berapa lama jadinya?', '5–14 hari kerja setelah desain kamu setujui, tergantung jumlah dan tingkat kerumitan.'],
   ['Aku nggak bisa desain. Gimana dong?', 'Tenang! Kirim logo dan warna kesukaanmu, tim kami yang buatkan mockup — gratis, revisi sampai cocok.'],
   ['Kirim ke luar pulau bisa?', 'Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.'],
@@ -476,7 +476,7 @@ function html404() {
 </head>
 <body style="font-family:var(--font-body,sans-serif);background:var(--af-paper,#FFF8EE);color:var(--af-ink,#2B2A28);display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px;">
 <div>
-  <img src="/assets/logo-agatha-felix.png" alt="${SITE.brand}" style="height:64px;margin-bottom:24px"/>
+  <a href="/" style="display:inline-block"><img src="/assets/logo-agatha-felix.png" alt="${SITE.brand}, ke Beranda" style="height:64px;margin-bottom:24px"/></a>
   <h1 style="font-family:var(--font-display,sans-serif);font-size:2rem;margin:0 0 8px">Waduh, halamannya nggak ketemu 🙈</h1>
   <p style="margin:0 0 24px">Mungkin link-nya salah ketik. Yuk balik ke beranda.</p>
   <a href="/" style="display:inline-block;background:var(--af-orange,#E8542D);color:#fff;text-decoration:none;font-weight:700;padding:12px 28px;border:2px solid var(--af-ink,#2B2A28);border-radius:999px;box-shadow:0 4px 0 var(--af-ink,#2B2A28)">← Kembali ke Beranda</a>

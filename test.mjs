@@ -5,7 +5,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 
 const read = (file) => fs.readFileSync(file, 'utf8');
-const tag = read('project/static/js/tracking.js');
+const tag = read('project/static/js/af-site.js');
 const handoff = read('project/static/js/lead-handoff.js');
 const config = { googleAdsId: 'AW-18374325686', waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE' };
 function tracking(hostname = 'localhost', pathname = '/', fresh = false) {
@@ -130,8 +130,10 @@ test('built routes expose content, metadata, styles, and valid local assets in r
     assert.equal((html.match(/rel="canonical"/g) || []).length, 1, file);
     assert.match(html, /name="description"/);
     assert.ok(!html.includes('id="af-loader"'));
-    assert.ok(!/30[–-]40 pcs|mulai 30 pcs|MOQ 100 pcs|di [Bb]awah Rp 50\.000|&lt;Rp 50rb/.test(html));
-    assert.equal((html.match(/src="\/js\/tracking.js"/g) || []).length, 1);
+    // Retired order claims. Custom minimum is 50 pcs (owner, 2026-09-24).
+    assert.ok(!/30[–-]40 pcs|mulai 30 pcs|MOQ 100 pcs|di [Bb]awah Rp 50\.000|&lt;Rp 50rb|[Mm]ulai 1 pcs|>1 pcs</.test(html), file + ' repeats a retired minimum-order claim');
+    assert.equal((html.match(/src="\/js\/af-site.js"/g) || []).length, 1);
+    assert.ok(!html.includes('tracking.js'), file + ' loads a script name that adblockers drop');
     if (!file.startsWith('raporsekolah')) assert.ok(html.includes('<style id="af-v2-responsive-shell"'), file + ' is missing responsive CSS');
     for (const [, raw] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
       if (/^(?:https?:|tel:|mailto:|#|data:)/.test(raw)) continue;

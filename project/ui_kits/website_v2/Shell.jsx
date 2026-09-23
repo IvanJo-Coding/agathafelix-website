@@ -31,8 +31,6 @@ const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
     /* Center hero / simulator text when stacked */
     #hero > div > div:first-child,
     #simulator [style*="flex-direction: column"] { align-items: flex-start; }
-    /* Rapor cover stack is decorative + fixed-positioned → scale to fit */
-    #sekolah [style*="height: 320px"] { transform: scale(.82); transform-origin: top left; }
     /* Factory photos: even 3-up strip, no squashing */
     #pabrik [style*="grid-template-columns: repeat(3, 1fr)"] { gap: 12px !important; }
     #pabrik figure img { height: 150px !important; }
