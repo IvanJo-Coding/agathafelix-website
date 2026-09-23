@@ -160,7 +160,7 @@ async function transpileSource(code) {
 
 // Shared Google Ads configuration for React and handwritten pages.
 const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
-<script src="/js/tracking.js"></script>`;
+<script src="/js/af-site.js"></script>`;
 
 // ---------------------------------------------------------------------------
 //  HTML document template (with SEO + Open Graph)
