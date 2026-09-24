@@ -115,7 +115,7 @@ const PAGES = [
     description:
       'Custom rapor sekolah & map cetak logo untuk sekolah, les, kantor & instansi. ' +
       'Minimal 50 pcs, sekitar Rp50.000/pcs untuk 100 pcs. Coba simulator rapor gratis.',
-    sections: ['Shell', 'Simulator', 'Portfolio', 'ProdukCustomSections'],
+    sections: ['Shell', 'Sheet', 'Simulator', 'Portfolio', 'CustomHarga', 'CustomProduk', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
 ];

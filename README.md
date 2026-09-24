@@ -88,6 +88,17 @@ and FAQ structured data consistent. The landing uses `Service` schema without
 an exact offer price; the old incomplete `AggregateOffer` has been removed.
 Sitemap dates are omitted until a reliable content-change date is available.
 
+## Custom product options and prices
+
+The six custom products on `/produk-custom/` (Map Jahit, Map Press, Map
+Executive, Clear Holder Poly, Clear Holder Full Printing, Zipper Bag Custom
+Printing) and their order options live in
+[`CustomProduk.jsx`](project/ui_kits/website_v2/CustomProduk.jsx). Prices live
+in [`CustomHarga.jsx`](project/ui_kits/website_v2/CustomHarga.jsx): every value
+starts as `null`, and the page shows "Harga dikirim di penawaran" until all the
+numbers a visitor's choices need are filled in. `npm test` checks that the price
+file has a slot for every option.
+
 ## Hand-written pages (`project/static/`)
 
 Everything under `project/static/` is copied into `dist/`. The build replaces

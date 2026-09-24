@@ -56,7 +56,7 @@ function ProdukCustomPage() {
             </p>
             <div className="af-pc-hero-cta" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi via WhatsApp</Button>
-              <Button variant="ghost" size="lg" href="#simulator">🎨 Coba Simulator</Button>
+              <Button variant="ghost" size="lg" href="#produk-custom">Lihat Pilihan Produk ↓</Button>
             </div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>
@@ -67,6 +67,8 @@ function ProdukCustomPage() {
           </div>
           <window.Wave fill="var(--af-yellow-tint)" />
         </section>
+
+        <window.CustomProdukSection />
 
         <window.SimulatorRapor />
 
@@ -105,7 +107,10 @@ function ProdukCustomPage() {
                   </li>
                 ))}
               </ul>
-              <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya tertarik dengan lini executive (document keeper foil emas).')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Lini Executive</Button>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya tertarik dengan lini executive (document keeper foil emas).')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Lini Executive</Button>
+                <Button variant="ghost" size="lg" href="#custom-map-executive" style={{ color: '#fff', borderColor: '#fff' }}>Lihat Pilihan Map Executive</Button>
+              </div>
             </div>
           </div>
           <window.Wave fill="var(--af-paper)" />
