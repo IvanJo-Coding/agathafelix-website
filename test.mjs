@@ -148,6 +148,114 @@ test('built routes expose content, metadata, styles, and valid local assets in r
   assert.ok(!read('dist/sitemap.xml').includes('lastmod'));
   assert.match(read('dist/raporsekolah/terima-kasih.html'), /noindex/);
 });
+test('FAQ structured data matches the answers visible on each page', () => {
+  for (const file of ['index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+      .flatMap(([, json]) => { const o = JSON.parse(json); return o['@graph'] || [o]; });
+    const faq = blocks.find((o) => o['@type'] === 'FAQPage');
+    assert.ok(faq && faq.mainEntity.length, file + ' has no FAQPage data');
+    // Visible text only: drop scripts and styles, so the JSON-LD cannot match itself.
+    const text = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, ' ');
+    for (const q of faq.mainEntity) {
+      assert.ok(text.includes(q.name), `${file}: question not shown: ${q.name}`);
+      assert.ok(text.includes(q.acceptedAnswer.text), `${file}: answer differs from the page: ${q.name}`);
+    }
+  }
+});
+// Custom products: load the built price table and product logic without a DOM.
+function customKit() {
+  const window = {};
+  const context = vm.createContext({ window, console });
+  for (const f of ['dist/js/CustomHarga.js', 'dist/js/CustomProduk.js']) vm.runInContext(read(f), context);
+  return { harga: window.HARGA_CUSTOM, kit: window.AfCustom };
+}
+test('custom price template has a slot for every priced option', () => {
+  const { harga, kit } = customKit();
+  for (const p of kit.CUSTOM_PRODUK) {
+    const table = harga[p.slug];
+    assert.ok(table, p.slug + ' missing from HARGA_CUSTOM');
+    const base = p.fields.find((f) => f.id === p.dasarKey);
+    for (const op of base.options.filter((x) => !x.noPrice)) assert.ok(table.dasar[op.id], `${p.slug}: no dasar row for ${op.id}`);
+    // Options as the page shows them (e.g. Map Jahit has no linen).
+    const sel = kit.customSel(p, {});
+    for (const f of p.fields) {
+      if (f.id === p.dasarKey || f.type === 'teks' || f.priced === false) continue;
+      for (const op of kit.optionsOf(f, sel).filter((x) => !x.noPrice && x.id !== 'lain')) {
+        assert.ok(table.tambahan[f.id] && op.id in table.tambahan[f.id], `${p.slug}: no tambahan slot for ${f.id}.${op.id}`);
+      }
+    }
+  }
+});
+test('custom estimate stays hidden until every needed price is filled in', () => {
+  const { harga, kit } = customKit();
+  const press = kit.CUSTOM_PRODUK.find((p) => p.slug === 'map-press');
+  const pick = { bahan: 'tpk-urat', poly: 'emas', 'inner-tipe': 'mika', 'inner-jumlah': '40' };
+  assert.equal(kit.perkiraanCustom(press, pick, 100, harga), null, 'the shipped template is all null, so no price is shown');
+  const filled = JSON.parse(JSON.stringify(harga));
+  const t = filled['map-press'];
+  t.dasar.f4 = { 50: 60000, 100: 50000, 300: 45000, 500: 40000 };
+  Object.assign(t.tambahan.bahan, { 'tpk-urat': 0, linen: 5000 });
+  Object.assign(t.tambahan.poly, { emas: 0 });
+  Object.assign(t.tambahan['inner-tipe'], { mika: 0 });
+  Object.assign(t.tambahan['inner-jumlah'], { 40: 3000 });
+  Object.assign(t.tambahan.karton, { k2: 0 });
+  Object.assign(t.tambahan.busa, { b3: 0, tanpa: -1000 });
+  t.sekaliBayar.klise = 250000;
+  // 120 pcs -> the 100 tier; inner 40 adds 3,000.
+  assert.deepEqual({ ...kit.perkiraanCustom(press, pick, 120, filled) }, { perPcs: 53000, sekali: 250000, total: 53000 * 120 + 250000 });
+  assert.equal(kit.perkiraanCustom(press, pick, 49, filled), null, 'below the lowest tier');
+  // Linen forces "tanpa busa": 50,000 + 5,000 + 3,000 - 1,000.
+  assert.equal(kit.perkiraanCustom(press, { ...pick, bahan: 'linen' }, 100, filled).perPcs, 57000);
+  assert.equal(kit.perkiraanCustom(press, { ...pick, ukuran: 'lain' }, 100, filled), null, 'custom sizes are quoted by hand');
+  assert.equal(kit.perkiraanCustom(press, { ...pick, siku: 'emas-lancip' }, 100, filled), null, 'an unfilled add-on hides the estimate');
+});
+test('custom options follow the production rules', () => {
+  const { kit } = customKit();
+  const [jahit, press, exec] = ['map-jahit', 'map-press', 'map-executive'].map((s) => kit.CUSTOM_PRODUK.find((p) => p.slug === s));
+  const bahan = (p, raw) => kit.optionsOf(p.fields.find((f) => f.id === 'bahan'), kit.customSel(p, raw)).map((o) => o.id);
+  assert.ok(!bahan(jahit, {}).includes('linen'), 'linen cannot be sewn');
+  assert.ok(bahan(press, {}).includes('linen'));
+  assert.ok(!bahan(exec, {}).includes('linen'), 'Map Executive is always sewn');
+  assert.ok(!exec.fields.some((f) => f.id === 'konstruksi'), 'Map Executive has no press/jahit choice');
+  const linen = kit.customSel(press, { bahan: 'linen', busa: 'b5' });
+  assert.equal(linen.busa, 'tanpa', 'linen takes no foam');
+  assert.equal(kit.customSel(press, { bahan: 'tpk-pasir', busa: 'b5' }).busa, 'b5', 'the foam choice returns after leaving linen');
+  assert.equal(kit.customSel(press, {}).karton, 'k2');
+  assert.equal(kit.customSel(press, {}).busa, 'b3');
+  assert.ok(!kit.visibleFields(press, kit.customSel(press, {})).some((f) => f.id === 'benang'));
+  assert.ok(kit.visibleFields(exec, kit.customSel(exec, {})).some((f) => f.id === 'benang'), 'Executive always asks for thread colour');
+  assert.deepEqual([...[60, 80, 120, 140].map(kit.ringSize)], ['1 inci', '1,5 inci', '1,5 inci', '2 inci']);
+});
+test('custom WhatsApp message carries the full specification', () => {
+  const { kit } = customKit();
+  const find = (s) => kit.CUSTOM_PRODUK.find((p) => p.slug === s);
+  const msg = kit.pesanCustom(find('map-jahit'), {
+    bahan: 'tpk-pasir', 'warna-sampul': ' navy ', benang: 'emas', poly: 'hologram', siku: 'emas-rounded',
+    'inner-tipe': 'pp-bening', 'inner-jumlah': 'lain', 'inner-jumlah-lain': '110', punggung: 'ring', jendela: 'pakai',
+  }, 250, 5, { sekolah: 'SMP Harapan', kota: 'Bekasi', waktu: 'Dalam 1 bulan' });
+  for (const line of ['*Map Jahit*', '- Ukuran: F4 / Folio', '- Bahan sampul: TPK tekstur pasir', '- Warna sampul: navy',
+    '- Warna benang jahit: Emas', '- Warna poly logo: Hologram (mohon dikonfirmasi)', '- Siku besi: Emas · rounded',
+    '- Jumlah inner: 110 lembar', '- Punggung: Ring D 4-ring (1,5 inci, inner plastik lepas berlubang)',
+    '- Jendela nama: Pakai jendela nama', 'Jumlah: 250 pcs (5 warna, minimal 50 pcs per warna)',
+    'Sekolah / instansi: SMP Harapan', 'Kota pengiriman: Bekasi', 'Dibutuhkan: Dalam 1 bulan']) {
+    assert.ok(msg.includes(line), 'message is missing: ' + line + '\n' + msg);
+  }
+  assert.ok(!msg.includes('Bahan sampul: Linen'));
+  assert.ok(!msg.includes('Kantong dalam'), 'add-ons that were not taken stay out of the message');
+  assert.match(kit.pesanCustom(find('clear-holder-print'), {}, 100, 1), /test print/);
+  const zip = kit.pesanCustom(find('zipper-bag-print'), { tipe: 'polos', 'warna-zipper': 'ungu', sisi: ['depan', 'belakang'] }, 100, 1);
+  assert.ok(zip.includes('- Tipe zipper bag: Polos') && zip.includes('- Warna zipper bag: Ungu') && zip.includes('- Sisi yang dicetak: Depan, Belakang'), zip);
+});
+test('every photo path used by the page scripts exists in the build', () => {
+  for (const file of fs.readdirSync('dist/js')) {
+    const code = read('dist/js/' + file);
+    for (const [, p] of code.matchAll(/["'`](\/(?:assets|raporsekolah)\/[\w./-]+\.(?:webp|png|jpe?g))["'`]/g)) {
+      assert.ok(fs.existsSync(path.join('dist', p)), `${file} points at missing ${p}`);
+    }
+  }
+});
 test('largest portfolio photos are served as compact WebP assets', () => {
   for (const name of ['clearholder-permata', 'rapor-penabur-cordura']) {
     const small = fs.statSync(`dist/assets/portfolio/${name}.webp`).size;

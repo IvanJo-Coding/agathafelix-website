@@ -15,11 +15,36 @@ const SIM_ACCENTS = [
   ['Emas', '#D4A93C'],
 ];
 
+// Phones: the cover preview comes first and is scaled down, so every colour
+// tap shows its result right above the swatches instead of a screen below.
+const SIM_CSS_ID = 'af-simulator';
+(function injectSimCss() {
+  if (typeof document === 'undefined' || document.getElementById(SIM_CSS_ID)) return;
+  const tag = document.createElement('style');
+  tag.id = SIM_CSS_ID;
+  tag.textContent = `
+  @media (max-width: 900px) {
+    #simulator .af-sim-grid { grid-template-columns: minmax(0, 1fr) !important; }
+    .af-sim-preview { order: -1; min-width: 0; }
+    /* Shell's stacked-layout rule left-aligns every flex column in #simulator,
+       which shrank the name field, upload box and WA button to their content. */
+    #simulator .af-sim-controls { align-items: stretch !important; }
+  }
+  @media (max-width: 680px) {
+    .af-sim-grid { gap: 20px !important; }
+    .af-sim-preview { height: 312px; align-items: flex-start; }
+    .af-sim-book { transform: scale(.72) rotate(1.5deg) !important; transform-origin: top center; }
+    .af-sim-controls { padding: 20px !important; gap: 16px !important; }
+  }`;
+  document.head.appendChild(tag);
+})();
+
 function SimulatorRapor() {
   const { Button, Input } = DS2s;
   const [color, setColor] = React.useState(0);
   const [accent, setAccent] = React.useState(0);
-  const [nama, setNama] = React.useState('SD Ceria Nusantara');
+  // Empty by default: a prefilled sample name used to travel into real enquiries.
+  const [nama, setNama] = React.useState('');
   const [logo, setLogo] = React.useState(null);
 
   const [, base, deep] = SIM_COLORS[color];
@@ -33,7 +58,14 @@ function SimulatorRapor() {
     reader.readAsDataURL(f);
   };
 
-  const pesanWA = `Halo Agatha Felix! Saya mau pesan rapor custom: warna ${SIM_COLORS[color][0]}, aksen ${SIM_ACCENTS[accent][0]}, untuk "${nama}".`;
+  const pesanWA = [
+    'Halo Agatha Felix! Saya mau pesan rapor custom sesuai simulator:',
+    '- Warna sampul: ' + SIM_COLORS[color][0],
+    '- Warna tulisan: ' + SIM_ACCENTS[accent][0],
+    ...(nama.trim() ? ['- Nama sekolah: ' + nama.trim()] : []),
+    'Jumlah: ',
+    'Logo sekolah saya kirim di chat ini.',
+  ].join('\n');
 
   const swatchStyle = (bg, isOn) => ({
     width: 44, height: 44, borderRadius: '50%', background: bg, cursor: 'pointer',
@@ -53,28 +85,28 @@ function SimulatorRapor() {
           <p style={{ margin: 0, fontSize: '0.9rem' }}>Pilih warna, tulis nama sekolah, pasang logo — langsung kelihatan jadinya. Suka? Kirim ke kami lewat WhatsApp.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 40, alignItems: 'center', maxWidth: 940, margin: '0 auto' }}>
+        <div className="af-sim-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr', gap: 40, alignItems: 'center', maxWidth: 940, margin: '0 auto' }}>
           {/* controls */}
-          <div style={{ background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)', boxShadow: '0 5px 0 var(--af-ink)', padding: 26, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div className="af-sim-controls" style={{ background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)', boxShadow: '0 5px 0 var(--af-ink)', padding: 26, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_COLORS[color][0]}</span></div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {SIM_COLORS.map(([label, bg], i) => (
-                  <button key={label} title={label} aria-label={label} onClick={() => setColor(i)} style={swatchStyle(bg, color === i)}></button>
+                  <button key={label} type="button" title={label} aria-label={'Warna sampul ' + label} aria-pressed={color === i} onClick={() => setColor(i)} style={swatchStyle(bg, color === i)}></button>
                 ))}
               </div>
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>2 · Warna tulisan</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>2 · Warna tulisan <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_ACCENTS[accent][0]}</span></div>
               <div style={{ display: 'flex', gap: 10 }}>
                 {SIM_ACCENTS.map(([label, bg], i) => (
-                  <button key={label} title={label} aria-label={label} onClick={() => setAccent(i)} style={swatchStyle(bg, accent === i)}></button>
+                  <button key={label} type="button" title={label} aria-label={'Warna tulisan ' + label} aria-pressed={accent === i} onClick={() => setAccent(i)} style={swatchStyle(bg, accent === i)}></button>
                 ))}
               </div>
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>3 · Nama sekolah / les</div>
-              <Input placeholder="cth: SD Ceria Nusantara" value={nama} onChange={(e) => setNama(e.target.value)} />
+              <Input placeholder="cth: SD Ceria Nusantara" aria-label="Nama sekolah atau tempat les" value={nama} onChange={(e) => setNama(e.target.value)} />
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>4 · Logo sekolah (opsional)</div>
@@ -95,8 +127,9 @@ function SimulatorRapor() {
           </div>
 
           {/* live mockup */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="af-sim-preview" style={{ display: 'flex', justifyContent: 'center' }}>
             <div
+              className="af-sim-book"
               style={{
                 width: 300, height: 410, background: base, border: '2px solid var(--af-ink)',
                 borderRadius: '14px 22px 22px 14px', boxShadow: '0 8px 0 var(--af-ink)',

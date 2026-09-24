@@ -66,15 +66,10 @@ const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
     /* giant hero map shrinks so it never clips */
     #hero [role="img"] { transform: scale(.8); transform-origin: top center; height: 460px !important; }
   }
-  /* Small phones: the simulator's rapor board is a fixed 300px. Plus the
-     container padding that is wider than a 320px screen, and because it sets the
-     grid column's min width, it dragged the whole simulator right and clipped
-     its own "Pesan Desain Ini via WA" button. Shrink the board proportionally;
-     its contents are centred and have room to spare at this size. */
+  /* Small phones. The simulator's 300px rapor board is scaled down in
+     Simulator.jsx, and its column may shrink below 300px (minmax(0, 1fr)
+     there), so the board no longer drags the grid past the screen edge. */
   @media (max-width: 360px) {
-    #simulator [style*="width: 300px"] {
-      width: 252px !important; height: 345px !important; padding: 20px !important;
-    }
     /* The CTA label is nowrap, so its min-content width (268px) set the grid
        column's floor and dragged the whole simulator past the right edge —
        clipping that very button. Let it wrap at this size. */
@@ -295,9 +290,11 @@ function FooterV2() {
         </div>
         <div>
           <div style={head}>Produk</div>
-          <a href="produk-standar.html" style={link}>Clear Holder</a>
-          <a href="produk-standar.html" style={link}>Map L &amp; Map Kancing</a>
-          <a href="produk-standar.html" style={link}>Map Executive</a>
+          {/* Each opens that product's detail sheet in the catalogue. */}
+          <a href="produk-standar.html#clear-holder" style={link}>Clear Holder</a>
+          <a href="produk-standar.html#map-kancing" style={link}>Map Kancing</a>
+          <a href="produk-standar.html#clear-sleeves" style={link}>Map L (Clear Sleeves)</a>
+          <a href="produk-standar.html#dokumen-keeper" style={link}>Map Executive</a>
           <a href="produk-custom.html" style={link}>Rapor &amp; Map Custom</a>
         </div>
         <div>

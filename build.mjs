@@ -104,17 +104,18 @@ const PAGES = [
     description:
       'Jual map plastik grosir langsung dari pabrik: clear holder, map kancing, business file, ' +
       'map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir, siap kirim.',
-    sections: ['Shell', 'ProdukStandarSections'],
+    sections: ['Shell', 'Sheet', 'ProdukStandarSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukStandarPage/>);`,
   },
   {
     out: 'produk-custom/index.html',
     canonical: '/produk-custom/',
     title: 'Custom Rapor Sekolah & Map Cetak Logo | Agatha Felix',
+    // Kept under ~155 characters so Google shows it whole.
     description:
-      'Custom rapor sekolah dengan logo & warna sekolahmu, plus map cetak logo untuk les, kantor & instansi. ' +
-      'Custom mulai 50 pcs; disarankan 100 pcs agar lebih ekonomis. Coba simulator rapor interaktif.',
-    sections: ['Shell', 'Simulator', 'Portfolio', 'ProdukCustomSections'],
+      'Custom rapor sekolah & map cetak logo untuk sekolah, les, kantor & instansi. ' +
+      'Minimal 50 pcs, sekitar Rp50.000/pcs untuk 100 pcs. Coba simulator rapor gratis.',
+    sections: ['Shell', 'Sheet', 'Simulator', 'Portfolio', 'CustomHarga', 'CustomProduk', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
 ];
@@ -196,6 +197,25 @@ const FAQ_ITEMS = [
   ['Kirim ke luar pulau bisa?', 'Bisa! Kami kirim ke seluruh Indonesia via ekspedisi. Ongkir dihitung transparan saat penawaran.'],
 ];
 
+// Same rule for the Custom & Rapor page: must match CUSTOM_FAQ in
+// ProdukCustomSections.jsx word for word (test.mjs checks it).
+const CUSTOM_FAQ_ITEMS = [
+  ['Minimal pesannya berapa?', 'Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.'],
+  ['Berapa lama produksinya?', '5–14 hari kerja setelah desain disetujui dan DP masuk, tergantung jumlah dan tingkat kerumitan.'],
+  ['Aku belum punya desain, cuma punya logo. Bisa?', 'Bisa. Kirim logo (JPG, PNG, PDF, atau CDR) dan warna yang kamu mau, tim kami buatkan mockup gratis dan revisi sampai cocok.'],
+  ['Teknik cetaknya apa saja?', 'Jahit, press dengan hot print foil emas atau silver, cordura, dan sablon, juga clear holder dan zipper bag berlogo. Contohnya ada di bagian Karya Kami di atas.'],
+  ['Ongkos kirimnya bagaimana?', 'Gratis ongkir Jabodetabek untuk pesanan minimal 50 pcs. Luar Jabodetabek kami kirim ke seluruh Indonesia via ekspedisi, ongkirnya dihitung saat penawaran.'],
+  ['Seberapa cepat dibalas?', 'Di jam kerja (Senin–Sabtu, 08.00–17.00 WIB) kami balas WhatsApp di bawah 1 jam. Pesan di luar jam itu kami balas di hari kerja berikutnya.'],
+];
+
+const faqSchema = (items) => ({
+  '@context': 'https://schema.org', '@type': 'FAQPage',
+  mainEntity: items.map(([q, a]) => ({
+    '@type': 'Question', name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+});
+
 function organizationSchema() {
   return {
     '@type': ['Organization', 'LocalBusiness'],
@@ -235,13 +255,7 @@ function jsonLdFor(page) {
       url: SITE.domain + '/', name: SITE.brand,
       publisher: { '@id': SITE.domain + '/#organization' }, inLanguage: 'id-ID',
     });
-    blocks.push({
-      '@context': 'https://schema.org', '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map(([q, a]) => ({
-        '@type': 'Question', name: q,
-        acceptedAnswer: { '@type': 'Answer', text: a },
-      })),
-    });
+    blocks.push(faqSchema(FAQ_ITEMS));
   } else {
     const crumb = { '/produk-standar/': 'Produk Standar', '/produk-custom/': 'Custom Rapor Sekolah' }[page.canonical] || page.title;
     blocks.push({
@@ -251,6 +265,7 @@ function jsonLdFor(page) {
         { '@type': 'ListItem', position: 2, name: crumb, item: SITE.domain + page.canonical },
       ],
     });
+    if (page.canonical === '/produk-custom/') blocks.push(faqSchema(CUSTOM_FAQ_ITEMS));
   }
   return blocks;
 }
