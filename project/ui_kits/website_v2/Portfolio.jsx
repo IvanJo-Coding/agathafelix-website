@@ -13,9 +13,35 @@ const PORTFOLIO = [
   { img: PF + 'clearholder-permata.png', client: 'PermataBank KPR', teknik: 'Clear Holder Custom', seg: 'Korporat', color: 'blue' },
 ];
 
+// Phones: two columns with square photos (one column made this section about
+// 3,100px tall on a 390px screen), and no tilt so a tap cannot leave it stuck.
+const PF_CSS_ID = 'af-portfolio';
+(function injectPfCss() {
+  if (typeof document === 'undefined' || document.getElementById(PF_CSS_ID)) return;
+  const tag = document.createElement('style');
+  tag.id = PF_CSS_ID;
+  tag.textContent = `
+  .af-pf-more { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-family: var(--font-display);
+    font-weight: 800; font-size: .8rem; color: var(--af-ink); text-decoration: none; }
+  .af-pf-more:hover { color: var(--af-orange-deep); }
+  @media (max-width: 680px) {
+    #karya .af-pf-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    .af-pf-card { transform: none !important; border-radius: var(--radius-md) !important; box-shadow: 0 4px 0 var(--af-ink) !important; }
+    .af-pf-img { height: auto !important; aspect-ratio: 1 / 1; }
+    .af-pf-cap { padding: 10px 11px 12px !important; }
+    .af-pf-client { font-size: .86rem !important; }
+    .af-pf-teknik { font-size: .66rem !important; padding: 2px 8px !important; }
+    .af-pf-seg { top: 6px !important; left: 6px !important; font-size: 9px !important; padding: 2px 7px !important; }
+    .af-pf-more { font-size: .74rem; margin-top: 8px; }
+  }`;
+  document.head.appendChild(tag);
+})();
+
 function PortfolioCard({ p, rot }) {
+  const pesan = `Halo Agatha Felix! Saya lihat contoh ${p.teknik} untuk ${p.client} di website. Saya mau pesan yang mirip untuk sekolah / instansi kami.`;
   return (
     <figure
+      className="af-pf-card"
       style={{
         margin: 0, background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)',
         boxShadow: '0 5px 0 var(--af-ink)', overflow: 'hidden', transform: `rotate(${rot}deg)`,
@@ -25,8 +51,9 @@ function PortfolioCard({ p, rot }) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = `rotate(${rot}deg)`; }}
     >
       <div style={{ background: '#f4ede1', borderBottom: '2px solid var(--af-ink)', position: 'relative' }}>
-        <img src={p.img} alt={'Map custom ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
+        <img className="af-pf-img" src={p.img} alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
         <span
+          className="af-pf-seg"
           style={{
             position: 'absolute', top: 10, left: 10, background: `var(--af-${p.color})`, color: '#fff',
             border: '2px solid var(--af-ink)', borderRadius: 999, fontFamily: 'var(--font-display)',
@@ -36,11 +63,14 @@ function PortfolioCard({ p, rot }) {
           {p.seg}
         </span>
       </div>
-      <figcaption style={{ padding: '13px 16px 15px' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: 'var(--text-heading)', lineHeight: 1.25 }}>{p.client}</div>
-        <div style={{ display: 'inline-flex', marginTop: 7, alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 600, color: `var(--af-${p.color}-deep)`, background: `var(--af-${p.color}-tint)`, border: `1.5px solid var(--af-${p.color}-soft)`, padding: '3px 11px', borderRadius: 999 }}>
+      <figcaption className="af-pf-cap" style={{ padding: '13px 16px 15px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1 }}>
+        <div className="af-pf-client" style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: 'var(--text-heading)', lineHeight: 1.25 }}>{p.client}</div>
+        <div className="af-pf-teknik" style={{ display: 'inline-flex', marginTop: 7, alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 600, color: `var(--af-${p.color}-deep)`, background: `var(--af-${p.color}-tint)`, border: `1.5px solid var(--af-${p.color}-soft)`, padding: '3px 11px', borderRadius: 999 }}>
           {p.teknik}
         </div>
+        <a className="af-pf-more" href={window.waLink(pesan)} target="_blank" rel="noopener noreferrer" style={{ marginTop: 'auto', paddingTop: 10 }}>
+          Pesan yang mirip <span aria-hidden="true">→</span>
+        </a>
       </figcaption>
     </figure>
   );
@@ -61,16 +91,19 @@ function PortfolioCustom() {
           highlightColor="purple"
           description="Dari rapor sekolah jahit & press sampai map korporat berlogo — ini sebagian yang sudah kami produksi."
         />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div className="af-pf-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
           {PORTFOLIO.map((p, i) => <PortfolioCard key={p.client} p={p} rot={rots[i % rots.length]} />)}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginTop: 32 }}>
+        {/* A plain list of techniques. It used to look like a row of buttons
+            (ink border + candy shadow) that did nothing when tapped. */}
+        <p style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: '32px 0 0', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+          <span>Teknik yang kami kerjakan:</span>
           {['Jahit', 'Press', 'Cordura', 'Clear Holder Custom', 'Zipper Bag'].map((t, i) => (
-            <span key={t} style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-body)', background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 999, padding: '7px 16px', boxShadow: '0 3px 0 var(--af-ink)' }}>
+            <span key={t} style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-body)', background: 'var(--af-paper-2)', borderRadius: 999, padding: '5px 12px' }}>
               {['🪡', '🔥', '🧵', '🎨', '👜'][i]} {t}
             </span>
           ))}
-        </div>
+        </p>
       </div>
     </section>
   );

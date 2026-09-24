@@ -148,6 +148,22 @@ test('built routes expose content, metadata, styles, and valid local assets in r
   assert.ok(!read('dist/sitemap.xml').includes('lastmod'));
   assert.match(read('dist/raporsekolah/terima-kasih.html'), /noindex/);
 });
+test('FAQ structured data matches the answers visible on each page', () => {
+  for (const file of ['index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+      .flatMap(([, json]) => { const o = JSON.parse(json); return o['@graph'] || [o]; });
+    const faq = blocks.find((o) => o['@type'] === 'FAQPage');
+    assert.ok(faq && faq.mainEntity.length, file + ' has no FAQPage data');
+    // Visible text only: drop scripts and styles, so the JSON-LD cannot match itself.
+    const text = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, ' ');
+    for (const q of faq.mainEntity) {
+      assert.ok(text.includes(q.name), `${file}: question not shown: ${q.name}`);
+      assert.ok(text.includes(q.acceptedAnswer.text), `${file}: answer differs from the page: ${q.name}`);
+    }
+  }
+});
 test('largest portfolio photos are served as compact WebP assets', () => {
   for (const name of ['clearholder-permata', 'rapor-penabur-cordura']) {
     const small = fs.statSync(`dist/assets/portfolio/${name}.webp`).size;
