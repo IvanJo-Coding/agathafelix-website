@@ -70,8 +70,12 @@ The form prepares a WhatsApp message; it does **not** save a lead to a backend
 or confirm that a WhatsApp message was sent. Contact details travel between
 pages in session storage (30-minute expiry), with a cleaned fragment fallback
 when storage is unavailable. They are no longer placed in the thank-you query.
-Only a fresh form handoff loads the thank-you Google tag, reducing false page-load
-conversions from direct visits and refreshes. The existing Google Ads URL-based
+The thank-you page always loads the Google tag, so a WhatsApp click there is
+sent, but only a fresh form handoff sends the page view that the URL-based
+conversion counts; direct visits and refreshes load it with
+`send_page_view: false`. The handoff is marked measured only after the tag
+loads, so a failed or blocked load is retried on reload (within the 30 minutes)
+and a measured one is never sent twice. The existing Google Ads URL-based
 conversion handles the form; its WhatsApp retry button does not add a second
 WhatsApp conversion for the same prepared lead. The URL-based
 conversion rule was verified in Ads: URL starts with

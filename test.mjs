@@ -8,9 +8,10 @@ const read = (file) => fs.readFileSync(file, 'utf8');
 const tag = read('project/static/js/af-site.js');
 const handoff = read('project/static/js/lead-handoff.js');
 const config = { googleAdsId: 'AW-18374325686', waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE' };
-function tracking(hostname = 'localhost', pathname = '/', fresh = false) {
+// Pass the window from prepare() to run both scripts on one page, as the browser does.
+function tracking(hostname = 'localhost', pathname = '/', window = {}) {
   const listeners = [], scripts = [], timers = [], navigations = [];
-  const window = { AF_TRACKING: config, AF_LEAD_PREPARED: fresh };
+  window.AF_TRACKING = config;
   const context = vm.createContext({ window, URL, Date,
     location: { hostname, pathname, origin: 'https://' + hostname, assign: (url) => navigations.push(url) },
     document: { createElement: () => ({}), head: { appendChild: (el) => scripts.push(el) },
@@ -63,28 +64,58 @@ function prepare(href, pending, storageAvailable = true) {
       setItem: (_, value) => { if (!storageAvailable) throw Error('storage blocked'); saved = JSON.parse(value); },
     }, history: { replaceState: (_, __, value) => { cleaned = value; } },
   });
-  return { window, saved, cleaned };
+  // The tag marks the lead measured later, so read storage when asked.
+  return { window, cleaned, get saved() { return saved; } };
 }
 const thanks = 'https://agatha-felix.com/raporsekolah/terima-kasih.html';
+const thanksPath = '/raporsekolah/terima-kasih.html';
 const wa = 'https://wa.me/6282219472613?text=Local%20test';
-test('a fresh handoff is recognized once, without counting refreshes or direct visits', () => {
+test('a fresh handoff counts once the tag loads, and a failed load is retried', () => {
   const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
   assert.equal(first.window.AF_LEAD_URL, wa);
   assert.equal(first.window.AF_LEAD_PREPARED, true);
-  assert.equal(prepare(thanks, first.saved).window.AF_LEAD_PREPARED, false);
-  assert.equal(tracking('agatha-felix.com', '/raporsekolah/terima-kasih.html').scripts.length, 0);
-  const fresh = tracking('agatha-felix.com', '/raporsekolah/terima-kasih.html', true);
-  assert.equal(fresh.scripts.length, 1);
-  assert.equal(fresh.window.dataLayer[1][2].page_location, thanks);
-  fresh.window.AF_LEAD_URL = wa;
-  fresh.click(wa);
-  assert.equal(fresh.window.dataLayer.length, 2, 'WhatsApp retry must not double-count the prepared form');
+  assert.equal(first.saved.measured, false, 'opening the page is not a measurement');
+  const failed = tracking('agatha-felix.com', thanksPath, first.window);
+  assert.equal(failed.scripts.length, 1);
+  assert.equal(failed.window.dataLayer[1][2].page_location, thanks);
+  assert.ok(!('send_page_view' in failed.window.dataLayer[1][2]));
+  // The tag never loaded (blocked or offline), so a reload sends the page view again.
+  const retry = prepare(thanks, first.saved);
+  assert.equal(retry.window.AF_LEAD_MEASURED, false);
+  const loaded = tracking('agatha-felix.com', thanksPath, retry.window);
+  assert.ok(!('send_page_view' in loaded.window.dataLayer[1][2]));
+  loaded.scripts[0].onload();
+  assert.equal(retry.saved.measured, true);
+  // Once measured, a reload keeps the message but sends no second form conversion.
+  const reload = prepare(thanks, retry.saved);
+  assert.equal(reload.window.AF_LEAD_URL, wa);
+  const quiet = tracking('agatha-felix.com', thanksPath, reload.window);
+  assert.equal(quiet.window.dataLayer[1][2].send_page_view, false);
+  assert.equal(quiet.scripts[0].onload, undefined);
+  quiet.click(wa);
+  assert.equal(quiet.window.dataLayer.length, 2, 'WhatsApp retry must not double-count the prepared form');
+});
+test('direct and expired thank-you visits deliver WhatsApp clicks without a form conversion', () => {
+  for (const pending of [null, { url: wa, created: Date.now() - 31 * 60 * 1000, measured: false }]) {
+    const visit = prepare(thanks, pending);
+    assert.ok(!visit.window.AF_LEAD_URL);
+    const result = tracking('agatha-felix.com', thanksPath, visit.window);
+    assert.equal(result.scripts.length, 1, 'the tag must load so the click is sent');
+    assert.equal(result.window.dataLayer[1][2].send_page_view, false);
+    assert.equal(result.window.dataLayer[1][2].page_location, thanks);
+    assert.equal(result.click('https://wa.me/6282219472613', '').defaultPrevented, true);
+    assert.equal(result.window.dataLayer.at(-1)[1], 'conversion');
+    assert.equal(result.window.dataLayer.at(-1)[2].send_to, config.waConversionLabel);
+  }
 });
 test('storage fallback and old links remove contact details before tracking', () => {
   const fallback = prepare(thanks + '#wa=' + encodeURIComponent(wa), null, false);
   assert.equal(fallback.window.AF_LEAD_URL, wa);
   assert.equal(fallback.cleaned, thanks);
   assert.equal(fallback.window.AF_LEAD_PREPARED, true);
+  assert.equal(fallback.window.AF_LEAD_MEASURED, false);
+  const stored = prepare(thanks + '#wa=' + encodeURIComponent(wa), null);
+  assert.deepEqual([stored.saved.url, stored.saved.measured], [wa, false], 'kept for a retry when storage works here');
   const old = prepare(thanks + '?wa=' + encodeURIComponent(wa));
   assert.equal(old.cleaned, thanks);
   assert.equal(old.window.AF_LEAD_URL, wa);

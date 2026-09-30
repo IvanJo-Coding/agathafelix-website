@@ -5,12 +5,23 @@
   var legacy = url.searchParams.get('wa');
   var pending;
   try { pending = JSON.parse(sessionStorage.getItem(key)); } catch (_) {}
-  if (fallback) pending = { url: fallback, created: Date.now(), measured: false };
-  if (pending && Date.now() - pending.created < 30 * 60 * 1000) {
-    window.AF_LEAD_URL = pending.url;
-    window.AF_LEAD_PREPARED = !pending.measured;
-    pending.measured = true;
+  if (fallback) {
+    pending = { url: fallback, created: Date.now(), measured: false };
+    // Storage may work on this page even if the form could not use it.
     try { sessionStorage.setItem(key, JSON.stringify(pending)); } catch (_) {}
+  }
+  if (pending && Date.now() - pending.created < 30 * 60 * 1000) {
+    // Two separate states: the message is prepared (the WhatsApp button keeps
+    // it for 30 minutes), and the form conversion has been measured. The second
+    // is recorded only once the Google tag has loaded, so a failed or blocked
+    // load is retried on reload and a successful one is never counted twice.
+    window.AF_LEAD_URL = pending.url;
+    window.AF_LEAD_PREPARED = true;
+    window.AF_LEAD_MEASURED = !!pending.measured;
+    window.AF_LEAD_MARK_MEASURED = function () {
+      pending.measured = window.AF_LEAD_MEASURED = true;
+      try { sessionStorage.setItem(key, JSON.stringify(pending)); } catch (_) {}
+    };
   } else if (legacy) {
     // Preserve old bookmarked links without counting them as new submissions.
     window.AF_LEAD_URL = legacy;

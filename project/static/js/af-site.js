@@ -15,15 +15,23 @@
   }
   window.AFTracking = { trackWhatsApp: trackWhatsApp };
 
+  // A thank-you page view is the form conversion (a URL rule in Google Ads), so
+  // only a fresh handoff that has not been measured yet may send one. Direct
+  // visits and reloads still load the tag, without a page view, so a WhatsApp
+  // click there is delivered instead of waiting in dataLayer.
+  var formConversion = thankYou && window.AF_LEAD_PREPARED && !window.AF_LEAD_MEASURED;
+
   // Local previews never send page views or test conversions to Google Ads.
-  // A direct visit/reload of the thank-you page is not a fresh form submission.
-  if (production && (!thankYou || window.AF_LEAD_PREPARED)) {
+  if (production) {
+    var params = {};
+    if (thankYou) params.page_location = location.origin + location.pathname;
+    if (thankYou && !formConversion) params.send_page_view = false;
     window.gtag('js', new Date());
-    window.gtag('config', config.googleAdsId, thankYou ? {
-      page_location: location.origin + location.pathname,
-    } : {});
+    window.gtag('config', config.googleAdsId, params);
     var script = document.createElement('script');
     script.async = true;
+    // Loading the tag sends the queued page view; until then a reload retries.
+    if (formConversion) script.onload = function () { window.AF_LEAD_MARK_MEASURED(); };
     script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.googleAdsId);
     document.head.appendChild(script);
   }
