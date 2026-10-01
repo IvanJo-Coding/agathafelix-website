@@ -104,7 +104,7 @@ const PAGES = [
     description:
       'Jual map plastik grosir langsung dari pabrik: clear holder, map kancing, business file, ' +
       'map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir, siap kirim.',
-    sections: ['Shell', 'Sheet', 'ProdukStandarSections'],
+    sections: ['Shell', 'Sheet', 'HargaStandar', 'ProdukStandarSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukStandarPage/>);`,
   },
   {

@@ -103,6 +103,17 @@ starts as `null`, and the page shows "Harga dikirim di penawaran" until all the
 numbers a visitor's choices need are filled in. `npm test` checks that the price
 file has a slot for every option.
 
+## Standard product prices
+
+The price list on `/produk-standar/` (the "Daftar Harga" section, each type's
+prices in its detail sheet, and "Mulai Rp…" on the cards) comes from
+[`HargaStandar.jsx`](project/ui_kits/website_v2/HargaStandar.jsx), copied from
+the owner's price list of 24 September 2026. Prices exclude PPN. Its `tipe`
+map links catalogue types to price rows: the B5 Clear Holder column is the
+catalogue's A5 type, the Executive column is Dokumen Keeper Executive, and both
+Carry File types show every width. Types without a mapping (File Case,
+Expanding File) keep "Tanya Harga". Update `update` whenever prices change.
+
 ## Hand-written pages (`project/static/`)
 
 Everything under `project/static/` is copied into `dist/`. The build replaces

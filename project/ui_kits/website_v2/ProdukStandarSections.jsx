@@ -179,6 +179,32 @@ function gallery(fam, v, colour) {
   ];
 }
 
+// Prices from HargaStandar.jsx. A type's rows: a Clear Holder column ('ch:x')
+// or a list of item ids. Types without a mapping stay "tanya harga".
+const rupiah = (n) => 'Rp' + n.toLocaleString('id-ID');
+function hargaTipe(slug) {
+  const hs = window.HARGA_STANDAR;
+  const map = hs.tipe[slug];
+  if (!map) return [];
+  if (typeof map === 'string') {
+    const col = hs.clearHolder.ukuran.findIndex(([key]) => 'ch:' + key === map);
+    return hs.clearHolder.isi.filter(([, row]) => typeof row[col] === 'number')
+      .map(([n, row]) => ({ label: 'Isi ' + n + ' lembar', harga: row[col], satuan: 'pcs' }));
+  }
+  return map.map((id) => {
+    for (const grup of hs.daftar) {
+      const b = grup.barang.find((x) => x[0] === id);
+      if (b) return { label: b[1] + ' · ' + b[3], kode: b[2], harga: b[4], satuan: grup.satuan };
+    }
+    return null;
+  }).filter(Boolean);
+}
+// Lowest price across a product's types, for the card.
+function mulaiDari(fam) {
+  const rows = fam.variants.flatMap((v) => hargaTipe(v.slug));
+  return rows.length ? rows.reduce((a, b) => (b.harga < a.harga ? b : a)) : null;
+}
+
 const FILTERS = [
   ['semua', 'Semua 🗂️'],
   ['sekolah', 'Buat Sekolah 🎒'],
@@ -213,6 +239,38 @@ const PS_CSS_ID = 'af-produk-standar';
   .af-ps-types { font-size: .72rem; font-weight: 700; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .af-ps-more { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-display);
     font-weight: 800; font-size: .8rem; color: var(--af-ink); margin-top: 2px; }
+  .af-ps-price { font-size: .78rem; font-weight: 700; color: var(--af-green-deep); }
+
+  /* Prices: rows in the detail sheet, and the full list below the grid. */
+  .af-ps-harga { display: grid; border: 2px solid var(--af-ink); border-radius: var(--radius-md); background: #fff; overflow: hidden; }
+  .af-ps-harga > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 12px; font-size: .88rem; }
+  .af-ps-harga > div + div { border-top: 1px solid var(--af-line); }
+  .af-ps-harga small, .af-ps-daftar small { display: block; font-size: .72rem; color: var(--text-muted); font-weight: 600; }
+  .af-ps-harga strong { font-family: var(--font-display); font-weight: 800; white-space: nowrap; }
+  .af-ps-harga strong small { display: inline; }
+  .af-ps-note { margin: 6px 0 0; font-size: .74rem; color: var(--text-muted); }
+  .af-ps-dh { margin-top: 36px; scroll-margin-top: 90px; }
+  .af-ps-dh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; align-items: start; }
+  .af-ps-box { background: #fff; border: 2px solid var(--af-ink); border-radius: var(--radius-lg); box-shadow: 0 4px 0 var(--af-ink); padding: 16px 18px; min-width: 0; }
+  .af-ps-box h3 { font-size: 1.05rem; margin: 0 0 10px; }
+  .af-ps-box h3 span { font-family: var(--font-body); font-weight: 700; font-size: .75rem; color: var(--text-muted); margin-left: 6px; }
+  .af-ps-tabel { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+  .af-ps-tabel th, .af-ps-tabel td { padding: 7px 6px; text-align: right; border-bottom: 1px solid var(--af-line); white-space: nowrap; }
+  .af-ps-tabel th:first-child { text-align: left; }
+  .af-ps-tabel thead th { font-family: var(--font-display); font-weight: 800; color: var(--af-ink); border-bottom: 2px solid var(--af-ink); }
+  .af-ps-tabel tbody th { font-weight: 700; color: var(--af-ink); }
+  .af-ps-tabel tr:last-child > * { border-bottom: none; }
+  .af-ps-daftar { list-style: none; margin: 0; padding: 0; font-size: .86rem; }
+  .af-ps-daftar li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--af-line); }
+  .af-ps-daftar li:last-child { border-bottom: none; }
+  .af-ps-daftar strong { font-weight: 700; color: var(--af-ink); }
+  .af-ps-daftar b { font-family: var(--font-display); font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  @media (max-width: 760px) { .af-ps-dh-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 400px) {
+    .af-ps-box { padding: 14px 12px; }
+    .af-ps-tabel { font-size: .78rem; }
+    .af-ps-tabel th, .af-ps-tabel td { padding: 6px 3px; }
+  }
 
   @media (max-width: 900px) { .af-ps-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 680px) {
@@ -251,6 +309,7 @@ const PS_CSS_ID = 'af-produk-standar';
 function KatalogCard({ fam, eager, onOpen }) {
   const first = fam.variants[0];
   const types = fam.variants.map((v) => v.label).filter(Boolean);
+  const mulai = mulaiDari(fam);
   return (
     <a
       href={'#' + fam.slug}
@@ -277,6 +336,7 @@ function KatalogCard({ fam, eager, onOpen }) {
         <h3 style={{ fontSize: '1.1rem' }}>{fam.name}</h3>
         {types.length > 1 ? <span className="af-ps-types">{types.length} tipe · {types.join(' · ')}</span> : null}
         <p className="af-ps-desc" style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.55, color: 'var(--text-body)', flex: 1 }}>{fam.desc}</p>
+        {mulai ? <span className="af-ps-price">{'Mulai ' + rupiah(mulai.harga) + '/' + mulai.satuan}</span> : null}
         <span className="af-ps-more" style={{ marginTop: 'auto' }}>Lihat detail <span aria-hidden="true">→</span></span>
       </div>
     </a>
@@ -304,7 +364,8 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
   }
 
   const chosen = colourIdx === null ? null : v.colours[colourIdx];
-  const waText = `Halo Agatha Felix! Saya mau tanya harga grosir *${fam.name}*${v.title ? ' (' + v.title + ')' : ''}.`
+  const harga = hargaTipe(v.slug);
+  const waText = `Halo Agatha Felix! Saya mau ${harga.length ? 'pesan' : 'tanya harga grosir'} *${fam.name}*${v.title ? ' (' + v.title + ')' : ''}.`
     + `\nWarna: ${chosen ? chosen.name : ''}\nJumlah: \nKota tujuan: `;
   const chip = (c) => ({ color: `var(--af-${c}-deep)`, background: `var(--af-${c}-tint)`, borderColor: `var(--af-${c}-soft)` });
 
@@ -313,7 +374,7 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
       pos={pos} total={total} onClose={onClose} onStep={onStep} resetKey={fam.slug}
       footer={<>
         <Button color="wa" size="lg" href={window.waLink(waText)} target="_blank" rel="noopener noreferrer">
-          <window.WaGlyph2 /> <span>Tanya Harga<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
+          <window.WaGlyph2 /> <span>{harga.length ? 'Pesan' : 'Tanya Harga'}<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
         </Button>
         <window.AfShareButton url={location.origin + location.pathname + '#' + v.slug} title={fam.name + ' — Agatha Felix'} />
       </>}
@@ -340,6 +401,21 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
                   <button key={t.slug} type="button" aria-pressed={i === vi} onClick={() => onVariant(i)}>{t.label}</button>
                 ))}
               </div>
+            </div>
+          ) : null}
+
+          {harga.length ? (
+            <div>
+              <h3 className="af-sheet-h">Harga</h3>
+              <div className="af-ps-harga">
+                {harga.map((r) => (
+                  <div key={r.label}>
+                    <span>{r.label}{r.kode ? <small>Kode {r.kode}</small> : null}</span>
+                    <strong>{rupiah(r.harga)}<small>/{r.satuan}</small></strong>
+                  </div>
+                ))}
+              </div>
+              <p className="af-ps-note">Belum termasuk PPN · update {window.HARGA_STANDAR.update}. Harga dapat berubah sewaktu-waktu.</p>
             </div>
           ) : null}
 
@@ -409,6 +485,51 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
         </div>
       </div>
     </window.AfSheet>
+  );
+}
+
+// The whole price list as published, including items without a catalogue card.
+function DaftarHarga() {
+  const hs = window.HARGA_STANDAR;
+  const angka = (n) => (typeof n === 'number' ? n.toLocaleString('id-ID') : '–');
+  return (
+    <div id="daftar-harga" className="af-ps-dh">
+      <h2 style={{ fontSize: 'var(--text-lg)', textAlign: 'center' }}>Daftar Harga</h2>
+      <p className="af-ps-note" style={{ textAlign: 'center', fontSize: '.8rem' }}>
+        Update {hs.update} · belum termasuk PPN · harga dapat berubah sewaktu-waktu
+      </p>
+      <div className="af-ps-dh-grid">
+        <div className="af-ps-box" style={{ gridColumn: '1 / -1' }}>
+          <h3>Clear Holder <span>Rupiah per pcs, menurut isi kantong (lembar)</span></h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="af-ps-tabel">
+              <thead>
+                <tr><th scope="col">Isi</th>{hs.clearHolder.ukuran.map(([key, label]) => <th key={key} scope="col">{label}</th>)}</tr>
+              </thead>
+              <tbody>
+                {hs.clearHolder.isi.map(([n, row]) => (
+                  <tr key={n}><th scope="row">{n}</th>{row.map((v, i) => <td key={i}>{angka(v)}</td>)}</tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="af-ps-note">B5 = Clear Holder tipe A5 di katalog. Executive = Dokumen Keeper Executive.</p>
+        </div>
+        {hs.daftar.map((grup) => (
+          <div key={grup.judul} className="af-ps-box">
+            <h3>{grup.judul} <span>per {grup.satuan}</span></h3>
+            <ul className="af-ps-daftar">
+              {grup.barang.map(([id, nama, kode, ukuran, harga]) => (
+                <li key={id}>
+                  <span><strong>{nama}</strong><small>{kode ? kode + ' · ' : ''}{ukuran}</small></span>
+                  <b>{rupiah(harga)}</b>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -498,8 +619,9 @@ function ProdukStandarPage() {
             <div className="af-ps-grid">
               {shown.map((f, i) => <KatalogCard key={f.slug} fam={f} eager={i < 4} onOpen={() => openProduct(f.slug)} />)}
             </div>
+            <DaftarHarga />
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 28 }}>
-              Harga menyusul setelah konfirmasi jumlah — chat kami untuk daftar harga grosir terbaru 👇
+              Mau pesan atau cek stok warna? Chat kami, sebutkan produk dan jumlahnya 👇
             </p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau tanya katalog & daftar harga grosir.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Katalog &amp; Harga</Button>

@@ -195,6 +195,24 @@ test('FAQ structured data matches the answers visible on each page', () => {
     }
   }
 });
+test('standard prices point at real catalogue types and are shown on the page', () => {
+  const window = {};
+  vm.runInNewContext(read('dist/js/HargaStandar.js'), { window });
+  const hs = window.HARGA_STANDAR;
+  const ids = new Set(hs.daftar.flatMap((g) => g.barang.map((b) => b[0])));
+  const cols = hs.clearHolder.ukuran.map(([key]) => 'ch:' + key);
+  const katalog = read('project/ui_kits/website_v2/ProdukStandarSections.jsx');
+  for (const [slug, map] of Object.entries(hs.tipe)) {
+    assert.ok(katalog.includes(`tipe('${slug}'`), slug + ' is not a catalogue type');
+    for (const ref of typeof map === 'string' ? [map] : map) assert.ok(cols.includes(ref) || ids.has(ref), slug + ' -> ' + ref);
+  }
+  for (const [, row] of hs.clearHolder.isi) assert.equal(row.length, hs.clearHolder.ukuran.length);
+  const html = read('dist/produk-standar/index.html');
+  assert.match(html, /id="daftar-harga"/);
+  assert.match(html, /belum termasuk PPN/);
+  for (const [, nama, , , harga] of hs.daftar.flatMap((g) => g.barang)) assert.ok(html.includes('Rp' + harga.toLocaleString('id-ID')), nama);
+  assert.ok(html.includes('Mulai Rp13.500/pcs'), 'Clear Holder card shows its lowest price');
+});
 // Custom products: load the built price table and product logic without a DOM.
 function customKit() {
   const window = {};
