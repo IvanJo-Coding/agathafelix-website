@@ -59,7 +59,11 @@ const SITE = {
 // a page that exists only in dist/ is destroyed by the next deploy.
 const STATIC_PAGES = [
   { canonical: '/raporsekolah/', inSitemap: true },
+  // Internal HPP calculator: noindex, untracked, never linked from the site.
+  { canonical: '/admin/', inSitemap: false },
 ];
+// Kit modules used only by hand-written pages (not prerendered).
+const STATIC_MODULES = ['AdminHpp'];
 
 // ---------------------------------------------------------------------------
 //  Per-page definitions (mirrors the original *.html glue scripts)
@@ -421,6 +425,10 @@ async function build() {
     const src = await fs.readFile(path.join(KIT, `${name}.jsx`), 'utf8');
     sections[name] = await transpileSource(src);
     await fs.writeFile(path.join(DIST, 'js', `${name}.js`), sections[name]);
+  }
+  for (const name of STATIC_MODULES) {
+    const src = await fs.readFile(path.join(KIT, `${name}.jsx`), 'utf8');
+    await fs.writeFile(path.join(DIST, 'js', `${name}.js`), await transpileSource(src));
   }
 
   // 5. Per-page glue + HTML

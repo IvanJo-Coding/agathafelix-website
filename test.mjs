@@ -297,6 +297,91 @@ test('custom WhatsApp message carries the full specification', () => {
   const zip = kit.pesanCustom(find('zipper-bag-print'), { tipe: 'polos', 'warna-zipper': 'ungu', sisi: ['depan', 'belakang'] }, 100, 1);
   assert.ok(zip.includes('- Tipe zipper bag: Polos') && zip.includes('- Warna zipper bag: Ungu') && zip.includes('- Sisi yang dicetak: Depan, Belakang'), zip);
 });
+// Admin HPP calculator: product definitions + calculator logic, without a DOM.
+// Every number below is a test value, never a real cost.
+function adminKit() {
+  const window = {};
+  const context = vm.createContext({ window, console });
+  for (const f of ['dist/js/CustomProduk.js', 'dist/js/AdminHpp.js']) vm.runInContext(read(f), context);
+  return { admin: window.AfAdmin, kit: window.AfCustom };
+}
+test('HPP: tiers fall back, inner costs per sheet, one-time costs are spread over the order', () => {
+  const { admin, kit } = adminKit();
+  const data = admin.lengkapi({});
+  const press = kit.CUSTOM_PRODUK.find((p) => p.slug === 'map-press');
+  const hp = data.hpp['map-press'];
+  assert.ok(admin.hitungHpp(press, {}, 100, hp).kurang.length, 'an empty table is reported, not costed as zero');
+  Object.assign(hp.harga.dasar.f4, { 50: 20000, 100: 18000, 500: 15000 });
+  hp.harga.bahan['tpk-urat'][50] = 5000;
+  hp.harga.poly.emas[50] = 3000;
+  Object.assign(hp.harga['inner-tipe'].mika, { 50: 200, 300: 150 });
+  hp.harga.karton.k2[50] = 2000;
+  hp.harga.busa.b3[50] = 1000;
+  hp.harga.punggung['ring-15'][50] = 6000;
+  hp.sekali[0].biaya = 300000;
+  const pick = { bahan: 'tpk-urat', poly: 'emas', 'inner-tipe': 'mika', 'inner-jumlah': '40' };
+  const r = admin.hitungHpp(press, pick, 100, hp);
+  assert.deepEqual([...r.kurang], []);
+  // 18,000 + 5,000 + 3,000 + 40 × 200 + 2,000 + 1,000; klise 300,000 ÷ 100.
+  assert.equal(r.perPcs, 37000);
+  assert.equal(r.hppPcs, 40000);
+  // 300 pcs: the empty base tier uses the 100 column; inner drops to 150; klise 1,000 each.
+  assert.equal(admin.hitungHpp(press, pick, 300, hp).hppPcs, 18000 + 5000 + 3000 + 40 * 150 + 2000 + 1000 + 1000);
+  const ring = admin.hitungHpp(press, { ...pick, 'inner-jumlah': '80', punggung: 'ring' }, 100, hp);
+  assert.ok(ring.rincian.some((x) => x.label === 'Ring D 1,5 inci' && x.perPcs === 6000), 'ring size follows the sheet count');
+  const lain = admin.hitungHpp(press, { ...pick, 'inner-jumlah': 'lain', 'inner-jumlah-lain': 110 }, 100, hp);
+  assert.ok(lain.rincian.some((x) => x.perPcs === 110 * 200), 'a custom sheet count is costed per sheet');
+  assert.ok(admin.hitungHpp(press, { ...pick, poly: 'silver' }, 100, hp).kurang.some((k) => k.startsWith('Warna poly logo: Silver')));
+
+  const zip = kit.CUSTOM_PRODUK.find((p) => p.slug === 'zipper-bag-print');
+  const zh = data.hpp['zipper-bag-print'].harga;
+  zh.dasar.polos[50] = 9000;
+  zh.metode.dtf[50] = 0;
+  zh.sisi.depan[50] = 2500;
+  zh.sisi.belakang[50] = 2500;
+  zh['warna-cetak'].full[50] = 0;
+  const z = admin.hitungHpp(zip, { tipe: 'polos', metode: 'dtf', sisi: ['depan', 'belakang'], 'warna-cetak': 'full' }, 100, data.hpp['zipper-bag-print']);
+  assert.deepEqual([...z.kurang], []);
+  assert.equal(z.hppPcs, 14000, 'each printed side adds its cost');
+  assert.ok(admin.hitungHpp(zip, { tipe: 'polos', sisi: ['depan'], 'warna-cetak': 'full' }, 100, data.hpp['zipper-bag-print'])
+    .kurang.some((k) => k.startsWith('Cara cetak')), '"rekomendasikan" needs a real method before costing');
+});
+test('HPP: selling price, customer quote, and saved data that survives new options', () => {
+  const { admin, kit } = adminKit();
+  assert.equal(admin.hargaJual(40000, 30, 500), 52000);
+  assert.equal(admin.hargaJual(40100, 30, 500), 52500, 'rounded up, never down');
+  assert.equal(admin.hargaJual(40000, null, 500), null);
+  assert.equal(admin.hargaJual(33333, 0, 0), 33333);
+  const press = kit.CUSTOM_PRODUK.find((p) => p.slug === 'map-press');
+  const sel = kit.customSel(press, { bahan: 'tpk-urat', poly: 'emas', 'inner-tipe': 'mika', 'inner-jumlah': '40' });
+  const t = admin.teksPenawaran(press, sel, 100, 52000, { nama: 'SMP Contoh', kota: 'Bekasi' }, ['Klise / plat poly']);
+  for (const line of ['Untuk: SMP Contoh, Bekasi', '*Map Press*', '- Jumlah inner: 40 lembar', 'Harga: Rp52.000/pcs', 'Total: Rp5.200.000', 'termasuk klise']) {
+    assert.ok(t.includes(line), 'quote is missing: ' + line + '\n' + t);
+  }
+  assert.ok(!/HPP|markup/i.test(t), 'the quote never shows cost or markup');
+
+  const saved = admin.lengkapi({});
+  saved.hpp['map-press'].harga.dasar.f4[100] = 18000;
+  saved.hpp['map-press'].harga.lama = { x: { 50: 1 } };
+  delete saved.hpp['map-press'].harga.busa;
+  saved.sekolah.push({ id: 'a', nama: 'SMP Contoh', kota: '', segmen: 'premium', catatan: '' });
+  const again = admin.lengkapi(JSON.parse(JSON.stringify(saved)));
+  assert.equal(again.hpp['map-press'].harga.dasar.f4[100], 18000);
+  assert.equal(again.hpp['map-press'].harga.busa.tanpa[50], 0, 'a new option starts empty, "tanpa" at zero');
+  assert.deepEqual({ ...again.hpp['map-press'].harga.lama.x }, { 50: 1 }, 'rows for removed options are kept');
+  assert.equal(again.sekolah.length, 1);
+  assert.deepEqual(again.segmen.map((s) => s.markup), [null, null, null], 'no margin is assumed');
+});
+test('admin page stays private: noindex, untracked, unlinked, not in the sitemap', () => {
+  const html = read('dist/admin/index.html');
+  assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.ok(!html.includes('af-site.js') && !html.includes('googletagmanager'), 'no Google tag on the admin page');
+  for (const [, raw] of html.matchAll(/(?:href|src)="([^"]+)"/g)) assert.ok(fs.existsSync(path.join('dist', raw)), 'admin references missing ' + raw);
+  assert.ok(!read('dist/sitemap.xml').includes('/admin/'));
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    assert.ok(!read('dist/' + file).includes('/admin/'), file + ' links to the admin page');
+  }
+});
 test('every photo path used by the page scripts exists in the build', () => {
   for (const file of fs.readdirSync('dist/js')) {
     const code = read('dist/js/' + file);

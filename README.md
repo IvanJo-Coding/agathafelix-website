@@ -114,6 +114,22 @@ catalogue's A5 type, the Executive column is Dokumen Keeper Executive, and both
 Carry File types show every width. Types without a mapping (File Case,
 Expanding File) keep "Tanya Harga". Update `update` whenever prices change.
 
+## Admin HPP calculator (`/admin/`)
+
+[`AdminHpp.jsx`](project/ui_kits/website_v2/AdminHpp.jsx), served by
+`project/static/admin/index.html`, costs the six custom products from the same
+options as `CustomProduk.jsx`: a cost per option and quantity tier (50 / 100 /
+300 / 500; an empty tier uses the one to its left), inner sleeves per sheet,
+ring binders per ring size, and one-time costs spread over the order. A school
+list assigns each school a price segment, and each segment has a markup on HPP,
+so premium schools are not undercharged and budget schools not overcharged.
+
+The repo and the site are public, so **no cost, markup or school data is ever
+written in code.** The admin types it into the page; it stays in that browser's
+localStorage and moves between devices as an exported JSON file. Keep those
+files out of the repo. The page is `noindex`, loads no Google tag, is not in the
+sitemap, and nothing on the site links to it.
+
 ## Hand-written pages (`project/static/`)
 
 Everything under `project/static/` is copied into `dist/`. The build replaces
