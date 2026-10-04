@@ -80,8 +80,18 @@ It loads `async`, so it never delays the first paint; on the thank-you page the
 synchronous `lead-handoff.js` still runs first. A WhatsApp click is sent once,
 on click only: nothing fires when a page opens.
 
-The form prepares a WhatsApp message; it does **not** save a lead to a backend
-or confirm that a WhatsApp message was sent. Contact details travel between
+On `/raporsekolah/` the main action is **Kirim Contoh & Minta Harga via
+WhatsApp**, right under the headline with the 50 pcs minimum beside it. Its
+prefilled message is a checklist (sample photos outside and inside, quantity,
+date needed, city, school), so a buyer does not need material or finishing
+terms. The header link asks a plain question. There is no automatic pop-up.
+
+The form is the optional route. It asks for school, quantity (50 pcs or more,
+or it points to the stock catalogue), city, timing, whether a sample exists,
+and an optional contact name. It has **no phone field**, since the reply goes to
+the WhatsApp the visitor writes from, and nothing from it is sent to Google.
+It prepares a WhatsApp message; it does **not** save a lead to a backend
+or confirm that a WhatsApp message was sent. The prepared message travels between
 pages in session storage (30-minute expiry), with a cleaned fragment fallback
 when storage is unavailable. They are no longer placed in the thank-you query.
 The thank-you page always loads the Google tag, so a WhatsApp click there is

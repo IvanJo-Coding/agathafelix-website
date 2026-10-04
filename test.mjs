@@ -129,29 +129,71 @@ test('expired or redirected handoffs are rejected', () => {
   ]) assert.ok(!prepare(thanks, pending).window.AF_LEAD_URL);
 });
 
-test('the real form prepares the message and hands off even when storage is blocked', () => {
+// Runs the landing page's own inline script against a stub form.
+function landingForm(fields, { blocked = false } = {}) {
   const html = read('project/static/raporsekolah/index.html');
   const code = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((match) => match[1]).find((script) => script.includes("getElementById('leadForm')"));
+  const out = { location: {}, links: [] };
+  const element = { addEventListener() {}, classList: { add() {}, remove() {} }, hidden: true };
+  const input = () => ({ style: {}, focus() { out.focused = true; } });
+  const form = { addEventListener: (_, fn) => { out.submit = fn; }, elements: { sekolah: input(), jumlah: input(), kota: input() } };
+  const link = (wa, msg) => ({ href: '', addEventListener() {}, getAttribute: (k) => ({ 'data-wa': wa, 'data-msg': msg }[k] ?? null) });
+  out.links = [link('header', 'tanya'), link('hero', null)];
+  vm.runInNewContext(code, { window: { open: (url) => { out.opened = url; } }, location: out.location,
+    document: { addEventListener() {}, querySelectorAll: (sel) => sel === '[data-wa]' ? out.links : [],
+      getElementById: (id) => id === 'leadForm' ? form : id === 'leadErr' ? (out.err = element) : element },
+    addEventListener() {}, setTimeout() {},
+    sessionStorage: { setItem: (_, value) => { if (blocked) throw Error('storage blocked'); out.saved = JSON.parse(value); } },
+    FormData: class { get(key) { return fields[key]; } },
+  });
+  out.submit({ preventDefault() {} });
+  return out;
+}
+const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', waktu: 'Test', contoh: 'ada', pic: '' };
+test('the real form prepares the message and hands off even when storage is blocked', () => {
   for (const blocked of [false, true]) {
-    let submit, saved, opened;
-    const location = {};
-    const fields = { pic: 'Local Test', sekolah: 'Test School', kota: 'Test City', hp: '0000000000', waktu: 'Test' };
-    const element = { addEventListener() {}, classList: { add() {}, remove() {} } };
-    const form = { addEventListener: (_, fn) => { submit = fn; } };
-    vm.runInNewContext(code, { window: { open: (url) => { opened = url; } }, location,
-      document: { addEventListener() {}, querySelectorAll: () => [], getElementById: (id) => id === 'leadForm' ? form : element },
-      addEventListener() {}, setTimeout() {},
-      sessionStorage: { setItem: (_, value) => { if (blocked) throw Error('storage blocked'); saved = JSON.parse(value); } },
-      FormData: class { get(key) { return fields[key]; } },
-    });
-    submit({ preventDefault() {} });
+    const { opened, location, saved } = landingForm(leadFields, { blocked });
     assert.ok(opened.startsWith('https://wa.me/6282219472613?text='));
-    assert.ok(decodeURIComponent(opened).includes('Local Test'));
+    const text = decodeURIComponent(opened);
+    for (const line of ['Sekolah/lembaga: Test School', 'Jumlah: 120 pcs', 'Kota pengiriman: Test City', 'foto contoh map']) assert.ok(text.includes(line), line);
+    assert.ok(!/Nama PIC|No\. HP/.test(text), 'an empty PIC and the removed phone field stay out of the message');
     assert.ok(!location.href.includes('?'));
     if (blocked) assert.equal(new URLSearchParams(location.href.split('#')[1]).get('wa'), opened);
     else { assert.equal(location.href, 'terima-kasih.html'); assert.equal(saved.url, opened); }
   }
+  assert.match(decodeURIComponent(landingForm({ ...leadFields, contoh: 'belum', pic: 'Bu Test' }).opened), /Nama PIC: Bu Test[\s\S]*belum punya contoh/);
+});
+test('the form asks for the order size, not a phone number, and holds back orders under 50 pcs', () => {
+  const html = read('project/static/raporsekolah/index.html');
+  const form = html.slice(html.indexOf('<form class="lead'), html.indexOf('</form>'));
+  assert.ok(!/name="hp"|type="tel"/.test(form), 'the visitor already writes from their own WhatsApp');
+  assert.match(form, /name="jumlah"[^>]*min="50"/);
+  for (const jumlah of ['49', '', 'abc']) {
+    const result = landingForm({ ...leadFields, jumlah });
+    assert.equal(result.opened, undefined, `jumlah "${jumlah}" must not open WhatsApp`);
+    assert.equal(result.location.href, undefined);
+    assert.equal(result.err.hidden, false);
+    assert.ok(result.focused);
+  }
+  assert.match(landingForm({ ...leadFields, jumlah: '30' }).err.innerHTML, /50 pcs[\s\S]*\/produk-standar\//);
+});
+test('landing CTAs carry the sample checklist; the header asks a plain question', () => {
+  const { links } = landingForm(leadFields);
+  const [header, hero] = links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
+  assert.ok(links.every((l) => l.href.startsWith('https://wa.me/6282219472613?text=')));
+  assert.match(hero, /foto contoh map[\s\S]*Jumlah: \.\.\. pcs \(minimal 50\)[\s\S]*Dibutuhkan tanggal[\s\S]*Kota pengiriman/);
+  assert.ok(!header.includes('foto contoh'));
+});
+test('the landing page opens with the sample CTA and minimum order, and never pops up on its own', () => {
+  const html = read('project/static/raporsekolah/index.html');
+  const hero = html.slice(html.indexOf('<section id="hero"'), html.indexOf('<form class="lead'));
+  const cta = hero.indexOf('data-wa="hero"');
+  assert.ok(cta > 0 && cta < hero.indexOf('class="pricebar"'), 'the WhatsApp CTA comes before the price bar and photos');
+  assert.match(hero.slice(cta, cta + 2600), /Kirim Contoh &amp; Minta Harga via WhatsApp<\/a>\s*<p class="cta-note"><strong>Minimal 50 pcs<\/strong>/);
+  assert.ok(!/id="offer"|offer_tampil|setTimeout\(show|mouseout/.test(html), 'the automatic pop-up is gone');
+  // No Google tag call may run when the page opens: every gtag() sits inside a click handler.
+  for (const [line] of html.matchAll(/^.*gtag\(.*$/gm)) assert.match(line, /addEventListener\('click'/, line);
 });
 
 test('pages load self-hosted fonts and inline CSS; nothing render-blocking comes from Google Fonts', () => {
@@ -200,6 +242,9 @@ test('every WhatsApp link on the site uses the business number', () => {
       assert.match(url, /^wa\.me\/6282219472613$|^wa\.me\/$/, file + ': ' + url);
     }
   }
+  const custom = read('dist/produk-custom/index.html');
+  const moq = custom.indexOf('Minimal 50 pcs</strong> per desain'), cta = custom.indexOf('Kirim Contoh &amp; Minta Harga via WhatsApp');
+  assert.ok(moq > 0 && moq < cta && cta - moq < 2500, 'the minimum order is shown right before the hero WhatsApp button');
 });
 
 test('built routes expose content, metadata, styles, and valid local assets in raw HTML', () => {
