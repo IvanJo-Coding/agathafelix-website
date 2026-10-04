@@ -15,7 +15,7 @@ import esbuild from 'esbuild';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildComponents, optimizePhotos, prerender } from './build-tools.mjs';
+import { buildComponents, optimizePhotos, prerender, responsiveVariants } from './build-tools.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = __dirname;                              // repo root
@@ -163,9 +163,41 @@ async function transpileSource(code) {
   return `(function(){\n${body}\n})();\n`;
 }
 
-// Shared Google Ads configuration for React and handwritten pages.
+// Shared Google Ads configuration for React and handwritten pages. The click
+// handler loads async so it never holds back the first paint, and starts the
+// Google tag as soon as it arrives. (Deferred, it ran after the first paint and
+// Lighthouse counted it as blocking time.) On the thank-you page the parser only
+// reaches it after the synchronous lead-handoff.js whose result it reads.
 const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
-<script src="/js/af-site.js"></script>`;
+<script async src="/js/af-site.js"></script>`;
+
+// ---------------------------------------------------------------------------
+//  Critical CSS and fonts
+// ---------------------------------------------------------------------------
+// /styles.css used to reach the browser as styles.css → five @imported token
+// files → the Google Fonts stylesheet: three render-blocking round trips before
+// any text could show (lab LCP 5.6 s on /produk-custom/). The tokens are about
+// 7 KB, so every page now carries them inline, and the self-hosted fonts are
+// preloaded. /styles.css stays for the 404 and admin pages.
+const FONT_PRELOADS = ['plus-jakarta-sans-latin.woff2', 'baloo-2-latin.woff2']
+  .map((f) => `<link rel="preload" href="/assets/fonts/${f}" as="font" type="font/woff2" crossorigin>`).join('\n');
+
+async function minifyCss(css) {
+  const out = await esbuild.transform(css, { loader: 'css', minify: true, legalComments: 'none' });
+  // Token files live in /tokens/, so their relative font URLs become absolute.
+  return out.code.trim().split('../assets/').join('/assets/');
+}
+async function siteCss() {
+  const main = await fs.readFile(path.join(SRC, 'styles.css'), 'utf8');
+  const parts = [];
+  for (const [, file] of main.matchAll(/@import url\('([^']+)'\);/g)) {
+    parts.push(await fs.readFile(path.join(SRC, file), 'utf8'));
+  }
+  const css = await minifyCss(parts.join('\n'));
+  if (css.includes('@import')) throw new Error('styles.css still imports a stylesheet; inline it too');
+  return css;
+}
+const fontsCss = async () => minifyCss(await fs.readFile(path.join(SRC, 'tokens/fonts.css'), 'utf8'));
 
 // ---------------------------------------------------------------------------
 //  HTML document template (with SEO + Open Graph)
@@ -279,7 +311,7 @@ function ldScript(obj) {
   return `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 }
 
-function pageHtml(page, ogDim, mediaManifest, rendered) {
+function pageHtml(page, ogDim, mediaManifest, rendered, css) {
   const url = SITE.domain + page.canonical;
   const ogImage = SITE.domain + SITE.ogImage;
   const scripts = [
@@ -315,7 +347,8 @@ function pageHtml(page, ogDim, mediaManifest, rendered) {
 <meta name="twitter:description" content="${esc(page.description)}"/>
 <meta name="twitter:image" content="${ogImage}"/>
 ${jsonLdFor(page).map(ldScript).join('\n')}
-<link rel="stylesheet" href="/styles.css"/>
+${FONT_PRELOADS}
+<style>${css}</style>
 <style>html { scroll-behavior: smooth; }</style>
 ${rendered.css}
 <script>window.AF_MEDIA=${JSON.stringify(mediaManifest)};</script>
@@ -402,12 +435,24 @@ async function build() {
     await fs.cp(staticDir, DIST, { recursive: true });
   }
 
-  // Inject one shared tag configuration into each handwritten page.
+  // Inject one shared tag configuration and the self-hosted fonts into each
+  // handwritten page.
+  const fontHead = `${FONT_PRELOADS}\n<style>${await fontsCss()}</style>`;
   for (const name of ['index.html', 'terima-kasih.html']) {
     const file = path.join(DIST, 'raporsekolah', name);
     const html = await fs.readFile(file, 'utf8');
-    await fs.writeFile(file, html.replace('<!-- AF_GOOGLE_TAG -->', GTAG_HEAD));
+    if (!html.includes('<!-- AF_FONTS -->')) throw new Error(`raporsekolah/${name} lost its <!-- AF_FONTS --> marker`);
+    await fs.writeFile(file, html.replace('<!-- AF_GOOGLE_TAG -->', GTAG_HEAD).replace('<!-- AF_FONTS -->', fontHead));
   }
+  // srcset copies (name-480.webp, name-800.webp) of the landing page photos and
+  // of the WebP photo folders the React pages build a srcset for (afSrcSet in
+  // Shell.jsx).
+  const variants = [];
+  for (const dir of ['raporsekolah/img', 'assets/portfolio', 'assets/products', 'assets/factory']) {
+    variants.push(await responsiveVariants(path.join(DIST, dir)));
+  }
+  const sum = (k) => variants.reduce((a, v) => a + v[k], 0);
+  console.log(`  srcset photos: ${sum('count')} narrower copies, ${(sum('after') / 1e3).toFixed(0)} KB (originals ${(sum('before') / 1e3).toFixed(0)} KB)`);
 
   // 2. Build the shared design-system components from source.
   const bundle = rewriteAssets(await buildComponents(SRC));
@@ -434,6 +479,7 @@ async function build() {
   // 5. Per-page glue + HTML
   const ogDim = await imageSize(path.join(DIST, SITE.ogImage.replace(/^\//, '')));
   const mediaManifest = await testimoniManifest();
+  const css = await siteCss();
   for (const page of PAGES) {
     const key = page.canonical === '/' ? 'index' : page.canonical.replace(/\//g, '');
     const glue = await transpileSource(page.glue);
@@ -441,7 +487,7 @@ async function build() {
     const rendered = prerender({ bundle, sections: page.sections.map((name) => sections[name]), glue, media: mediaManifest });
     const outPath = path.join(DIST, page.out);
     await fs.mkdir(path.dirname(outPath), { recursive: true });
-    await fs.writeFile(outPath, pageHtml(page, ogDim, mediaManifest, rendered));
+    await fs.writeFile(outPath, pageHtml(page, ogDim, mediaManifest, rendered, css));
   }
 
   // 5b. Turn off media slots whose file has not been added yet.

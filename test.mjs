@@ -154,6 +154,54 @@ test('the real form prepares the message and hands off even when storage is bloc
   }
 });
 
+test('pages load self-hosted fonts and inline CSS; nothing render-blocking comes from Google Fonts', () => {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html']) {
+    const html = read('dist/' + file);
+    assert.ok(!html.includes('fonts.googleapis.com') && !html.includes('fonts.gstatic.com'), file);
+    assert.ok(!html.includes('<!-- AF_FONTS -->'), file + ' kept the font marker');
+    assert.ok(!/<link rel="stylesheet"/.test(html), file + ' has a render-blocking stylesheet');
+    assert.match(html, /<link rel="preload" href="\/assets\/fonts\/plus-jakarta-sans-latin\.woff2" as="font" type="font\/woff2" crossorigin>/);
+    assert.match(html, /@font-face\{font-family:"Baloo 2"[^}]*src:url\(\/assets\/fonts\/baloo-2-latin\.woff2\)/);
+    assert.match(html, /<script async src="\/js\/af-site\.js"><\/script>/, file + ' must not block on the tracking script');
+    assert.ok(!/<script src="\/js\/af-site/.test(html));
+  }
+  // Thank-you: the parser runs the synchronous handoff before it even finds the async tag script.
+  const thanks = read('dist/raporsekolah/terima-kasih.html');
+  assert.ok(thanks.indexOf('<script src="/js/lead-handoff.js">') < thanks.indexOf('af-site.js'));
+  assert.ok(!read('dist/tokens/fonts.css').includes('googleapis'));
+});
+test('every srcset candidate exists, and photos are lighter than the originals', () => {
+  assert.match(read('dist/produk-custom/index.html'), /srcset="\/assets\/portfolio\/[\w-]+-480\.webp 480w/i, 'portfolio cards ask for a narrower copy');
+  for (const file of ['index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    for (const [, set] of html.matchAll(/srcset="([^"]+)"/gi)) {
+      for (const candidate of set.split(',')) {
+        const [raw, w] = candidate.trim().split(/\s+/);
+        const local = path.join('dist', new URL(raw, 'https://local.test/' + file).pathname);
+        assert.ok(fs.existsSync(local), file + ' srcset references missing ' + raw);
+        assert.match(w, /^\d+w$/);
+      }
+    }
+    assert.ok(!html.includes('rel="preload" as="image"'), 'the hero text is the LCP element; no image preload competes with the fonts');
+  }
+  assert.ok(fs.statSync('dist/raporsekolah/img/stack-alazhar-480.webp').size < fs.statSync('dist/raporsekolah/img/stack-alazhar.webp').size / 3);
+  for (const [logo, max] of [['logo-agatha-felix', 40e3], ['logo-mark-white', 15e3]]) {
+    assert.ok(fs.statSync(`dist/assets/${logo}.webp`).size < max, logo + ' WebP is too heavy');
+  }
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html']) {
+    assert.ok(!/logo-(agatha-felix|mark-white)\.png/.test(read('dist/' + file).replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, '')), file + ' still shows a PNG logo');
+  }
+});
+test('every WhatsApp link on the site uses the business number', () => {
+  const files = ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html',
+    ...fs.readdirSync('dist/js').map((f) => 'js/' + f)];
+  for (const file of files) {
+    for (const [url] of read('dist/' + file).matchAll(/(?:wa\.me|api\.whatsapp\.com)\/[^\s"'`?)]*/g)) {
+      assert.match(url, /^wa\.me\/6282219472613$|^wa\.me\/$/, file + ': ' + url);
+    }
+  }
+});
+
 test('built routes expose content, metadata, styles, and valid local assets in raw HTML', () => {
   for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
     const html = read('dist/' + file);

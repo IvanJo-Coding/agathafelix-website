@@ -24,7 +24,18 @@ the branch that gets published. It is gitignored on `main` and never tracked the
   design-tool `_ds_bundle.js`. Changes to component source now reach production.
 - **Vendors React + ReactDOM production builds** locally.
 - **Creates WebP copies of 29 product, portfolio, and factory photos**, capped
-  at 1200 × 1200. Original PNG URLs remain available; page photos use WebP.
+  at 1200 × 1200, plus the two logos (480 px and 192 px wide, from 2929 px and
+  4800 px PNGs). Original PNG URLs remain available; page photos use WebP.
+- **Writes narrower srcset copies** (`name-480.webp`, `name-800.webp`) of every
+  WebP in `assets/products`, `assets/portfolio`, `assets/factory`, and
+  `raporsekolah/img`. `afSrcSet()` in `Shell.jsx` builds the srcset for the
+  React cards; `/raporsekolah/` lists its candidates in the HTML.
+- **Inlines the CSS and self-hosts the fonts.** The tokens (about 7 KB) go into
+  each page's `<style>` instead of the old `styles.css` → five `@import`s →
+  Google Fonts chain, and the two latin woff2 files in `project/assets/fonts/`
+  are preloaded. `tokens/fonts.css` is the one source of the `@font-face`
+  rules, including the size-matched Arial fallbacks; the landing pages get it
+  through their `<!-- AF_FONTS -->` marker.
 - **Copies all assets in** and rewrites every `../../` path → root-relative
   (`/assets/...`) so nothing depends on the design-system folder layout.
 - **Clean URLs via folders** — `/produk-standar/`, `/produk-custom/` work on any
@@ -65,6 +76,9 @@ Google Ads conversion tracking lives in `SITE.googleAdsId` and
 three React pages and both landing pages. The shared click handler is
 `project/static/js/af-site.js` (deliberately not named tracking.js, which
 antivirus and adblock lists block); it never loads Google tags on localhost.
+It loads `async`, so it never delays the first paint; on the thank-you page the
+synchronous `lead-handoff.js` still runs first. A WhatsApp click is sent once,
+on click only: nothing fires when a page opens.
 
 The form prepares a WhatsApp message; it does **not** save a lead to a backend
 or confirm that a WhatsApp message was sent. Contact details travel between
@@ -224,5 +238,8 @@ with WhatsApp ordering as-is, but review:
       follow-up — say the word and I'll wire it.
 - [ ] **OG share image** uses `hero-products.png`. For pixel-perfect previews,
       add a dedicated 1200×630 image and point `SITE.ogImage` at it.
-- [ ] **Fonts** load from Google Fonts (Baloo 2 + Plus Jakarta Sans). Fine for
-      production; self-host later if you want zero third-party requests.
+- [x] **Fonts** are self-hosted (Baloo 2 + Plus Jakarta Sans, OFL, latin
+      subset) in `project/assets/fonts/`; no request goes to Google Fonts.
+- [ ] **Cache**: GitHub Pages serves every file with a fixed 10-minute
+      `Cache-Control`, which the repo cannot change. Longer caching would need
+      a CDN in front (e.g. Cloudflare).
