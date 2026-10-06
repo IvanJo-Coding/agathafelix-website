@@ -258,6 +258,57 @@ function landingForm(fields, { blocked = false } = {}) {
   return out;
 }
 const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', waktu: 'Test', contoh: 'ada', pic: '' };
+
+// Runs the built landing page's inline scripts and af-site.js on one shared
+// window in production, as the browser does. A click reaches the link's own
+// listeners first, then the document's, as in the DOM.
+function landingPage() {
+  const html = read('dist/raporsekolah/index.html');
+  const documentClicks = [];
+  const link = (href, text, attrs) => {
+    const el = { href, target: '', textContent: text, clicks: [], getAttribute: (k) => attrs[k] ?? null,
+      addEventListener: (type, fn) => { if (type === 'click') el.clicks.push(fn); } };
+    el.closest = () => el;
+    return el;
+  };
+  const tel = [link('tel:+6282219472613', 'Telepon 0822-1947-2613', { 'data-tel': '' })];
+  const wa = [link('https://wa.me/6282219472613', 'Kirim Contoh', { 'data-wa': 'hero' })];
+  const stub = { addEventListener() {}, classList: { add() {} }, elements: {}, style: {} };
+  const page = { URL, Date, setTimeout() {}, addEventListener() {},
+    location: { hostname: 'agatha-felix.com', pathname: '/raporsekolah/', origin: 'https://agatha-felix.com' },
+    document: { readyState: 'interactive', createElement: () => ({}), head: { appendChild() {} },
+      addEventListener: (type, fn) => { if (type === 'click') documentClicks.push(fn); },
+      querySelectorAll: (sel) => (sel === '[data-tel]' ? tel : sel === '[data-wa]' ? wa : []),
+      getElementById: () => stub },
+  };
+  page.window = page;
+  const context = vm.createContext(page);
+  for (const [, code] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) vm.runInContext(code, context);
+  vm.runInContext(read('dist/js/af-site.js'), context);
+  function click(el) {
+    const event = { target: el, preventDefault() { this.defaultPrevented = true; } };
+    for (const fn of [...el.clicks, ...documentClicks]) fn.call(el, event);
+    return event;
+  }
+  return { page, tel, wa, click };
+}
+test('one phone click on the landing page sends one klik_telepon to GA4, with its button label', () => {
+  const { page, tel, wa, click } = landingPage();
+  const ga4 = page.AF_TRACKING.googleAnalyticsId;
+  assert.match(ga4, /^G-/, 'the build carries the GA4 ID');
+  const events = (name) => googleCalls(page).filter((e) => e[0] === 'event' && e[1] === name);
+  // An event without send_to goes to every configured destination, GA4 included.
+  const toGa4 = (e) => !e[2] || !e[2].send_to || e[2].send_to === ga4;
+  const call = click(tel[0]);
+  assert.equal(call.defaultPrevented, undefined, 'the tel: link still dials');
+  assert.deepEqual(events('klik_telepon').filter(toGa4), [['event', 'klik_telepon', { send_to: ga4, button_label: 'Telepon 0822-1947-2613' }]]);
+  assert.deepEqual(clarityCalls(page).slice(1), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon 0822-1947-2613']]);
+  // WhatsApp on the same page still counts one Ads conversion and one GA4 event.
+  click(wa[0]);
+  assert.equal(events('conversion').length, 1);
+  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp', { send_to: ga4, button_label: 'hero' }]]);
+  assert.equal(events('klik_telepon').length, 1, 'a WhatsApp click adds no phone event');
+});
 test('the real form prepares the message and hands off even when storage is blocked', () => {
   for (const blocked of [false, true]) {
     const { opened, location, saved } = landingForm(leadFields, { blocked });

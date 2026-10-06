@@ -497,7 +497,8 @@ var WA='6282219472613';
 function waLink(msg){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(msg)}
 /* Every price button opens the same checklist, so a school that already has a
    sample sends what a quote needs. The header link stays a plain question.
-   The Ads conversion for these clicks is sent once, by af-site.js. */
+   The Ads conversion for these clicks is sent once, by af-site.js, which also
+   sends the klik_whatsapp and klik_telepon events (with the button name). */
 var MSG={
 contoh:'Halo Agatha Felix, saya mau minta harga sampul rapor custom.\n\nSaya kirim foto contoh map kami (tampak luar & dalam) di chat ini.\n- Jumlah: ... pcs (minimal 50)\n- Dibutuhkan tanggal: ...\n- Kota pengiriman: ...\n- Sekolah/lembaga: ...',
 tanya:'Halo Agatha Felix, saya mau tanya sampul rapor custom untuk sekolah/lembaga kami.'};
@@ -535,7 +536,6 @@ document.querySelectorAll('.igvid[data-video]').forEach(function(card){
   };
   v.src=card.dataset.video;
 });
-document.querySelectorAll('[data-tel]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_telepon')})});
 var f=document.getElementById('leadForm'),err=document.getElementById('leadErr'),need=['sekolah','jumlah','kota'];
 function invalid(names,html){
 err.innerHTML=html;err.hidden=false;
