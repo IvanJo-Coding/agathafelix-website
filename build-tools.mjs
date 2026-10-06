@@ -44,19 +44,48 @@ export async function optimizePhotos(dist) {
   for (const name of ['document-keeper-green.png', 'hero-products.png']) {
     files.push(path.join(dist, 'assets', name));
   }
+  // The logos were 2929 px and 4800 px PNGs (210 KB and 141 KB) shown at most
+  // 64 px tall, loaded on every page next to the first text. Two to three
+  // times their largest display size is plenty.
+  const caps = { 'logo-agatha-felix.png': 480, 'logo-mark-white.png': 192 };
+  for (const name of Object.keys(caps)) files.push(path.join(dist, 'assets', name));
   const names = new Set();
   let before = 0, after = 0;
   for (const file of files) {
     const original = await fs.stat(file);
     const output = file.replace(/\.png$/i, '.webp');
-    const info = await sharp(file).rotate().resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 82, effort: 5 }).toFile(output);
+    const cap = caps[path.basename(file)] || 1200;
+    const info = await sharp(file).rotate().resize({ width: cap, height: cap, fit: 'inside', withoutEnlargement: true })
+      .webp(caps[path.basename(file)] ? { quality: 90, alphaQuality: 100, effort: 6 } : { quality: 82, effort: 5 }).toFile(output);
     names.add(path.basename(file));
     before += original.size;
     after += info.size;
   }
   console.log(`  photos: ${files.length} WebP copies, ${(before / 1e6).toFixed(1)} MB → ${(after / 1e6).toFixed(1)} MB`);
   return (code) => code.replace(/[\w-]+\.png\b/g, (name) => names.has(name) ? name.replace(/\.png$/, '.webp') : name);
+}
+
+// Narrower copies (name-480.webp, name-800.webp) of every WebP in a folder, for
+// srcset: pages showed 1,000–1,200 px photos in boxes 160–450 px wide. Every
+// name always exists (a photo already narrower is copied as is), so the React
+// pages can build a srcset from any photo path without a manifest.
+export async function responsiveVariants(dir, widths = [480, 800]) {
+  let count = 0, before = 0, after = 0;
+  const variant = new RegExp(`-(?:${widths.join('|')})\\.webp$`, 'i');
+  for (const name of await fs.readdir(dir)) {
+    if (!/\.webp$/i.test(name) || variant.test(name)) continue;
+    const file = path.join(dir, name);
+    const { width } = await sharp(file).metadata();
+    for (const w of widths) {
+      const out = file.replace(/\.webp$/i, `-${w}.webp`);
+      if (width <= w) { await fs.copyFile(file, out); continue; }
+      const info = await sharp(file).resize({ width: w }).webp({ quality: 78, effort: 5 }).toFile(out);
+      count++;
+      after += info.size;
+    }
+    if (width > widths[0]) before += (await fs.stat(file)).size;
+  }
+  return { count, before, after };
 }
 
 // The kit uses window exports and injects a few style elements during render.

@@ -7,6 +7,15 @@ function waLink(text) {
   return 'https://wa.me/' + WA_NUMBER + (text ? '?text=' + encodeURIComponent(text) : '');
 }
 
+// srcset for a built photo: the build writes name-480.webp and name-800.webp
+// next to every WebP in these folders. Unbuilt previews (../../ paths, PNGs)
+// get no srcset and keep the plain src.
+function afSrcSet(src) {
+  if (!/^\/(?:assets\/(?:products|portfolio|factory)|raporsekolah\/img)\/[\w-]+\.webp$/.test(src)) return undefined;
+  const base = src.slice(0, -'.webp'.length);
+  return base + '-480.webp 480w, ' + base + '-800.webp 800w';
+}
+
 // --- Responsive layer (inline-styled components → overridden via !important) ---
 // This layer is included in prerendered HTML and reused during hydration.
 const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
@@ -329,4 +338,4 @@ function FooterV2() {
   );
 }
 
-Object.assign(window, { HeaderV2, FooterV2, FloatingWAV2, WaGlyph2, Wave, ConfettiV2, MarqueeV2, waLink, WA_NUMBER });
+Object.assign(window, { HeaderV2, FooterV2, FloatingWAV2, WaGlyph2, Wave, ConfettiV2, MarqueeV2, waLink, WA_NUMBER, afSrcSet });

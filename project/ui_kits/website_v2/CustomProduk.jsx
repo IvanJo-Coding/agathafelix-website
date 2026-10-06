@@ -392,7 +392,7 @@ function CustomCard({ p, onOpen }) {
       href={'#custom-' + p.slug} className="af-cp-card" aria-haspopup="dialog"
       onClick={(e) => { if (e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault(); onOpen(); }}
     >
-      <div className="af-cp-img"><img src={p.photos[0][0]} alt={p.photos[0][1]} loading="lazy" decoding="async" /></div>
+      <div className="af-cp-img"><img src={p.photos[0][0]} srcSet={window.afSrcSet(p.photos[0][0])} sizes="(max-width: 680px) 50vw, 380px" alt={p.photos[0][1]} loading="lazy" decoding="async" /></div>
       <div className="af-cp-body">
         <h3 style={{ fontSize: '1.15rem' }}>{p.name}</h3>
         <p className="af-cp-desc" style={{ margin: 0, fontSize: '.82rem', lineHeight: 1.55, color: 'var(--text-body)' }}>{p.desc}</p>

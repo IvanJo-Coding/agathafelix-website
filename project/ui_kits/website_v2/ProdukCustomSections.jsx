@@ -6,6 +6,12 @@ const wrapPC = (extra = {}) => ({
   padding: '72px var(--container-pad)', ...extra,
 });
 
+// Hero WhatsApp message: a checklist of what a quote needs, so a buyer with a
+// sample can ask without knowing material or finishing terms.
+const CONTOH_WA = 'Halo Agatha Felix! Saya mau minta harga map / rapor custom.\n\n' +
+  'Saya kirim foto contoh produk yang kami mau (tampak luar & dalam) di chat ini.\n' +
+  '- Produk: ...\n- Jumlah: ... pcs (minimal 50)\n- Dibutuhkan tanggal: ...\n- Kota pengiriman: ...\n- Sekolah/instansi: ...';
+
 // Visible FAQ. build.mjs (CUSTOM_FAQ_ITEMS) publishes the same text as FAQPage
 // structured data, and test.mjs checks the two stay identical.
 const CUSTOM_FAQ = [
@@ -31,7 +37,7 @@ const PC_CSS_ID = 'af-produk-custom';
     .af-pc-steps > div > div { width: 44px !important; height: 44px !important; margin: 0 !important; font-size: 1.15rem !important; grid-row: span 2; }
     .af-pc-steps h3 { font-size: 1.1rem !important; margin: 2px 0 4px !important; }
     .af-pc-hero-cta { width: 100%; max-width: 360px; }
-    .af-pc-hero-cta .af-btn { flex: 1 1 100%; }
+    .af-pc-hero-cta .af-btn { flex: 1 1 100%; white-space: normal !important; padding-left: 20px !important; padding-right: 20px !important; line-height: 1.3; }
   }`;
   document.head.appendChild(tag);
 })();
@@ -52,10 +58,14 @@ function ProdukCustomPage() {
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 540 }}>
               Rapor sekolah, map les, sampai file kantor notaris — kami cetak sesuai identitasmu.
-              Custom mulai 50 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
+              Punya contoh? Kirim fotonya lewat WhatsApp, kami hitungkan harganya. Tidak perlu tahu istilah bahan.
+            </p>
+            {/* The minimum order sits right above the button, so nobody reaches WhatsApp without seeing it. */}
+            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-body)' }}>
+              <strong style={{ color: 'var(--af-ink)' }}>Minimal 50 pcs</strong> per desain · sekitar Rp50.000/pcs untuk 100 pcs, sesuai model, bahan, dan cetak
             </p>
             <div className="af-pc-hero-cta" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi via WhatsApp</Button>
+              <Button color="wa" size="lg" href={window.waLink(CONTOH_WA)} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Kirim Contoh &amp; Minta Harga via WhatsApp</Button>
               <Button variant="ghost" size="lg" href="#produk-custom">Lihat Pilihan Produk ↓</Button>
             </div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>

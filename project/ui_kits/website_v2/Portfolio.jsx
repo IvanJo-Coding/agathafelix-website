@@ -51,7 +51,7 @@ function PortfolioCard({ p, rot }) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = `rotate(${rot}deg)`; }}
     >
       <div style={{ background: '#f4ede1', borderBottom: '2px solid var(--af-ink)', position: 'relative' }}>
-        <img className="af-pf-img" src={p.img} alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
+        <img className="af-pf-img" src={p.img} srcSet={window.afSrcSet(p.img)} sizes="(max-width: 680px) 50vw, 300px" alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
         <span
           className="af-pf-seg"
           style={{
@@ -138,7 +138,7 @@ function FactoryBand() {
           {FACTORY.map((f, i) => (
             <figure key={f.cap} style={{ margin: 0, transform: `rotate(${(i - 1) * 1.5}deg)` }}>
               <div style={{ border: '2px solid rgba(255,255,255,.3)', borderRadius: 'var(--radius-md)', overflow: 'hidden', boxShadow: '0 5px 0 rgba(0,0,0,.4)' }}>
-                <img src={f.img} alt={f.cap} loading="lazy" decoding="async" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
+                <img src={f.img} srcSet={window.afSrcSet(f.img)} sizes="(max-width: 680px) 100vw, 260px" alt={f.cap} loading="lazy" decoding="async" style={{ width: '100%', height: 200, objectFit: 'cover', display: 'block' }} />
               </div>
               <figcaption style={{ color: 'rgba(255,255,255,.7)', fontSize: '0.74rem', fontWeight: 600, textAlign: 'center', marginTop: 8 }}>{f.cap}</figcaption>
             </figure>
