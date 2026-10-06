@@ -121,13 +121,13 @@ function SimulatorRapor() {
                 {logo ? '✓ Logo terpasang — klik untuk ganti' : '⬆ Unggah logo (PNG/JPG)'}
               </label>
             </div>
-            <Button color="wa" size="lg" href={window.waLink(pesanWA)} target="_blank" rel="noopener noreferrer">
+            <Button color="wa" size="lg" {...window.waPribadi(pesanWA)} target="_blank" rel="noopener noreferrer">
               <window.WaGlyph2 /> Pesan Desain Ini via WA
             </Button>
           </div>
 
-          {/* live mockup */}
-          <div className="af-sim-preview" style={{ display: 'flex', justifyContent: 'center' }}>
+          {/* live mockup. Masked for Clarity: it shows the typed school name and the uploaded logo. */}
+          <div className="af-sim-preview" data-clarity-mask="true" style={{ display: 'flex', justifyContent: 'center' }}>
             <div
               className="af-sim-book"
               style={{

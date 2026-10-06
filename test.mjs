@@ -81,6 +81,34 @@ test('contact clicks are counted per button in Clarity, never with the message i
   live.click('https://example.com/', '_blank', { text: 'Lainnya' });
   assert.equal(queued().length, 4);
 });
+test('a typed message kept out of the page opens in full and counts once', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withClarity);
+  const opened = [];
+  live.window.open = (...args) => opened.push(args);
+  const link = { href: 'https://wa.me/6282219472613', textContent: 'Minta Penawaran via WhatsApp', getAttribute: () => null };
+  const url = 'https://wa.me/6282219472613?text=' + encodeURIComponent('Sekolah / instansi: SD Budi');
+  live.window.AFTracking.openWhatsApp(link, url);
+  assert.deepEqual(opened, [[url, '_blank', 'noopener']]);
+  // React cancelled the click before it bubbled up to the document listener.
+  live.listeners[0]({ target: { closest: () => link }, defaultPrevented: true, preventDefault() {} });
+  assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, 1);
+  assert.deepEqual(clarityCalls(live.window).slice(1), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'Minta Penawaran via WhatsApp']]);
+  live.window.AFTracking.openWhatsApp(link, 'https://evil.example/?text=x');
+  assert.equal(opened.length, 1, 'only WhatsApp links are opened');
+});
+test('messages carrying what the visitor typed never sit in an href (Clarity records links)', () => {
+  const kit = (file) => read('project/ui_kits/website_v2/' + file);
+  assert.match(kit('CustomProduk.jsx'), /\{\.\.\.window\.waPribadi\(waText\)\}/);
+  assert.match(kit('Simulator.jsx'), /\{\.\.\.window\.waPribadi\(pesanWA\)\}/);
+  assert.match(kit('Simulator.jsx'), /className="af-sim-preview" data-clarity-mask="true"/, 'the preview shows the typed name and logo');
+  // pesanCustom() and the simulator's pesanWA hold typed input; the standard sheet's waText does not.
+  for (const file of fs.readdirSync('project/ui_kits/website_v2').filter((f) => f.endsWith('.jsx') && f !== 'ProdukStandarSections.jsx')) {
+    assert.ok(!/waLink\((waText|pesanWA)\)/.test(kit(file)), file + ' puts a typed message into an href');
+  }
+  const html = read('dist/produk-custom/index.html');
+  const simulator = html.slice(html.indexOf('id="simulator"'));
+  assert.match(simulator, /href="https:\/\/wa\.me\/6282219472613"/, 'the prerendered simulator button keeps the bare number');
+});
 test('same-tab WhatsApp navigation survives a blocked tag and callback races', () => {
   const result = tracking('agatha-felix.com');
   assert.equal(result.click('https://wa.me/6282219472613', '').defaultPrevented, true);

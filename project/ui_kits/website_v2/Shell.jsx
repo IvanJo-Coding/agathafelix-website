@@ -6,6 +6,21 @@ const WA_NUMBER = '6282219472613';
 function waLink(text) {
   return 'https://wa.me/' + WA_NUMBER + (text ? '?text=' + encodeURIComponent(text) : '');
 }
+// Link props for a message that carries what the visitor typed (school, city,
+// a colour, a name). It never goes into the page: Clarity records every href
+// and the link of every click. The button keeps the bare number, and the click
+// opens the full message; af-site.js counts it as the WhatsApp conversion.
+function waPribadi(text) {
+  return {
+    href: waLink(''),
+    onClick: (e) => {
+      e.preventDefault();
+      const url = waLink(text);
+      if (window.AFTracking && window.AFTracking.openWhatsApp) window.AFTracking.openWhatsApp(e.currentTarget, url);
+      else window.open(url, '_blank', 'noopener');
+    },
+  };
+}
 
 // srcset for a built photo: the build writes name-480.webp and name-800.webp
 // next to every WebP in these folders. Unbuilt previews (../../ paths, PNGs)
@@ -338,4 +353,4 @@ function FooterV2() {
   );
 }
 
-Object.assign(window, { HeaderV2, FooterV2, FloatingWAV2, WaGlyph2, Wave, ConfettiV2, MarqueeV2, waLink, WA_NUMBER, afSrcSet });
+Object.assign(window, { HeaderV2, FooterV2, FloatingWAV2, WaGlyph2, Wave, ConfettiV2, MarqueeV2, waLink, waPribadi, WA_NUMBER, afSrcSet });

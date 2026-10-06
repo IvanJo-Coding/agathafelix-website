@@ -13,7 +13,18 @@
       event_callback: callback,
     });
   }
-  window.AFTracking = { trackWhatsApp: trackWhatsApp };
+  // For a message the page keeps out of its HTML (waPribadi in Shell.jsx). The
+  // page has already cancelled the click, so the listener below skips it: count
+  // it here once and open the message in a new tab, as the link would have.
+  function openWhatsApp(link, url) {
+    var target;
+    try { target = new URL(url); } catch (_) { return; }
+    if (target.protocol !== 'https:' || target.hostname !== 'wa.me') return;
+    noteContact(link, true);
+    trackWhatsApp();
+    window.open(target.href, '_blank', 'noopener');
+  }
+  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
@@ -62,6 +73,12 @@
     var name = link.getAttribute('data-wa') || link.getAttribute('aria-label') || link.textContent || '';
     return name.replace(/\s+/g, ' ').trim().slice(0, 60) || 'tanpa label';
   }
+  // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
+  function noteContact(link, whatsapp) {
+    if (!useClarity) return;
+    window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
+    window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', buttonName(link));
+  }
 
   document.addEventListener('click', function (event) {
     // The prepared form already uses the thank-you URL conversion. Its retry
@@ -73,11 +90,7 @@
     var url;
     try { url = new URL(link.href); } catch (_) { return; }
     var whatsapp = url.protocol === 'https:' && /^(wa\.me|api\.whatsapp\.com)$/.test(url.hostname);
-    // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
-    if (useClarity && (whatsapp || url.protocol === 'tel:')) {
-      window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
-      window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', buttonName(link));
-    }
+    if (whatsapp || url.protocol === 'tel:') noteContact(link, whatsapp);
     if (!whatsapp) return;
     if (link.target === '_blank' || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
       trackWhatsApp();

@@ -91,6 +91,17 @@ are always masked by Clarity. WhatsApp and phone clicks add the events
 `klik_whatsapp` / `klik_telepon` and the tags `tombol_whatsapp` /
 `tombol_telepon`, named by `data-wa` or the button text, never the link.
 
+Clarity records every `href` in the page and the link of every click, and
+input masking does not cover either. So a WhatsApp message built from what a
+visitor typed (the custom-product sheet, the rapor simulator) uses
+`waPribadi(text)` from `Shell.jsx` instead of `waLink`: the button keeps the
+bare number and the click opens the full message through
+`AFTracking.openWhatsApp`, which counts one conversion. The simulator preview,
+which shows the typed name and uploaded logo, carries `data-clarity-mask`.
+`npm run check:privacy` (after a build; needs Chrome and network) runs Clarity's
+real recorder on the local build, types marker values into every field, and
+fails if any of them, or the logo, would be uploaded.
+
 On `/raporsekolah/` the main action is **Kirim Contoh & Minta Harga via
 WhatsApp**, right under the headline with the 50 pcs minimum beside it. Its
 prefilled message is a checklist (sample photos outside and inside, quantity,
