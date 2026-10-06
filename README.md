@@ -80,6 +80,74 @@ It loads `async`, so it never delays the first paint; on the thank-you page the
 synchronous `lead-handoff.js` still runs first. A WhatsApp click is sent once,
 on click only: nothing fires when a page opens.
 
+GA4 uses `SITE.googleAnalyticsId = G-F2P4YVFY6P`, verified in the existing
+**Agatha Felix DB** property (`464888556`), web stream `9867882952`. Both
+Google destinations use one `gtag.js` loader. GA4 receives `klik_whatsapp`
+and `klik_telepon` with `button_label` only, and `generate_lead` with
+`method: whatsapp_form` on a fresh form handoff. A lead here means a prepared
+WhatsApp enquiry, not proof that the visitor sent the message. These events
+are routed explicitly to GA4; the existing Ads WhatsApp and thank-you URL
+goals stay in place without adding new Ads conversions. Do not import the
+GA4 events as additional primary Ads goals for those same actions.
+`generate_lead` is registered as a GA4 key event (once per event, with no
+default monetary value); its code deduplicates refreshes of the same handoff.
+
+In GA4, keep enhanced measurement's **outbound clicks, form interactions,
+and site search OFF**. Automatic outbound events could read the thank-you
+page's prepared WhatsApp URL; contact and validated form events are measured
+explicitly instead. Page views, scrolls, video engagement and file downloads
+remain enabled. Email redaction is on; URL query redaction includes `wa`,
+`text`, `email`, `phone`, `sekolah`, `kota`, and `pic`.
+
+The existing Ads account (`378-871-5919`) is linked to that GA4 property,
+with app/web metrics enabled. Clarity project `ytbsysdvb4` is connected to
+both the same Ads account and GA4 property. GA4's event-scoped custom
+dimension **Tombol kontak** uses `button_label` for comparing contact buttons.
+
+Campaign **Search | Sekolah | Rapor & Ijazah** (`24196852973`) has this
+campaign-level final URL suffix (keep auto-tagging ON for `gclid`):
+
+```text
+utm_source=google&utm_medium=cpc&utm_campaign=Search%20%7C%20Sekolah%20%7C%20Rapor%20%26%20Ijazah&utm_id={campaignid}&utm_content={creative}
+```
+
+Use a unique, matching campaign name for each future campaign. Google Ads'
+URL test found both `/raporsekolah/` and `/produk-custom/` with these parameters.
+UTMs connect new ad sessions to Clarity's campaign reports; they cannot
+retroactively tag older visits. See [Clarity advertising setup](https://learn.microsoft.com/en-us/clarity/advertising-dashboard/ad-getting-started).
+
+Verified on the live site on 2026-10-07: Tag Assistant found both destination
+IDs and a GA4 `page_view` hit to `analytics.google.com/g/collect`. The custom
+sheet's WhatsApp href stayed at the bare business number after typing a
+school and city; the simulator preview retained its Clarity mask. GA4's
+Realtime/DebugView still showed no received events during the initial setup
+check, so server-side receipt remains to be checked after initial processing.
+Google notes that [first-time setup can take up to 24 hours to appear in
+Realtime](https://support.google.com/analytics/answer/9311124?hl=en).
+
+**Microsoft Clarity** (heatmaps, scroll depth, time on page, recordings) runs
+when `SITE.clarityId` holds the project ID; empty keeps it off. In the Clarity
+project, keep **Settings → Setup → Cookies OFF**: `af-site.js` also tells
+Clarity consent is denied, so it sets no cookies and each page view counts as
+its own session. This setting applies to Clarity, separately from the Google
+tag's storage settings. It starts after the `load` event,
+never on localhost, `/admin/` (recordings would show cost prices) or the
+thank-you page (its WhatsApp link holds the visitor's message). Input fields
+are always masked by Clarity. WhatsApp and phone clicks add the events
+`klik_whatsapp` / `klik_telepon` and the tags `tombol_whatsapp` /
+`tombol_telepon`, named by `data-wa` or the button text, never the link.
+
+Clarity records every `href` in the page and the link of every click, and
+input masking does not cover either. So a WhatsApp message built from what a
+visitor typed (the custom-product sheet, the rapor simulator) uses
+`waPribadi(text)` from `Shell.jsx` instead of `waLink`: the button keeps the
+bare number and the click opens the full message through
+`AFTracking.openWhatsApp`, which counts one conversion. The simulator preview,
+which shows the typed name and uploaded logo, carries `data-clarity-mask`.
+`npm run check:privacy` (after a build; needs Chrome and network) runs Clarity's
+real recorder on the local build, types marker values into every field, and
+fails if any of them, or the logo, would be uploaded.
+
 On `/raporsekolah/` the main action is **Kirim Contoh & Minta Harga via
 WhatsApp**, right under the headline with the 50 pcs minimum beside it. Its
 prefilled message is a checklist (sample photos outside and inside, quantity,
@@ -105,7 +173,8 @@ WhatsApp conversion for the same prepared lead. The URL-based
 conversion rule was verified in Ads: URL starts with
 `agatha-felix.com/raporsekolah/terima-kasih.html`. End-to-end delivery still needs
 verification after deployment; local tests never send real conversions.
-No form conversion label or GA4 measurement ID has been invented.
+The form conversion remains the existing URL rule; the GA4 measurement ID
+was read from the signed-in Analytics account rather than created anew.
 
 Owner-confirmed pricing (2026-09-24): minimum order **50 pcs** for every custom
 product, including logo printing on a Produk Standar item; **100 pcs

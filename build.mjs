@@ -46,6 +46,11 @@ const SITE = {
   // Google Ads conversion tracking, injected into every generated page.
   googleAdsId: 'AW-18374325686',
   waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE',
+  // Existing GA4 web stream in Agatha Felix DB (property 464888556).
+  googleAnalyticsId: 'G-F2P4YVFY6P',
+  // Microsoft Clarity project ID (heatmaps, scroll depth, recordings). Empty
+  // means Clarity stays off. The project must keep its Cookies setting OFF.
+  clarityId: 'ytbsysdvb4',
 };
 
 // ---------------------------------------------------------------------------
@@ -59,6 +64,7 @@ const SITE = {
 // a page that exists only in dist/ is destroyed by the next deploy.
 const STATIC_PAGES = [
   { canonical: '/raporsekolah/', inSitemap: true },
+  { canonical: '/kebijakan-privasi/', inSitemap: true },
   // Internal HPP calculator: noindex, untracked, never linked from the site.
   { canonical: '/admin/', inSitemap: false },
 ];
@@ -168,7 +174,7 @@ async function transpileSource(code) {
 // Google tag as soon as it arrives. (Deferred, it ran after the first paint and
 // Lighthouse counted it as blocking time.) On the thank-you page the parser only
 // reaches it after the synchronous lead-handoff.js whose result it reads.
-const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
+const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel, googleAnalyticsId: SITE.googleAnalyticsId, clarityId: SITE.clarityId})};</script>
 <script async src="/js/af-site.js"></script>`;
 
 // ---------------------------------------------------------------------------
@@ -438,10 +444,10 @@ async function build() {
   // Inject one shared tag configuration and the self-hosted fonts into each
   // handwritten page.
   const fontHead = `${FONT_PRELOADS}\n<style>${await fontsCss()}</style>`;
-  for (const name of ['index.html', 'terima-kasih.html']) {
-    const file = path.join(DIST, 'raporsekolah', name);
+  for (const name of ['raporsekolah/index.html', 'raporsekolah/terima-kasih.html', 'kebijakan-privasi/index.html']) {
+    const file = path.join(DIST, name);
     const html = await fs.readFile(file, 'utf8');
-    if (!html.includes('<!-- AF_FONTS -->')) throw new Error(`raporsekolah/${name} lost its <!-- AF_FONTS --> marker`);
+    if (!html.includes('<!-- AF_FONTS -->')) throw new Error(`${name} lost its <!-- AF_FONTS --> marker`);
     await fs.writeFile(file, html.replace('<!-- AF_GOOGLE_TAG -->', GTAG_HEAD).replace('<!-- AF_FONTS -->', fontHead));
   }
   // srcset copies (name-480.webp, name-800.webp) of the landing page photos and

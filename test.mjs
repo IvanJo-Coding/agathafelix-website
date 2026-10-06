@@ -9,23 +9,29 @@ const tag = read('project/static/js/af-site.js');
 const handoff = read('project/static/js/lead-handoff.js');
 const config = { googleAdsId: 'AW-18374325686', waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE' };
 // Pass the window from prepare() to run both scripts on one page, as the browser does.
-function tracking(hostname = 'localhost', pathname = '/', window = {}) {
-  const listeners = [], scripts = [], timers = [], navigations = [];
-  window.AF_TRACKING = config;
+function tracking(hostname = 'localhost', pathname = '/', window = {}, settings = config) {
+  const listeners = [], scripts = [], timers = [], navigations = [], loads = [];
+  window.AF_TRACKING = settings;
+  window.addEventListener = (type, fn) => { if (type === 'load') loads.push(fn); };
   const context = vm.createContext({ window, URL, Date,
     location: { hostname, pathname, origin: 'https://' + hostname, assign: (url) => navigations.push(url) },
-    document: { createElement: () => ({}), head: { appendChild: (el) => scripts.push(el) },
+    document: { readyState: 'interactive', createElement: () => ({}), head: { appendChild: (el) => scripts.push(el) },
       addEventListener: (_, fn) => listeners.push(fn) },
     setTimeout: (fn) => timers.push(fn),
   });
   vm.runInContext(tag, context);
-  function click(href, target = '_blank') {
-    const event = { target: { closest: () => ({ href, target }) }, preventDefault() { this.defaultPrevented = true; } };
+  // attrs: the button's attributes, plus its visible text as `text`.
+  function click(href, target = '_blank', attrs = {}) {
+    const link = { href, target, textContent: attrs.text || '', getAttribute: (name) => attrs[name] ?? null };
+    const event = { target: { closest: () => link }, preventDefault() { this.defaultPrevented = true; } };
     listeners[0](event);
     return event;
   }
-  return { context, window, listeners, scripts, timers, navigations, click };
+  return { context, window, listeners, scripts, timers, navigations, loads, click };
 }
+const withClarity = { ...config, clarityId: 'tq1clarity' };
+// Clarity's queue holds `arguments` objects from the page's realm; compare them as plain arrays.
+const clarityCalls = (window) => JSON.parse(JSON.stringify(window.clarity.q.map((call) => Array.from(call))));
 
 test('production tag retains its Ads ID; previews do not contact Google', () => {
   assert.equal(tracking().scripts.length, 0);
@@ -45,6 +51,63 @@ test('WhatsApp clicks are measured once; ordinary and lookalike links are ignore
   assert.equal(result.window.dataLayer.length, 1);
   assert.equal(result.window.dataLayer[0][1], 'conversion');
   assert.equal(result.window.dataLayer[0][2].send_to, config.waConversionLabel);
+});
+test('Clarity starts after load, cookieless, only in production and never on the thank-you page', () => {
+  const live = tracking('agatha-felix.com', '/', {}, withClarity);
+  assert.equal(live.scripts.length, 1, 'only the Google tag before the page has loaded');
+  assert.deepEqual(clarityCalls(live.window)[0], ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' }]);
+  assert.equal(live.loads.length, 1);
+  live.loads[0]();
+  assert.equal(live.scripts[1].src, 'https://www.clarity.ms/tag/tq1clarity');
+  assert.equal(live.scripts[1].async, true);
+  for (const [host, page, settings] of [['localhost', '/', withClarity], ['agatha-felix.com', '/raporsekolah/terima-kasih.html', withClarity], ['agatha-felix.com', '/', config]]) {
+    const off = tracking(host, page, {}, settings);
+    assert.equal(off.window.clarity, undefined, host + page);
+    assert.equal(off.loads.length, 0, host + page);
+  }
+});
+test('contact clicks are counted per button in Clarity, never with the message in the link', () => {
+  const live = tracking('agatha-felix.com', '/raporsekolah/', {}, withClarity);
+  const queued = () => clarityCalls(live.window).slice(1);
+  live.click('https://wa.me/6282219472613?text=Nama%20PIC%3A%20Budi', '_blank', { 'data-wa': 'hero', text: 'Kirim Contoh' });
+  assert.deepEqual(queued(), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'hero']]);
+  assert.ok(!JSON.stringify(live.window.clarity.q).includes('Budi'));
+  assert.equal(live.window.dataLayer.at(-1)[2].send_to, config.waConversionLabel, 'the Ads conversion still fires');
+  const ads = live.window.dataLayer.length;
+  const call = live.click('tel:+6282219472613', '', { text: '\n  Telepon  ' });
+  assert.equal(call.defaultPrevented, undefined, 'a phone link opens as usual');
+  assert.deepEqual(queued().slice(2), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon']]);
+  assert.equal(live.window.dataLayer.length, ads, 'a phone call is not an Ads conversion');
+  live.click('https://example.com/', '_blank', { text: 'Lainnya' });
+  assert.equal(queued().length, 4);
+});
+test('a typed message kept out of the page opens in full and counts once', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withClarity);
+  const opened = [];
+  live.window.open = (...args) => opened.push(args);
+  const link = { href: 'https://wa.me/6282219472613', textContent: 'Minta Penawaran via WhatsApp', getAttribute: () => null };
+  const url = 'https://wa.me/6282219472613?text=' + encodeURIComponent('Sekolah / instansi: SD Budi');
+  live.window.AFTracking.openWhatsApp(link, url);
+  assert.deepEqual(opened, [[url, '_blank', 'noopener']]);
+  // React cancelled the click before it bubbled up to the document listener.
+  live.listeners[0]({ target: { closest: () => link }, defaultPrevented: true, preventDefault() {} });
+  assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, 1);
+  assert.deepEqual(clarityCalls(live.window).slice(1), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'Minta Penawaran via WhatsApp']]);
+  live.window.AFTracking.openWhatsApp(link, 'https://evil.example/?text=x');
+  assert.equal(opened.length, 1, 'only WhatsApp links are opened');
+});
+test('messages carrying what the visitor typed never sit in an href (Clarity records links)', () => {
+  const kit = (file) => read('project/ui_kits/website_v2/' + file);
+  assert.match(kit('CustomProduk.jsx'), /\{\.\.\.window\.waPribadi\(waText\)\}/);
+  assert.match(kit('Simulator.jsx'), /\{\.\.\.window\.waPribadi\(pesanWA\)\}/);
+  assert.match(kit('Simulator.jsx'), /className="af-sim-preview" data-clarity-mask="true"/, 'the preview shows the typed name and logo');
+  // pesanCustom() and the simulator's pesanWA hold typed input; the standard sheet's waText does not.
+  for (const file of fs.readdirSync('project/ui_kits/website_v2').filter((f) => f.endsWith('.jsx') && f !== 'ProdukStandarSections.jsx')) {
+    assert.ok(!/waLink\((waText|pesanWA)\)/.test(kit(file)), file + ' puts a typed message into an href');
+  }
+  const html = read('dist/produk-custom/index.html');
+  const simulator = html.slice(html.indexOf('id="simulator"'));
+  assert.match(simulator, /href="https:\/\/wa\.me\/6282219472613"/, 'the prerendered simulator button keeps the bare number');
 });
 test('same-tab WhatsApp navigation survives a blocked tag and callback races', () => {
   const result = tracking('agatha-felix.com');
@@ -70,6 +133,50 @@ function prepare(href, pending, storageAvailable = true) {
 const thanks = 'https://agatha-felix.com/raporsekolah/terima-kasih.html';
 const thanksPath = '/raporsekolah/terima-kasih.html';
 const wa = 'https://wa.me/6282219472613?text=Local%20test';
+
+const withAnalytics = { ...withClarity, googleAnalyticsId: 'G-F2P4YVFY6P' };
+const googleCalls = (window) => JSON.parse(JSON.stringify(window.dataLayer.map((call) => Array.from(call))));
+
+test('GA4 shares the Google loader and contact events never carry the WhatsApp message', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withAnalytics);
+  vm.runInContext(tag, live.context);
+  assert.equal(live.scripts.length, 1, 'one loader even if the shared script runs twice');
+  assert.deepEqual(googleCalls(live.window).filter((e) => e[0] === 'config').map((e) => e[1]),
+    [config.googleAdsId, withAnalytics.googleAnalyticsId]);
+  live.click(wa, '', { 'data-wa': 'hero' });
+  live.click('tel:+6282219472613', '', { text: 'Telepon' });
+  const events = googleCalls(live.window).filter((e) => e[0] === 'event');
+  assert.deepEqual(events.filter((e) => e[1] !== 'conversion'), [
+    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero' }],
+    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: 'Telepon' }],
+  ]);
+  assert.equal(events.filter((e) => e[1] === 'conversion').length, 1);
+  assert.ok(!JSON.stringify(events).includes('Local%20test'));
+  live.timers[0]();
+  live.window.dataLayer.find((e) => e[1] === 'conversion')[2].event_callback();
+  assert.equal(live.navigations.length, 1, 'GA4 does not disrupt the Ads navigation callback');
+  const preview = tracking('localhost', '/', {}, withAnalytics);
+  preview.click(wa);
+  assert.equal(preview.scripts.length, 0);
+  assert.ok(!googleCalls(preview.window).some((e) => e[2]?.send_to === withAnalytics.googleAnalyticsId));
+});
+
+test('GA4 counts a fresh form handoff once, with no form values or URL parameters', () => {
+  const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
+  const live = tracking('agatha-felix.com', thanksPath, first.window, withAnalytics);
+  const calls = googleCalls(live.window);
+  assert.deepEqual(calls.find((e) => e[0] === 'config' && e[1] === withAnalytics.googleAnalyticsId)[2], { page_location: thanks });
+  assert.deepEqual(calls.filter((e) => e[1] === 'generate_lead'), [
+    ['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_form' }],
+  ]);
+  live.scripts[0].onload();
+  for (const pending of [first.saved, null]) {
+    const visit = prepare(thanks, pending);
+    const quiet = tracking('agatha-felix.com', thanksPath, visit.window, withAnalytics);
+    assert.ok(!googleCalls(quiet.window).some((e) => e[1] === 'generate_lead'));
+    assert.equal(googleCalls(quiet.window).find((e) => e[1] === withAnalytics.googleAnalyticsId)[2].send_page_view, false);
+  }
+});
 test('a fresh handoff counts once the tag loads, and a failed load is retried', () => {
   const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
   assert.equal(first.window.AF_LEAD_URL, wa);
@@ -151,6 +258,57 @@ function landingForm(fields, { blocked = false } = {}) {
   return out;
 }
 const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', waktu: 'Test', contoh: 'ada', pic: '' };
+
+// Runs the built landing page's inline scripts and af-site.js on one shared
+// window in production, as the browser does. A click reaches the link's own
+// listeners first, then the document's, as in the DOM.
+function landingPage() {
+  const html = read('dist/raporsekolah/index.html');
+  const documentClicks = [];
+  const link = (href, text, attrs) => {
+    const el = { href, target: '', textContent: text, clicks: [], getAttribute: (k) => attrs[k] ?? null,
+      addEventListener: (type, fn) => { if (type === 'click') el.clicks.push(fn); } };
+    el.closest = () => el;
+    return el;
+  };
+  const tel = [link('tel:+6282219472613', 'Telepon 0822-1947-2613', { 'data-tel': '' })];
+  const wa = [link('https://wa.me/6282219472613', 'Kirim Contoh', { 'data-wa': 'hero' })];
+  const stub = { addEventListener() {}, classList: { add() {} }, elements: {}, style: {} };
+  const page = { URL, Date, setTimeout() {}, addEventListener() {},
+    location: { hostname: 'agatha-felix.com', pathname: '/raporsekolah/', origin: 'https://agatha-felix.com' },
+    document: { readyState: 'interactive', createElement: () => ({}), head: { appendChild() {} },
+      addEventListener: (type, fn) => { if (type === 'click') documentClicks.push(fn); },
+      querySelectorAll: (sel) => (sel === '[data-tel]' ? tel : sel === '[data-wa]' ? wa : []),
+      getElementById: () => stub },
+  };
+  page.window = page;
+  const context = vm.createContext(page);
+  for (const [, code] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) vm.runInContext(code, context);
+  vm.runInContext(read('dist/js/af-site.js'), context);
+  function click(el) {
+    const event = { target: el, preventDefault() { this.defaultPrevented = true; } };
+    for (const fn of [...el.clicks, ...documentClicks]) fn.call(el, event);
+    return event;
+  }
+  return { page, tel, wa, click };
+}
+test('one phone click on the landing page sends one klik_telepon to GA4, with its button label', () => {
+  const { page, tel, wa, click } = landingPage();
+  const ga4 = page.AF_TRACKING.googleAnalyticsId;
+  assert.match(ga4, /^G-/, 'the build carries the GA4 ID');
+  const events = (name) => googleCalls(page).filter((e) => e[0] === 'event' && e[1] === name);
+  // An event without send_to goes to every configured destination, GA4 included.
+  const toGa4 = (e) => !e[2] || !e[2].send_to || e[2].send_to === ga4;
+  const call = click(tel[0]);
+  assert.equal(call.defaultPrevented, undefined, 'the tel: link still dials');
+  assert.deepEqual(events('klik_telepon').filter(toGa4), [['event', 'klik_telepon', { send_to: ga4, button_label: 'Telepon 0822-1947-2613' }]]);
+  assert.deepEqual(clarityCalls(page).slice(1), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon 0822-1947-2613']]);
+  // WhatsApp on the same page still counts one Ads conversion and one GA4 event.
+  click(wa[0]);
+  assert.equal(events('conversion').length, 1);
+  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp', { send_to: ga4, button_label: 'hero' }]]);
+  assert.equal(events('klik_telepon').length, 1, 'a WhatsApp click adds no phone event');
+});
 test('the real form prepares the message and hands off even when storage is blocked', () => {
   for (const blocked of [false, true]) {
     const { opened, location, saved } = landingForm(leadFields, { blocked });
@@ -469,11 +627,29 @@ test('admin page stays private: noindex, untracked, unlinked, not in the sitemap
   const html = read('dist/admin/index.html');
   assert.match(html, /<meta name="robots" content="noindex,nofollow">/);
   assert.ok(!html.includes('af-site.js') && !html.includes('googletagmanager'), 'no Google tag on the admin page');
+  assert.ok(!html.includes('clarity'), 'no Clarity on the admin page: recordings would show cost prices');
   for (const [, raw] of html.matchAll(/(?:href|src)="([^"]+)"/g)) assert.ok(fs.existsSync(path.join('dist', raw)), 'admin references missing ' + raw);
   assert.ok(!read('dist/sitemap.xml').includes('/admin/'));
   for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
     assert.ok(!read('dist/' + file).includes('/admin/'), file + ' links to the admin page');
   }
+});
+test('the privacy page names every measuring tool and every public page links to it', () => {
+  const html = read('dist/kebijakan-privasi/index.html');
+  assert.equal((html.match(/<h1\b/g) || []).length, 1);
+  assert.match(html, /<link rel="canonical" href="https:\/\/agatha-felix\.com\/kebijakan-privasi\/">/);
+  assert.ok(!html.includes('<!-- AF_FONTS -->') && !html.includes('<!-- AF_GOOGLE_TAG -->'), 'the build fills both markers');
+  assert.match(html, /<script async src="\/js\/af-site\.js"><\/script>/);
+  for (const tool of ['Google Ads', 'Google Analytics', 'Microsoft Clarity']) assert.ok(html.includes('<h3>' + tool + '</h3>'), tool);
+  assert.ok(!html.includes('wa.me'), 'a data request must not count as a WhatsApp conversion');
+  for (const [, raw] of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
+    assert.ok(fs.existsSync(path.join('dist', raw.endsWith('/') ? raw + 'index.html' : raw)), 'missing ' + raw);
+  }
+  assert.ok(read('dist/sitemap.xml').includes('<loc>https://agatha-felix.com/kebijakan-privasi/</loc>'));
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html']) {
+    assert.ok(read('dist/' + file).includes('href="/kebijakan-privasi/"'), file + ' does not link the privacy page');
+  }
+  assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Google Analytics[\s\S]*Microsoft Clarity/);
 });
 test('every photo path used by the page scripts exists in the build', () => {
   for (const file of fs.readdirSync('dist/js')) {

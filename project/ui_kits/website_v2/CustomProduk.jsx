@@ -532,7 +532,7 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
     <window.AfSheet
       pos={pos} total={total} onClose={onClose} onStep={onStep} resetKey={p.slug}
       footer={<>
-        <Button color="wa" size="lg" href={window.waLink(waText)} target="_blank" rel="noopener noreferrer">
+        <Button color="wa" size="lg" {...window.waPribadi(waText)} target="_blank" rel="noopener noreferrer">
           <window.WaGlyph2 /> <span>Minta Penawaran<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
         </Button>
         <window.AfShareButton url={location.origin + location.pathname + '#custom-' + p.slug} title={p.name + ' — Agatha Felix'} />

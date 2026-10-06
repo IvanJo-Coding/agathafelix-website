@@ -9,6 +9,7 @@
     "preview": "node build.mjs && node preview.mjs",
     "serve": "node preview.mjs",
     "test": "node --test test.mjs",
+    "check:privacy": "node privacy-check.mjs",
     "deploy": "node deploy.mjs"
   },
   "devDependencies": {
