@@ -48,7 +48,7 @@ const SITE = {
   waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE',
   // Microsoft Clarity project ID (heatmaps, scroll depth, recordings). Empty
   // means Clarity stays off. The project must keep its Cookies setting OFF.
-  clarityId: '',
+  clarityId: 'ytbsysdvb4',
 };
 
 // ---------------------------------------------------------------------------
