@@ -64,6 +64,7 @@ const SITE = {
 // a page that exists only in dist/ is destroyed by the next deploy.
 const STATIC_PAGES = [
   { canonical: '/raporsekolah/', inSitemap: true },
+  { canonical: '/kebijakan-privasi/', inSitemap: true },
   // Internal HPP calculator: noindex, untracked, never linked from the site.
   { canonical: '/admin/', inSitemap: false },
 ];
@@ -443,10 +444,10 @@ async function build() {
   // Inject one shared tag configuration and the self-hosted fonts into each
   // handwritten page.
   const fontHead = `${FONT_PRELOADS}\n<style>${await fontsCss()}</style>`;
-  for (const name of ['index.html', 'terima-kasih.html']) {
-    const file = path.join(DIST, 'raporsekolah', name);
+  for (const name of ['raporsekolah/index.html', 'raporsekolah/terima-kasih.html', 'kebijakan-privasi/index.html']) {
+    const file = path.join(DIST, name);
     const html = await fs.readFile(file, 'utf8');
-    if (!html.includes('<!-- AF_FONTS -->')) throw new Error(`raporsekolah/${name} lost its <!-- AF_FONTS --> marker`);
+    if (!html.includes('<!-- AF_FONTS -->')) throw new Error(`${name} lost its <!-- AF_FONTS --> marker`);
     await fs.writeFile(file, html.replace('<!-- AF_GOOGLE_TAG -->', GTAG_HEAD).replace('<!-- AF_FONTS -->', fontHead));
   }
   // srcset copies (name-480.webp, name-800.webp) of the landing page photos and

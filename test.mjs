@@ -634,6 +634,23 @@ test('admin page stays private: noindex, untracked, unlinked, not in the sitemap
     assert.ok(!read('dist/' + file).includes('/admin/'), file + ' links to the admin page');
   }
 });
+test('the privacy page names every measuring tool and every public page links to it', () => {
+  const html = read('dist/kebijakan-privasi/index.html');
+  assert.equal((html.match(/<h1\b/g) || []).length, 1);
+  assert.match(html, /<link rel="canonical" href="https:\/\/agatha-felix\.com\/kebijakan-privasi\/">/);
+  assert.ok(!html.includes('<!-- AF_FONTS -->') && !html.includes('<!-- AF_GOOGLE_TAG -->'), 'the build fills both markers');
+  assert.match(html, /<script async src="\/js\/af-site\.js"><\/script>/);
+  for (const tool of ['Google Ads', 'Google Analytics', 'Microsoft Clarity']) assert.ok(html.includes('<h3>' + tool + '</h3>'), tool);
+  assert.ok(!html.includes('wa.me'), 'a data request must not count as a WhatsApp conversion');
+  for (const [, raw] of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
+    assert.ok(fs.existsSync(path.join('dist', raw.endsWith('/') ? raw + 'index.html' : raw)), 'missing ' + raw);
+  }
+  assert.ok(read('dist/sitemap.xml').includes('<loc>https://agatha-felix.com/kebijakan-privasi/</loc>'));
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html']) {
+    assert.ok(read('dist/' + file).includes('href="/kebijakan-privasi/"'), file + ' does not link the privacy page');
+  }
+  assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Google Analytics[\s\S]*Microsoft Clarity/);
+});
 test('every photo path used by the page scripts exists in the build', () => {
   for (const file of fs.readdirSync('dist/js')) {
     const code = read('dist/js/' + file);

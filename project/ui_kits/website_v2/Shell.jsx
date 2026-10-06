@@ -346,7 +346,7 @@ function FooterV2() {
           display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
         }}
       >
-        <span>© 2026 Agatha Felix Stationery</span>
+        <span>© 2026 Agatha Felix Stationery · <a href="/kebijakan-privasi/" style={{ color: 'inherit' }}>Kebijakan Privasi</a></span>
         <span>Langsung dari Pabrik — Bukan Reseller 🏭</span>
       </div>
     </footer>
