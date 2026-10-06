@@ -481,7 +481,7 @@ Lanjut ke WhatsApp</button>
 <b>Agatha Felix Stationery</b>
 <div>Pabrik map plastik &amp; sampul rapor custom · WhatsApp 0822-1947-2613 · Senin–Sabtu 08.00–17.00 WIB</div>
 <div>Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya, Kec. Bekasi Timur, Kota Bekasi, Jawa Barat 17112 · <a href="https://maps.app.goo.gl/GA1jHXYczEmmMN136" target="_blank" rel="noopener" data-maps>Google Maps</a> · <a href="https://www.instagram.com/agathafelix_indonesia/" target="_blank" rel="noopener" data-ig>Instagram</a></div>
-<details id="privasi"><summary>Kebijakan Privasi</summary><p>Formulir di halaman ini (nama sekolah atau lembaga, jumlah kebutuhan, kota, perkiraan waktu kebutuhan, dan nama PIC bila diisi) tidak menyimpan data di server kami: isinya disusun menjadi pesan WhatsApp yang Anda kirim sendiri. Isi pesan dan foto yang Anda kirim hanya kami gunakan untuk mengirimkan penawaran harga serta contoh desain. Data tidak kami jual, sewakan, atau bagikan ke pihak ketiga selain layanan pengiriman pesan yang kami pakai untuk membalas Anda. Halaman ini menggunakan cookie Google untuk mengukur efektivitas iklan; isi formulir tidak kami kirim ke Google. Kami juga memakai Microsoft Clarity, tanpa cookie, untuk melihat bagian halaman yang diklik, digulir, dan dibaca agar situs ini bisa kami perbaiki; isi kolom formulir disamarkan dan tidak ikut terekam. Ingin data Anda dihapus? Kirim permintaan lewat WhatsApp 0822-1947-2613 dan kami hapus dari catatan kami.</p></details>
+<details id="privasi"><summary>Kebijakan Privasi</summary><p>Formulir di halaman ini (nama sekolah atau lembaga, jumlah kebutuhan, kota, perkiraan waktu kebutuhan, dan nama PIC bila diisi) tidak menyimpan data di server kami: isinya disusun menjadi pesan WhatsApp yang Anda kirim sendiri. Isi pesan dan foto yang Anda kirim hanya kami gunakan untuk mengirimkan penawaran harga serta contoh desain. Data tidak kami jual, sewakan, atau bagikan ke pihak ketiga selain layanan pengiriman pesan yang kami pakai untuk membalas Anda. Halaman ini menggunakan cookie Google (Google Ads dan Google Analytics) untuk mengukur iklan dan menghitung kunjungan; isi formulir tidak kami kirim ke Google. Kami juga memakai Microsoft Clarity, tanpa cookie, untuk melihat bagian halaman yang diklik, digulir, dan dibaca agar situs ini bisa kami perbaiki; isi kolom formulir disamarkan dan tidak ikut terekam. Ingin data Anda dihapus? Kirim permintaan lewat WhatsApp 0822-1947-2613 dan kami hapus dari catatan kami. <a href="/kebijakan-privasi/">Baca kebijakan privasi lengkap</a>.</p></details>
 <div style="color:rgba(255,255,255,.5);font-size:13px">© 2026 Agatha Felix Stationery. Semua hak dilindungi.</div>
 </div></footer>
 
@@ -500,7 +500,8 @@ var WA='6282219472613';
 function waLink(msg){return 'https://wa.me/'+WA+'?text='+encodeURIComponent(msg)}
 /* Every price button opens the same checklist, so a school that already has a
    sample sends what a quote needs. The header link stays a plain question.
-   The Ads conversion for these clicks is sent once, by af-site.js. */
+   The Ads conversion for these clicks is sent once, by af-site.js, which also
+   sends the klik_whatsapp and klik_telepon events (with the button name). */
 var MSG={
 contoh:'Halo Agatha Felix, saya mau minta harga sampul rapor custom.\n\nSaya kirim foto contoh map kami (tampak luar & dalam) di chat ini.\n- Jumlah: ... pcs (minimal 50)\n- Dibutuhkan tanggal: ...\n- Kota pengiriman: ...\n- Sekolah/lembaga: ...',
 tanya:'Halo Agatha Felix, saya mau tanya sampul rapor custom untuk sekolah/lembaga kami.'};
@@ -538,7 +539,6 @@ document.querySelectorAll('.igvid[data-video]').forEach(function(card){
   };
   v.src=card.dataset.video;
 });
-document.querySelectorAll('[data-tel]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_telepon')})});
 var f=document.getElementById('leadForm'),err=document.getElementById('leadErr'),need=['sekolah','jumlah','kota'];
 function invalid(names,html){
 err.innerHTML=html;err.hidden=false;
