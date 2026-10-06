@@ -39,6 +39,15 @@
     if (thankYou && !formConversion) params.send_page_view = false;
     window.gtag('js', new Date());
     window.gtag('config', config.googleAdsId, params);
+    // Both destinations share one loader. Explicit routing below keeps GA4
+    // contact events separate from the existing Ads conversion goals.
+    if (config.googleAnalyticsId) {
+      window.gtag('config', config.googleAnalyticsId, params);
+      if (formConversion) window.gtag('event', 'generate_lead', {
+        send_to: config.googleAnalyticsId,
+        method: 'whatsapp_form',
+      });
+    }
     var script = document.createElement('script');
     script.async = true;
     // Loading the tag sends the queued page view; until then a reload retries.
@@ -75,9 +84,14 @@
   }
   // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
   function noteContact(link, whatsapp) {
+    var name = buttonName(link);
+    if (production && config.googleAnalyticsId) window.gtag('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon', {
+      send_to: config.googleAnalyticsId,
+      button_label: name,
+    });
     if (!useClarity) return;
     window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
-    window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', buttonName(link));
+    window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', name);
   }
 
   document.addEventListener('click', function (event) {

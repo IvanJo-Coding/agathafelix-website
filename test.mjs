@@ -133,6 +133,50 @@ function prepare(href, pending, storageAvailable = true) {
 const thanks = 'https://agatha-felix.com/raporsekolah/terima-kasih.html';
 const thanksPath = '/raporsekolah/terima-kasih.html';
 const wa = 'https://wa.me/6282219472613?text=Local%20test';
+
+const withAnalytics = { ...withClarity, googleAnalyticsId: 'G-F2P4YVFY6P' };
+const googleCalls = (window) => JSON.parse(JSON.stringify(window.dataLayer.map((call) => Array.from(call))));
+
+test('GA4 shares the Google loader and contact events never carry the WhatsApp message', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withAnalytics);
+  vm.runInContext(tag, live.context);
+  assert.equal(live.scripts.length, 1, 'one loader even if the shared script runs twice');
+  assert.deepEqual(googleCalls(live.window).filter((e) => e[0] === 'config').map((e) => e[1]),
+    [config.googleAdsId, withAnalytics.googleAnalyticsId]);
+  live.click(wa, '', { 'data-wa': 'hero' });
+  live.click('tel:+6282219472613', '', { text: 'Telepon' });
+  const events = googleCalls(live.window).filter((e) => e[0] === 'event');
+  assert.deepEqual(events.filter((e) => e[1] !== 'conversion'), [
+    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero' }],
+    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: 'Telepon' }],
+  ]);
+  assert.equal(events.filter((e) => e[1] === 'conversion').length, 1);
+  assert.ok(!JSON.stringify(events).includes('Local%20test'));
+  live.timers[0]();
+  live.window.dataLayer.find((e) => e[1] === 'conversion')[2].event_callback();
+  assert.equal(live.navigations.length, 1, 'GA4 does not disrupt the Ads navigation callback');
+  const preview = tracking('localhost', '/', {}, withAnalytics);
+  preview.click(wa);
+  assert.equal(preview.scripts.length, 0);
+  assert.ok(!googleCalls(preview.window).some((e) => e[2]?.send_to === withAnalytics.googleAnalyticsId));
+});
+
+test('GA4 counts a fresh form handoff once, with no form values or URL parameters', () => {
+  const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
+  const live = tracking('agatha-felix.com', thanksPath, first.window, withAnalytics);
+  const calls = googleCalls(live.window);
+  assert.deepEqual(calls.find((e) => e[0] === 'config' && e[1] === withAnalytics.googleAnalyticsId)[2], { page_location: thanks });
+  assert.deepEqual(calls.filter((e) => e[1] === 'generate_lead'), [
+    ['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_form' }],
+  ]);
+  live.scripts[0].onload();
+  for (const pending of [first.saved, null]) {
+    const visit = prepare(thanks, pending);
+    const quiet = tracking('agatha-felix.com', thanksPath, visit.window, withAnalytics);
+    assert.ok(!googleCalls(quiet.window).some((e) => e[1] === 'generate_lead'));
+    assert.equal(googleCalls(quiet.window).find((e) => e[1] === withAnalytics.googleAnalyticsId)[2].send_page_view, false);
+  }
+});
 test('a fresh handoff counts once the tag loads, and a failed load is retried', () => {
   const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
   assert.equal(first.window.AF_LEAD_URL, wa);
