@@ -80,6 +80,17 @@ It loads `async`, so it never delays the first paint; on the thank-you page the
 synchronous `lead-handoff.js` still runs first. A WhatsApp click is sent once,
 on click only: nothing fires when a page opens.
 
+**Microsoft Clarity** (heatmaps, scroll depth, time on page, recordings) runs
+when `SITE.clarityId` holds the project ID; empty keeps it off. In the Clarity
+project, keep **Settings → Setup → Cookies OFF**: `af-site.js` also tells
+Clarity consent is denied, so it sets no cookies, each page view counts as its
+own session, and no cookie banner is needed. It starts after the `load` event,
+never on localhost, `/admin/` (recordings would show cost prices) or the
+thank-you page (its WhatsApp link holds the visitor's message). Input fields
+are always masked by Clarity. WhatsApp and phone clicks add the events
+`klik_whatsapp` / `klik_telepon` and the tags `tombol_whatsapp` /
+`tombol_telepon`, named by `data-wa` or the button text, never the link.
+
 On `/raporsekolah/` the main action is **Kirim Contoh & Minta Harga via
 WhatsApp**, right under the headline with the 50 pcs minimum beside it. Its
 prefilled message is a checklist (sample photos outside and inside, quantity,

@@ -46,6 +46,9 @@ const SITE = {
   // Google Ads conversion tracking, injected into every generated page.
   googleAdsId: 'AW-18374325686',
   waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE',
+  // Microsoft Clarity project ID (heatmaps, scroll depth, recordings). Empty
+  // means Clarity stays off. The project must keep its Cookies setting OFF.
+  clarityId: '',
 };
 
 // ---------------------------------------------------------------------------
@@ -168,7 +171,7 @@ async function transpileSource(code) {
 // Google tag as soon as it arrives. (Deferred, it ran after the first paint and
 // Lighthouse counted it as blocking time.) On the thank-you page the parser only
 // reaches it after the synchronous lead-handoff.js whose result it reads.
-const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel})};</script>
+const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel, clarityId: SITE.clarityId})};</script>
 <script async src="/js/af-site.js"></script>`;
 
 // ---------------------------------------------------------------------------
