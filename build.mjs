@@ -336,6 +336,8 @@ function pageHtml(page, ogDim, mediaManifest, rendered, css) {
     '/_ds_bundle.js',
     ...page.sections.map((s) => `/js/${s}.js`),
     `/js/page-${page.canonical === '/' ? 'index' : page.canonical.replace(/\//g, '')}.js`,
+    // Photo zoom (project/static/js/af-zoom.js): any [data-zoom] photo.
+    '/js/af-zoom.js',
   ];
   return `<!DOCTYPE html>
 <html lang="id">
