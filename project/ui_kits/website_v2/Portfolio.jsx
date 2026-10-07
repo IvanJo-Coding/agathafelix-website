@@ -51,11 +51,12 @@ function PortfolioCard({ p, rot }) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = `rotate(${rot}deg)`; }}
     >
       <div style={{ background: '#f4ede1', borderBottom: '2px solid var(--af-ink)', position: 'relative' }}>
-        <img className="af-pf-img" src={p.img} srcSet={window.afSrcSet(p.img)} sizes="(max-width: 680px) 50vw, 300px" alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async" style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
+        <img className="af-pf-img" src={p.img} srcSet={window.afSrcSet(p.img)} sizes="(max-width: 680px) 50vw, 300px" alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async"
+          data-zoom={p.img} role="button" tabIndex={0} aria-label={'Perbesar foto: ' + p.teknik + ' untuk ' + p.client} style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
         <span
           className="af-pf-seg"
           style={{
-            position: 'absolute', top: 10, left: 10, background: `var(--af-${p.color})`, color: '#fff',
+            position: 'absolute', top: 10, left: 10, background: `var(--af-${p.color}-deep)`, color: '#fff',
             border: '2px solid var(--af-ink)', borderRadius: 999, fontFamily: 'var(--font-display)',
             fontWeight: 800, fontSize: 10, padding: '3px 10px',
           }}
@@ -68,7 +69,7 @@ function PortfolioCard({ p, rot }) {
         <div className="af-pf-teknik" style={{ display: 'inline-flex', marginTop: 7, alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 600, color: `var(--af-${p.color}-deep)`, background: `var(--af-${p.color}-tint)`, border: `1.5px solid var(--af-${p.color}-soft)`, padding: '3px 11px', borderRadius: 999 }}>
           {p.teknik}
         </div>
-        <a className="af-pf-more" href={window.waLink(pesan)} target="_blank" rel="noopener noreferrer" style={{ marginTop: 'auto', paddingTop: 10 }}>
+        <a className="af-pf-more" data-wa="portofolio" href={window.waLink(pesan)} target="_blank" rel="noopener noreferrer" style={{ marginTop: 'auto', paddingTop: 10 }}>
           Pesan yang mirip <span aria-hidden="true">→</span>
         </a>
       </figcaption>
@@ -91,7 +92,7 @@ function PortfolioCustom() {
           highlightColor="purple"
           description="Dari rapor sekolah jahit & press sampai map korporat berlogo — ini sebagian yang sudah kami produksi."
         />
-        <div className="af-pf-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+        <div className="af-pf-grid" data-zoom-group style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
           {PORTFOLIO.map((p, i) => <PortfolioCard key={p.client} p={p} rot={rots[i % rots.length]} />)}
         </div>
         {/* A plain list of techniques. It used to look like a row of buttons
@@ -132,7 +133,7 @@ function FactoryBand() {
             Press, jahit, sablon, sampai packing — semua satu atap. Itu kenapa harga kami harga pabrik,
             dan kualitasnya kami pegang dari awal sampai akhir.
           </p>
-          <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bertanya tentang kapasitas produksi map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Kapasitas Produksi</Button>
+          <Button color="wa" data-wa="kapasitas" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bertanya tentang kapasitas produksi map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Kapasitas Produksi</Button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {FACTORY.map((f, i) => (

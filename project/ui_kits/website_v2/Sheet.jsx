@@ -211,14 +211,16 @@ function AfGallery({ imgs, slide, onSlide, fit = 'contain' }) {
     <div className="af-sheet-gallery">
       <div style={{ position: 'relative' }}>
         <div
-          className="af-sheet-track" ref={trackRef}
+          className="af-sheet-track" ref={trackRef} data-zoom-group
           onScroll={(e) => {
             const t = e.currentTarget;
             const i = Math.round(t.scrollLeft / t.clientWidth);
             if (i !== slide) onSlide(i);
           }}
         >
-          {imgs.map(([src, alt], i) => <img key={src} src={src} alt={alt} decoding="async" loading={i ? 'lazy' : 'eager'} style={fit === 'cover' ? { objectFit: 'cover' } : undefined} />)}
+          {/* Tap a photo to see it large (af-zoom.js); only the one in view takes Tab focus. */}
+          {imgs.map(([src, alt], i) => <img key={src} src={src} alt={alt} decoding="async" loading={i ? 'lazy' : 'eager'} style={fit === 'cover' ? { objectFit: 'cover' } : undefined}
+            data-zoom={src} role="button" tabIndex={i === slide ? 0 : -1} aria-label={'Perbesar foto: ' + alt} />)}
         </div>
         {imgs.length > 1 ? (
           <span aria-hidden="true" style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(43,42,40,.75)', color: '#fff', borderRadius: 999, fontSize: 12, fontWeight: 700, padding: '3px 10px' }}>{slide + 1}/{imgs.length}</span>

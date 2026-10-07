@@ -98,7 +98,7 @@ function GiantMap() {
             }}
           ></span>
         </div>
-        <img src="../../assets/logo-mark-white.png" alt="" style={{ height: 64 }} />
+        <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 64, width: 'auto' }} />
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#fff', fontSize: 18, letterSpacing: '0.04em' }}>MAP KANCING · A4</span>
         <span
           style={{
@@ -147,7 +147,7 @@ function HeroV2() {
             <strong style={{ color: 'var(--text-heading)' }}> Warna-warni boleh, harga tetap ramah.</strong>
           </p>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau minta penawaran map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Minta Penawaran Gratis</Button>
+            <Button color="wa" data-wa="hero" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau minta penawaran map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Minta Penawaran Gratis</Button>
             <Button color="purple" size="lg" href="produk-custom.html#simulator">🎨 Coba Simulator Rapor</Button>
           </div>
           <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', marginTop: 4 }}>

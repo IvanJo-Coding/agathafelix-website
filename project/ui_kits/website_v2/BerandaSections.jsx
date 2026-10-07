@@ -102,7 +102,7 @@ function SekolahV2() {
                   zIndex: i,
                 }}
               >
-                <img src="../../assets/logo-mark-white.png" alt="" style={{ height: 44, opacity: .95 }} />
+                <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 44, width: 'auto', opacity: .95 }} />
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#fff', fontSize: 13, textAlign: 'center', lineHeight: 1.3 }}>RAPOR<br />SISWA</span>
                 <span style={{ background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 999, fontSize: 9, fontWeight: 700, padding: '2px 10px', color: 'var(--af-ink)' }}>LOGO SEKOLAHMU</span>
               </div>
@@ -119,7 +119,7 @@ function SekolahV2() {
             Custom mulai <strong style={{ color: 'var(--af-yellow)' }}>50 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom untuk sekolah / les.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Gratis</Button>
+            <Button color="wa" data-wa="sekolah" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom untuk sekolah / les.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Gratis</Button>
             <Button color="orange" size="lg" href="produk-custom.html#simulator">🎨 Desain Sendiri di Simulator</Button>
           </div>
         </div>
@@ -271,7 +271,7 @@ function FAQV2() {
           <Badge color="blue">Masih Penasaran?</Badge>
           <h2 style={{ fontSize: 'var(--text-xl)' }}>Tanya-Tanya Dulu, Boleh Banget</h2>
           <p style={{ margin: 0, fontSize: '0.88rem' }}>Belum ketemu jawabannya? Langsung saja chat kami — dibalas manusia, bukan robot.</p>
-          <Button variant="ghost" href={window.waLink('Halo Agatha Felix! Saya ada beberapa pertanyaan.')} target="_blank" rel="noopener noreferrer">Tanya via WhatsApp →</Button>
+          <Button variant="ghost" data-wa="faq" href={window.waLink('Halo Agatha Felix! Saya ada beberapa pertanyaan.')} target="_blank" rel="noopener noreferrer">Tanya via WhatsApp →</Button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <FAQItem question="Minimal pesan berapa, sih?" defaultOpen>Minimal 50 pcs untuk produk custom. Makin banyak makin ekonomis: kami sarankan 100 pcs, dengan perkiraan sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</FAQItem>
@@ -290,13 +290,13 @@ function CTAV2() {
     <section style={{ background: 'var(--af-orange)', position: 'relative', overflow: 'hidden' }}>
       <window.ConfettiV2 density={1} />
       <div style={wrapV2({ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 })}>
-        <img src="../../assets/logo-mark-white.png" alt="" style={{ height: 60 }} />
+        <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 60, width: 'auto' }} />
         <h2 style={{ fontSize: 'var(--text-xl)', color: '#fff', maxWidth: 560 }}>Yuk, Bikin Map Versi Kamu!</h2>
         <p style={{ margin: 0, color: 'rgba(255,255,255,.92)', fontSize: '0.95rem', maxWidth: 440 }}>
           Cerita kebutuhanmu, kami buatkan penawaran terbaik — gratis, tanpa komitmen, langsung dari pabriknya.
         </p>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bikin map / rapor versi saya.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Chat WhatsApp Sekarang</Button>
+          <Button color="wa" data-wa="penutup" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bikin map / rapor versi saya.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Chat WhatsApp Sekarang</Button>
           <Button color="purple" size="lg" href="produk-custom.html#simulator">🎨 Main ke Simulator Rapor</Button>
         </div>
       </div>

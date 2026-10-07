@@ -2,7 +2,8 @@ import React from 'react';
 
 const BTN_COLORS = {
   orange: ['var(--af-orange)', 'var(--af-orange-deep)'],
-  wa:     ['var(--af-wa)',     'var(--af-wa-deep)'],
+  // Dark text on WhatsApp green: white on it is 1.98:1, under WCAG AA.
+  wa:     ['var(--af-wa)',     'var(--af-wa-deep)', 'var(--af-wa-ink)'],
   green:  ['var(--af-green)',  'var(--af-green-deep)'],
   purple: ['var(--af-purple)', 'var(--af-purple-deep)'],
   blue:   ['var(--af-blue)',   'var(--af-blue-deep)'],
@@ -25,7 +26,7 @@ function injectBtnCss() {
       transition:transform var(--duration-fast,140ms) var(--ease-smooth,ease),
                  box-shadow var(--duration-fast,140ms) var(--ease-smooth,ease),
                  background var(--duration-fast,140ms) ease; }
-    .af-btn-solid { background:var(--btn); color:#fff; box-shadow:0 4px 0 var(--btn-deep); }
+    .af-btn-solid { background:var(--btn); color:var(--btn-ink, #fff); box-shadow:0 4px 0 var(--btn-deep); }
     .af-btn-solid:hover { transform:translateY(-1px); box-shadow:0 5px 0 var(--btn-deep); filter:brightness(1.04); }
     .af-btn-solid:active { transform:translateY(3px); box-shadow:0 1px 0 var(--btn-deep); filter:none; }
     .af-btn-ghost { background:transparent; color:var(--af-ink); border:2px solid var(--af-ink); box-shadow:none; }
@@ -55,10 +56,10 @@ export function Button({
   ...rest
 }) {
   injectBtnCss();
-  const [bg, deep] = BTN_COLORS[color] || BTN_COLORS.orange;
+  const [bg, deep, ink] = BTN_COLORS[color] || BTN_COLORS.orange;
   const sz = BTN_SIZES[size] || BTN_SIZES.md;
   const cls = `af-btn ${variant === 'ghost' ? 'af-btn-ghost' : 'af-btn-solid'}`;
-  const mergedStyle = { '--btn': bg, '--btn-deep': deep, ...sz, ...style };
+  const mergedStyle = { '--btn': bg, '--btn-deep': deep, ...(ink ? { '--btn-ink': ink } : {}), ...sz, ...style };
   const Tag = href ? 'a' : 'button';
   return (
     <Tag className={cls} href={href} disabled={disabled} style={mergedStyle} {...rest}>

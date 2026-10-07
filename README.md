@@ -148,11 +148,50 @@ which shows the typed name and uploaded logo, carries `data-clarity-mask`.
 real recorder on the local build, types marker values into every field, and
 fails if any of them, or the logo, would be uploaded.
 
-On `/raporsekolah/` the main action is **Kirim Contoh & Minta Harga via
-WhatsApp**, right under the headline with the 50 pcs minimum beside it. Its
-prefilled message is a checklist (sample photos outside and inside, quantity,
-date needed, city, school), so a buyer does not need material or finishing
-terms. The header link asks a plain question. There is no automatic pop-up.
+**Load order (mobile speed).** The Google tag and Clarity start after the
+`load` event, once a frame is painted and the browser is idle, or at the first
+tap or key press, whichever comes first; a WhatsApp click loads the Google tag
+at once, and anything sent earlier waits in `dataLayer`. The thank-you page
+still loads it immediately (its page view is the form conversion). The React
+pages start their hydration scripts after the first paint, in order, from one
+inline loader (`afterPaintScripts` in `build.mjs`). In the mobile lab
+(simulated Moto G Power, Google tag on, hits blocked) this took LCP from
+6.6–6.8 s to 2.3 s (rapor) and 2.5 s (custom).
+
+**Events.** Contact clicks: `klik_whatsapp` / `klik_telepon` with
+`button_label` = the button's `data-wa` (every WhatsApp button has one: `hero`,
+`header`, `bubble`, `sticky`, `footer`, `model`, `sheet-detail`, `sheet-bantu`,
+`sheet-standar`, `simulator`, `model-lain`, `portofolio`, `penutup`, ...), to
+GA4, plus Clarity tags `tombol_whatsapp` / `tombol_telepon`. Steps before
+contact go through `AFTracking.noteStep`, which accepts only these names and
+values (anything else is dropped): `product_detail_open` {`product_id` = a code
+slug, `cta_position` = `kartu` | `tautan` | `navigasi`}, `quote_start`
+{`product_id`, `quote_mode` = `detail` | `bantu` | `form`}, and
+`quote_form_submit` (Clarity only, sent once the rapor form is valid and handed
+to WhatsApp, before the thank-you page; GA4 already counts that handoff as
+`generate_lead`). None of these is, or should be imported as, a primary Ads
+conversion.
+
+**Photo zoom.** `project/static/js/af-zoom.js` opens any `[data-zoom]` photo in
+a `<dialog>`, fetching the large file only then; `[data-zoom-group]` adds
+prev/next, arrow keys and swipes. Escape stays inside it, so a product sheet
+underneath stays open. Product sheet photos, the portfolio and the landing
+page photos use it; the simulator preview never does.
+
+On `/raporsekolah/` the main action is **Minta Harga & Mockup Gratis**, right
+under the headline with the 50 pcs minimum and "rata-rata Rp50rb/pcs untuk
+100 pcs" beside it, and "Belum punya contoh? Kami bantu pilih model." under
+it. Its prefilled message is a checklist (quantity, date needed, city, school),
+and a sample photo is optional: the message says "kalau ada", never that a
+photo was sent. The header link asks a plain question. There is no automatic
+pop-up.
+
+On `/produk-custom/` each product sheet offers **Saya pilih sendiri** or
+**Bantu pilihkan spesifikasi**. The quick path hides the technical choices
+(keeping any picks), and its message (`pesanBantu`) lists only what the buyer
+picked, never defaults. Without instant prices (`CustomHarga.jsx` is still
+empty), the sheet explains how the price is worked out; Map Jahit and Map
+Press add the owner's average, about Rp50.000/pcs for 100 pcs.
 
 The form is the optional route. It asks for school, quantity (50 pcs or more,
 or it points to the stock catalogue), city, timing, whether a sample exists,

@@ -121,7 +121,7 @@ function SimulatorRapor() {
                 {logo ? '✓ Logo terpasang — klik untuk ganti' : '⬆ Unggah logo (PNG/JPG)'}
               </label>
             </div>
-            <Button color="wa" size="lg" {...window.waPribadi(pesanWA)} target="_blank" rel="noopener noreferrer">
+            <Button color="wa" size="lg" data-wa="simulator" {...window.waPribadi(pesanWA)} target="_blank" rel="noopener noreferrer">
               <window.WaGlyph2 /> Pesan Desain Ini via WA
             </Button>
           </div>

@@ -37,7 +37,9 @@ if (!config.clarityId) throw new Error('SITE.clarityId is empty: there is nothin
 const tag = await (await fetch('https://www.clarity.ms/tag/' + config.clarityId)).text();
 const recorderUrl = tag.match(/https:\/\/scripts\.clarity\.ms\/[^"]+\/clarity\.js/)[0];
 const recorder = await (await fetch(recorderUrl)).text();
-const settings = tag.match(/"script",(\{.*\})\);?\s*$/)[1];
+// The settings object closes the loader call; the loader may add statements
+// after it (a console.warn when the project excludes this IP, for one).
+const settings = tag.match(/"script",(\{.*?\})\)/)[1];
 const loader = `(function () {
   var cfg = ${settings};
   cfg.upload = function (payload) { window.__afUpload(payload); };
