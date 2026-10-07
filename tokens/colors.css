@@ -7,17 +7,18 @@
 :root {
   /* ---- Brand base (from logo letterforms) ---- */
   --af-orange:       #E8542D;  /* clownfish + 'A' — PRIMARY brand color */
-  --af-orange-deep:  #C73E1D;
+  --af-orange-deep:  #B23518;  /* text on tints at WCAG AA (4.5:1 on orange-soft) */
   --af-orange-soft:  #FBDDD2;
   --af-orange-tint:  #FDF0EA;
 
   --af-green:        #2BA84A;  /* 'g' green */
-  --af-green-deep:   #1F8438;
+  --af-green-deep:   #1B7431;  /* AA on green-tint */
   --af-green-soft:   #D3F0DB;
   --af-green-tint:   #EDF9F0;
 
   --af-yellow:       #F5D920;  /* 'a' lemon yellow — decorative only, never text */
-  --af-yellow-deep:  #E3A812;  /* amber — usable for small text/stars */
+  --af-yellow-deep:  #E3A812;  /* amber — stars and decoration */
+  --af-yellow-ink:   #7A5A00;  /* text on yellow-soft (AA) */
   --af-yellow-soft:  #FCF3C4;
   --af-yellow-tint:  #FEFAE6;
 
@@ -27,18 +28,19 @@
   --af-purple-tint:  #F3EFFA;
 
   --af-blue:         #38AEE8;  /* 'h' sky blue */
-  --af-blue-deep:    #1D87BD;
+  --af-blue-deep:    #13668F;  /* AA on white, blue-tint and blue-soft */
   --af-blue-soft:    #D2EDFA;
   --af-blue-tint:    #EBF7FD;
 
   /* ---- WhatsApp (primary conversion channel) ---- */
   --af-wa:           #25D366;
   --af-wa-deep:      #1AAB50;
+  --af-wa-ink:       #2B2A28;  /* text on WA green: white was 1.98:1, ink is 7.1:1 */
 
   /* ---- Ink & paper neutrals (warm) ---- */
   --af-ink:          #2B2A28;  /* near-black from logo tagline */
   --af-ink-2:        #5C574F;  /* secondary text */
-  --af-ink-3:        #8C857A;  /* muted text / captions */
+  --af-ink-3:        #6E675C;  /* muted text / captions (AA on white and paper) */
   --af-line:         #EADFD2;  /* hairline borders on paper */
   --af-line-strong:  #2B2A28;  /* sticker outlines (use at 2px) */
 

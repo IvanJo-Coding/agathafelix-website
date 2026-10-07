@@ -6,8 +6,11 @@
   window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
   var production = /^(www\.)?agatha-felix\.com$/.test(location.hostname);
   var thankYou = location.pathname === '/raporsekolah/terima-kasih.html';
+  var later = [];
+  var loadTag = function () {};
 
   function trackWhatsApp(callback) {
+    loadTag();
     window.gtag('event', 'conversion', {
       send_to: config.waConversionLabel,
       event_callback: callback,
@@ -24,7 +27,48 @@
     trackWhatsApp();
     window.open(target.href, '_blank', 'noopener');
   }
-  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp };
+  // A testimonial clip played on the page instead of on Instagram. GA4's own
+  // video_start name, so it lands in GA4's video reports.
+  function noteVideo(title) {
+    if (production && config.googleAnalyticsId) window.gtag('event', 'video_start', {
+      send_to: config.googleAnalyticsId,
+      video_title: title,
+      video_provider: 'agatha-felix.com',
+    });
+    if (!useClarity) return;
+    window.clarity('event', 'putar_video');
+    window.clarity('set', 'video', title);
+  }
+  // Steps before contact. Only these names, and only enum values or a product
+  // slug from the code: nothing a visitor typed can be passed through here.
+  // quote_form_submit goes to Clarity only; GA4 already counts that handoff
+  // as generate_lead on the thank-you page. None of these is an Ads goal.
+  var STEPS = {
+    product_detail_open: { product_id: 'slug', cta_position: ['kartu', 'tautan', 'navigasi'] },
+    quote_start: { product_id: 'slug', quote_mode: ['detail', 'bantu', 'form'] },
+    quote_form_submit: {},
+  };
+  function noteStep(name, params) {
+    var spec = STEPS[name];
+    if (!spec) return false;
+    var clean = {};
+    for (var key in spec) {
+      var value = params && params[key];
+      var ok = spec[key] === 'slug' ? /^[a-z0-9-]{2,40}$/.test(value || '') : spec[key].indexOf(value) >= 0;
+      if (!ok) return false;
+      clean[key] = value;
+    }
+    if (name !== 'quote_form_submit' && production && config.googleAnalyticsId) {
+      clean.send_to = config.googleAnalyticsId;
+      window.gtag('event', name, clean);
+    }
+    if (useClarity) {
+      window.clarity('event', name);
+      if (clean.product_id) window.clarity('set', 'produk', clean.product_id);
+    }
+    return true;
+  }
+  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
@@ -53,7 +97,24 @@
     // Loading the tag sends the queued page view; until then a reload retries.
     if (formConversion) script.onload = function () { window.AF_LEAD_MARK_MEASURED(); };
     script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.googleAdsId);
-    document.head.appendChild(script);
+    var tagLoaded = false;
+    loadTag = function () {
+      if (tagLoaded) return;
+      tagLoaded = true;
+      document.head.appendChild(script);
+    };
+    // The thank-you page loads it at once: its page view is the form
+    // conversion. Elsewhere it waits for the page to finish loading, or for
+    // the first tap or key press: fetched early (about 346 KB for both
+    // destinations) it held the hero text back some 6 s in mobile lab runs.
+    // Anything sent before then waits in dataLayer and goes out on load.
+    if (thankYou) loadTag();
+    else {
+      later.push(loadTag);
+      ['pointerdown', 'keydown', 'touchstart'].forEach(function (type) {
+        window.addEventListener(type, loadTag, { once: true, passive: true, capture: true });
+      });
+    }
   }
 
   // Microsoft Clarity: click, scroll and attention heatmaps, time on page, and
@@ -66,14 +127,28 @@
   if (useClarity) {
     window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
     window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
-    var startClarity = function () {
+    later.push(function () {
       var clarity = document.createElement('script');
       clarity.async = true;
       clarity.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(config.clarityId);
       document.head.appendChild(clarity);
+    });
+  }
+  // Tags that wait for the page: started together after the load event, once
+  // a frame has been painted (so never ahead of the hero text, even where the
+  // first frame is late) and the browser is idle (at most 2 s later).
+  if (later.length) {
+    var startLater = function () {
+      var start = function () { later.forEach(function (fn) { fn(); }); };
+      var idle = function () {
+        if (window.requestIdleCallback) window.requestIdleCallback(start, { timeout: 2000 });
+        else setTimeout(start, 1);
+      };
+      if (window.requestAnimationFrame) window.requestAnimationFrame(function () { setTimeout(idle, 0); });
+      else idle();
     };
-    if (document.readyState === 'complete') startClarity();
-    else window.addEventListener('load', startClarity);
+    if (document.readyState === 'complete') startLater();
+    else window.addEventListener('load', startLater);
   }
 
   // The landing page names its buttons in data-wa; elsewhere the visible text
