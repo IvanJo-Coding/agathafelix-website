@@ -56,7 +56,8 @@ header .logo{display:flex;flex-shrink:0}
 .hdr-r{margin-left:auto;display:flex;align-items:center;gap:12px}
 .hdr-tel{font-family:var(--fd);font-weight:800;font-size:16px;color:var(--ink);text-decoration:none;white-space:nowrap}
 #hero{background:linear-gradient(180deg,var(--orange-tint),var(--paper));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:46px;align-items:start;padding:52px 0 66px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;grid-template-areas:"main photo" "more photo";gap:0 46px;align-items:start;padding:52px 0 66px}
+.hero-main{grid-area:main}.hero-more{grid-area:more}
 .hero-h1 em{font-style:normal;color:var(--orange)}
 .hero-sub{font-size:18px;margin-top:16px;max-width:36em}
 .pricebar{display:grid;grid-template-columns:repeat(3,auto);gap:10px;margin-top:22px;background:#fff;border:2px solid var(--ink);border-radius:18px;box-shadow:0 4px 0 rgba(43,42,40,.16);padding:16px 8px;justify-content:space-around;text-align:center}
@@ -79,12 +80,13 @@ header .logo{display:flex;flex-shrink:0}
 .kirim-alt{font-size:14px;margin-top:12px;max-width:520px}
 .kirim-alt a{font-weight:700}
 @media (max-width:420px){.kirim{grid-template-columns:1fr}}
-.hero-photo{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hero-photo{grid-area:photo;display:grid;grid-template-columns:1fr;gap:14px}
 .hero-photo figure{margin:0;background:#fff;border:2px solid var(--ink);border-radius:18px;box-shadow:0 3px 0 rgba(43,42,40,.16);overflow:hidden}
 .hero-photo img{aspect-ratio:4/3;object-fit:cover;object-position:center 40%;width:100%}
 .hero-photo figcaption{font-size:12.5px;font-weight:700;color:var(--ink);padding:8px 12px;border-top:1px solid var(--line);background:var(--paper)}
 form.lead{padding:24px;scroll-margin-top:90px}
-form.lead h3{font-size:22px}
+form.lead h2{font-size:22px}
+.form-sec .lead{max-width:560px;margin:0 auto}
 .lead-note{font-size:13.5px;color:var(--ink3);margin-top:4px}
 .f{display:block;margin-top:14px}
 .f span{display:block;font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:6px}
@@ -137,6 +139,10 @@ fieldset.f label:has(input:checked){border-color:var(--green)}
 .igvid:not([data-video]) .igvid-body{align-self:center}
 .igvid:not([data-video]) .igvid-glyph{width:30px;height:30px}
 .igvid:not([data-video]) .igvid-play{display:none}
+.vidmodal{padding:0;border:0;background:transparent;width:min(92vw,460px);max-width:none;overflow:visible}
+.vidmodal::backdrop{background:rgba(20,18,16,.86)}
+.vidmodal video{display:block;width:100%;max-height:80vh;background:#000;border:2px solid var(--ink);border-radius:18px}
+.vidmodal-x{position:absolute;top:-54px;right:0;width:44px;height:44px;border-radius:var(--pill);border:2px solid var(--ink);background:#fff;color:var(--ink);font:800 26px/1 var(--fd);cursor:pointer}
 .promo{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .promo>div{padding:22px 24px;display:flex;gap:16px;align-items:flex-start}
 .ic{width:46px;height:46px;flex:0 0 46px;border-radius:var(--pill);display:grid;place-items:center}
@@ -214,7 +220,7 @@ footer details p{color:rgba(255,255,255,.72)}
 @media (max-width:360px){.stickybar .btn{font-size:15px;padding:12px 10px}}
 .wabubble{position:fixed;right:20px;bottom:24px;z-index:65;width:60px;height:60px;border-radius:var(--pill);background:var(--wa);border:2px solid var(--ink);box-shadow:0 4px 0 var(--wa-deep);display:grid;place-items:center;color:#fff}
 .wabubble svg{width:30px;height:30px}
-@media (max-width:960px){.model{max-width:560px;justify-self:center}.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;gap:32px;padding:38px 0 48px}.models,.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}.trust-grid{grid-template-columns:1fr 1fr;gap:22px}}
+@media (max-width:960px){.model{max-width:560px;justify-self:center}.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;grid-template-areas:"main" "photo" "more";gap:0;padding:38px 0 48px}.hero-photo{grid-template-columns:1fr 1fr;margin-top:24px}.models,.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}.trust-grid{grid-template-columns:1fr 1fr;gap:22px}}
 @media (max-width:700px){.sec{padding:42px 0}.igvid-grid{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.clients-row{gap:8px}.klien{font-size:12.5px;padding:6px 12px}.klien.has-logo img{height:34px}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}}
 /* 320px phones: the logo + WhatsApp button together still outrun the header. */
 @media (max-width:400px){header img{height:28px}.hdr-r .btn{font-size:13.5px;padding:9px 12px}header .wrap{gap:10px}}
@@ -232,14 +238,20 @@ footer details p{color:rgba(255,255,255,.72)}
 </div></header>
 
 <section id="hero"><div class="wrap"><div class="hero-grid">
-<div>
-<span class="eyebrow">Pabrik Langsung · Bekasi · Untuk Sekolah, Yayasan &amp; Lembaga Kursus</span>
-<h1 class="hero-h1" style="margin-top:12px">Sampul Rapor &amp; Ijazah Custom Logo Sekolah <em>Mulai 50 pcs</em></h1>
-<p class="hero-sub">Sudah punya contoh map rapor atau ijazah? Kirim fotonya lewat WhatsApp beserta jumlah dan tanggal dibutuhkan, kami balas dengan harga per pcs. Tidak perlu tahu nama bahan atau teknik cetaknya.</p>
+<div class="hero-main">
+<span class="eyebrow">Mulai 50 pcs · Pabrik di Bekasi · Untuk Sekolah, Yayasan &amp; Lembaga Kursus</span>
+<h1 class="hero-h1" style="margin-top:12px">Map Rapor &amp; Ijazah Berlogo Sekolah, <em>Langsung dari Pabrik</em></h1>
+<p class="hero-sub">Sudah punya contoh sampul rapor atau ijazah? Kirim fotonya lewat WhatsApp beserta jumlah dan tanggal dibutuhkan, kami balas dengan harga per pcs. Tidak perlu tahu nama bahan atau teknik cetaknya.</p>
 <div class="hero-cta">
 <a class="btn btn-wa btn-lg" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="hero"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Kirim Contoh &amp; Minta Harga via WhatsApp</a>
 <p class="cta-note"><strong>Minimal 50 pcs</strong> per desain · ±Rp50rb/pcs untuk 100 pcs · dibalas &lt; 1 jam di jam kerja</p>
 </div>
+</div>
+<div class="hero-photo">
+<figure><img src="img/collection-480.webp" srcset="img/collection-480.webp 480w, img/collection-800.webp 800w, img/collection.webp 1091w" sizes="(max-width:960px) calc(50vw - 30px), 500px" decoding="async" alt="Sampul rapor dan ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta"><figcaption>SMAK Penabur · SPH Lippo Cikarang</figcaption></figure>
+<figure><img src="img/stack-alazhar-480.webp" srcset="img/stack-alazhar-480.webp 480w, img/stack-alazhar-800.webp 800w, img/stack-alazhar.webp 1090w" sizes="(max-width:960px) calc(50vw - 30px), 500px" decoding="async" alt="Sampul ijazah custom Al-Azhar Kelapa Gading lima pilihan warna"><figcaption>Al-Azhar Kelapa Gading · 5 warna</figcaption></figure>
+</div>
+<div class="hero-more">
 <ul class="kirim">
 <li class="kirim-h">Yang perlu dikirim di chat:</li>
 <li>Foto map contoh, tampak luar</li>
@@ -258,36 +270,7 @@ footer details p{color:rgba(255,255,255,.72)}
 <span class="chip"><svg viewBox="0 0 24 24" style="color:var(--blue-deep)"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Gratis ongkir Jabodetabek min. 50 pcs</span>
 <span class="chip"><svg viewBox="0 0 24 24" style="color:var(--purple)"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5–14 hari kerja</span>
 </div>
-<div class="hero-photo">
-<figure><img src="img/collection-480.webp" srcset="img/collection-480.webp 480w, img/collection-800.webp 800w, img/collection.webp 1091w" sizes="(max-width:960px) calc(50vw - 30px), 286px" decoding="async" alt="Sampul rapor dan ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta"><figcaption>SMAK Penabur · SPH Lippo Cikarang</figcaption></figure>
-<figure><img src="img/stack-alazhar-480.webp" srcset="img/stack-alazhar-480.webp 480w, img/stack-alazhar-800.webp 800w, img/stack-alazhar.webp 1090w" sizes="(max-width:960px) calc(50vw - 30px), 286px" decoding="async" alt="Sampul ijazah custom Al-Azhar Kelapa Gading lima pilihan warna"><figcaption>Al-Azhar Kelapa Gading · 5 warna</figcaption></figure>
 </div>
-</div>
-
-<!-- Optional route. No phone field: the reply goes to the WhatsApp the visitor sends from. -->
-<form class="lead card" id="leadForm" novalidate>
-<h3>Atau Isi Form Singkat</h3>
-<p class="lead-note">Kami susun pesannya, Anda tinggal tekan Kirim di WhatsApp. Tidak perlu mengisi nomor HP. Di jam kerja (Senin–Sabtu, 08.00–17.00 WIB) kami balas di bawah 1 jam.</p>
-<label class="f"><span>Nama Sekolah / Lembaga</span><input name="sekolah" required autocomplete="organization" placeholder="mis. SDIT Al-Furqon / Bimbel Cerdas"></label>
-<label class="f"><span>Jumlah Kebutuhan (pcs)</span><input name="jumlah" required type="number" inputmode="numeric" min="50" step="1" placeholder="mis. 120" aria-describedby="jumlahHint"><small class="f-sub" id="jumlahHint">Minimal 50 pcs per desain / warna.</small></label>
-<label class="f"><span>Kota Pengiriman</span><input name="kota" required autocomplete="address-level2" placeholder="mis. Bekasi"></label>
-<label class="f"><span>Kapan Dibutuhkan</span><select name="waktu">
-<option>Secepatnya (± 2 minggu)</option>
-<option selected>Dalam 1 bulan</option>
-<option>1–3 bulan lagi</option>
-<option>Belum pasti, masih survei harga</option>
-</select></label>
-<fieldset class="f"><legend>Sudah punya contoh map?</legend>
-<label><input type="radio" name="contoh" value="ada" checked> Sudah, fotonya saya kirim di WhatsApp</label>
-<label><input type="radio" name="contoh" value="belum"> Belum, minta saran model</label>
-</fieldset>
-<label class="f"><span>Nama PIC <em class="opt">(opsional)</em></span><input name="pic" autocomplete="name" placeholder="mis. Bu Rahma"></label>
-<p class="f-err" id="leadErr" role="alert" hidden></p>
-<button class="btn btn-wa btn-lg" type="submit" style="margin-top:20px">
-<svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-Lanjut ke WhatsApp</button>
-<p class="f-hint">Form ini tidak menyimpan data di server kami. Tidak ada biaya konsultasi.</p>
-</form>
 </div></div></section>
 
 <div class="trust"><div class="wrap"><div class="trust-grid">
@@ -309,6 +292,33 @@ Lanjut ke WhatsApp</button>
 <span class="klien" data-logo="img/klien/robotics-education-center.png">Robotics Education Center</span>
 <span class="klien" data-logo="img/klien/badan-pertanahan-nasional.png">Badan Pertanahan Nasional</span>
 </div></div></div>
+
+<section class="sec form-sec"><div class="wrap">
+<!-- Optional route. No phone field: the reply goes to the WhatsApp the visitor sends from. -->
+<form class="lead card" id="leadForm" novalidate>
+<h2>Atau Isi Form Singkat</h2>
+<p class="lead-note">Kami susun pesannya, Anda tinggal tekan Kirim di WhatsApp. Tidak perlu mengisi nomor HP. Di jam kerja (Senin–Sabtu, 08.00–17.00 WIB) kami balas di bawah 1 jam.</p>
+<label class="f"><span>Nama Sekolah / Lembaga</span><input name="sekolah" required autocomplete="organization" placeholder="mis. SDIT Al-Furqon / Bimbel Cerdas"></label>
+<label class="f"><span>Jumlah Kebutuhan (pcs)</span><input name="jumlah" required type="number" inputmode="numeric" min="50" step="1" placeholder="mis. 120" aria-describedby="jumlahHint"><small class="f-sub" id="jumlahHint">Minimal 50 pcs per desain / warna.</small></label>
+<label class="f"><span>Kota Pengiriman</span><input name="kota" required autocomplete="address-level2" placeholder="mis. Bekasi"></label>
+<label class="f"><span>Kapan Dibutuhkan</span><select name="waktu">
+<option>Secepatnya (± 2 minggu)</option>
+<option selected>Dalam 1 bulan</option>
+<option>1–3 bulan lagi</option>
+<option>Belum pasti, masih survei harga</option>
+</select></label>
+<fieldset class="f"><legend>Sudah punya contoh map?</legend>
+<label><input type="radio" name="contoh" value="ada" checked> Sudah, fotonya saya kirim di WhatsApp</label>
+<label><input type="radio" name="contoh" value="belum"> Belum, minta saran model</label>
+</fieldset>
+<label class="f"><span>Nama PIC <em class="opt">(opsional)</em></span><input name="pic" autocomplete="name" placeholder="mis. Bu Rahma"></label>
+<p class="f-err" id="leadErr" role="alert" hidden></p>
+<button class="btn btn-wa btn-lg" type="submit" style="margin-top:20px">
+<svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+Lanjut ke WhatsApp</button>
+<p class="f-hint">Form ini tidak menyimpan data di server kami. Tidak ada biaya konsultasi.</p>
+</form>
+</div></section>
 
 <section class="sec"><div class="wrap">
 <div class="promo">
@@ -491,6 +501,11 @@ Lanjut ke WhatsApp</button>
 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
+<dialog class="vidmodal" id="vidModal" aria-label="Video testimoni">
+<button class="vidmodal-x" type="button" aria-label="Tutup video">&times;</button>
+<video controls playsinline preload="none"></video>
+</dialog>
+
 <div class="stickybar">
 <a class="btn btn-wa" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="sticky">Minta Harga via WA</a>
 <a class="btn btn-ghost" href="tel:+6282219472613" data-tel>Telepon</a>
@@ -510,7 +525,11 @@ tanya:'Halo Agatha Felix, saya mau tanya sampul rapor custom untuk sekolah/lemba
 document.querySelectorAll('[data-wa]').forEach(function(a){
 a.href=waLink(MSG[a.getAttribute('data-msg')]||MSG.contoh);a.target='_blank';a.rel='noopener noreferrer'});
 document.querySelectorAll('[data-maps]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_maps')})});
-document.querySelectorAll('[data-ig]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_instagram')})});
+/* A testimonial card with its clip plays it here, with sound, instead of opening
+   Instagram. Without <dialog> support it stays an Instagram link. */
+var modal=document.getElementById('vidModal');
+function playsHere(a){return !!(modal&&modal.showModal&&a.getAttribute('data-video'))}
+document.querySelectorAll('[data-ig]').forEach(function(a){a.addEventListener('click',function(){if(!playsHere(a)&&typeof gtag==='function')gtag('event','klik_instagram')})});
 
 /* Progressive media upgrade. Both of these probe a file before touching the DOM,
    so a logo or clip that has not been added yet simply leaves the placeholder in
@@ -540,7 +559,22 @@ document.querySelectorAll('.igvid[data-video]').forEach(function(card){
     }
   };
   v.src=card.dataset.video;
+  if(!playsHere(card))return;
+  card.querySelector('.igvid-cta').textContent='Putar video ▶';
+  card.addEventListener('click',function(e){
+    e.preventDefault();
+    var player=modal.querySelector('video');
+    player.src=card.dataset.video;
+    modal.showModal();
+    var p=player.play();if(p&&p.catch)p.catch(function(){});
+    if(window.AFTracking&&AFTracking.noteVideo)AFTracking.noteVideo(card.querySelector('.igvid-name').textContent);
+  });
 });
+if(modal&&modal.showModal){
+  modal.querySelector('.vidmodal-x').addEventListener('click',function(){modal.close()});
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.close()});
+  modal.addEventListener('close',function(){var v=modal.querySelector('video');v.pause();v.removeAttribute('src');v.load()});
+}
 var f=document.getElementById('leadForm'),err=document.getElementById('leadErr'),need=['sekolah','jumlah','kota'];
 function invalid(names,html){
 err.innerHTML=html;err.hidden=false;

@@ -262,8 +262,14 @@ const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', w
 // Runs the built landing page's inline scripts and af-site.js on one shared
 // window in production, as the browser does. A click reaches the link's own
 // listeners first, then the document's, as in the DOM.
-function landingPage() {
+function landingPage({ cards = [] } = {}) {
   const html = read('dist/raporsekolah/index.html');
+  const video = { src: '', played: 0, pause() {}, load() {}, play() { this.played++; return Promise.resolve(); },
+    removeAttribute(name) { if (name === 'src') this.src = ''; } };
+  const modal = { open: false, listeners: {}, video, showModal() { this.open = true; },
+    close() { this.open = false; for (const fn of this.listeners.close || []) fn(); },
+    querySelector: (sel) => (sel === 'video' ? video : { addEventListener() {} }),
+    addEventListener(type, fn) { (this.listeners[type] ||= []).push(fn); } };
   const documentClicks = [];
   const link = (href, text, attrs) => {
     const el = { href, target: '', textContent: text, clicks: [], getAttribute: (k) => attrs[k] ?? null,
@@ -276,10 +282,10 @@ function landingPage() {
   const stub = { addEventListener() {}, classList: { add() {} }, elements: {}, style: {} };
   const page = { URL, Date, setTimeout() {}, addEventListener() {},
     location: { hostname: 'agatha-felix.com', pathname: '/raporsekolah/', origin: 'https://agatha-felix.com' },
-    document: { readyState: 'interactive', createElement: () => ({}), head: { appendChild() {} },
+    document: { readyState: 'interactive', createElement: () => ({ setAttribute() {} }), head: { appendChild() {} },
       addEventListener: (type, fn) => { if (type === 'click') documentClicks.push(fn); },
-      querySelectorAll: (sel) => (sel === '[data-tel]' ? tel : sel === '[data-wa]' ? wa : []),
-      getElementById: () => stub },
+      querySelectorAll: (sel) => ({ '[data-tel]': tel, '[data-wa]': wa, '[data-ig]': cards, '.igvid[data-video]': cards }[sel] || []),
+      getElementById: (id) => (id === 'vidModal' ? modal : stub) },
   };
   page.window = page;
   const context = vm.createContext(page);
@@ -290,12 +296,12 @@ function landingPage() {
     for (const fn of [...el.clicks, ...documentClicks]) fn.call(el, event);
     return event;
   }
-  return { page, tel, wa, click };
+  return { page, tel, wa, click, link, modal };
 }
 test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip is no empty box', () => {
   const html = read('dist/raporsekolah/index.html');
   assert.match(html, /<title>Sampul Rapor &amp; Ijazah [^<]*<\/title>/);
-  assert.match(html, /<h1 [^>]*>Sampul Rapor &amp; Ijazah Custom Logo Sekolah /);
+  assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Berlogo Sekolah, /);
   assert.match(html, /<summary>Bisa untuk map ijazah juga\?<\/summary>/);
   // The build drops data-video for a clip that is not in the repo; CSS then shows a compact card.
   for (const [card] of html.matchAll(/<a class="igvid"[^>]*>/g)) {
@@ -303,6 +309,31 @@ test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip
     if (clip) assert.ok(fs.existsSync(path.join('dist/raporsekolah', clip[1])), card);
   }
   assert.match(html, /\.igvid:not\(\[data-video\]\)\{display:flex\}/);
+});
+test('the landing photos follow the CTA on a phone, and the form follows the client list', () => {
+  const html = read('dist/raporsekolah/index.html');
+  const at = (marker) => html.indexOf(marker);
+  assert.ok(at('class="hero-main"') < at('class="hero-photo"') && at('class="hero-photo"') < at('class="hero-more"'));
+  assert.match(html, /grid-template-areas:"main" "photo" "more"/, 'phones show the photos right after the CTA');
+  assert.ok(at('<div class="clients">') > 0 && at('<div class="clients">') < at('id="leadForm"'), 'the form sits below the client list');
+  assert.ok(at('id="leadForm"') > at('</section>'), 'the form left the hero');
+});
+test('a testimonial clip plays on the page, not on Instagram, and counts once', () => {
+  const card = { href: 'https://www.instagram.com/p/DdDqBuSStgs/', target: '_blank', clicks: [], dataset: { video: 'img/testi-cikeas.mp4' },
+    classList: { add() {} }, getAttribute: (k) => ({ 'data-ig': '', 'data-video': 'img/testi-cikeas.mp4' }[k] ?? null),
+    addEventListener: (type, fn) => { if (type === 'click') card.clicks.push(fn); },
+    querySelector: (sel) => (sel === '.igvid-name' ? { textContent: 'Sekolah Alam Cikeas' } : { appendChild() {} }) };
+  card.closest = () => card;
+  const { page, click, modal } = landingPage({ cards: [card] });
+  const ga4 = page.AF_TRACKING.googleAnalyticsId;
+  assert.equal(click(card).defaultPrevented, true, 'Instagram does not open');
+  assert.ok(modal.open);
+  assert.deepEqual([modal.video.src, modal.video.played], ['img/testi-cikeas.mp4', 1]);
+  assert.deepEqual(googleCalls(page).filter((e) => e[0] === 'event'),
+    [['event', 'video_start', { send_to: ga4, video_title: 'Sekolah Alam Cikeas', video_provider: 'agatha-felix.com' }]], 'no klik_instagram');
+  assert.deepEqual(clarityCalls(page).slice(1), [['event', 'putar_video'], ['set', 'video', 'Sekolah Alam Cikeas']]);
+  modal.close();
+  assert.equal(modal.video.src, '', 'closing stops the download');
 });
 test('one phone click on the landing page sends one klik_telepon to GA4, with its button label', () => {
   const { page, tel, wa, click } = landingPage();

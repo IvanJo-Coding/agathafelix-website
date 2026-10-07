@@ -24,7 +24,19 @@
     trackWhatsApp();
     window.open(target.href, '_blank', 'noopener');
   }
-  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp };
+  // A testimonial clip played on the page instead of on Instagram. GA4's own
+  // video_start name, so it lands in GA4's video reports.
+  function noteVideo(title) {
+    if (production && config.googleAnalyticsId) window.gtag('event', 'video_start', {
+      send_to: config.googleAnalyticsId,
+      video_title: title,
+      video_provider: 'agatha-felix.com',
+    });
+    if (!useClarity) return;
+    window.clarity('event', 'putar_video');
+    window.clarity('set', 'video', title);
+  }
+  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
