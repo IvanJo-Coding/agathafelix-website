@@ -317,6 +317,16 @@ function ldScript(obj) {
   return `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, '\\u003c')}</script>`;
 }
 
+// The prerendered page is readable before any script runs, so the hydration
+// scripts start downloading only after the first frame has been painted, in
+// their order (async=false). Requested at parse time they competed with the
+// fonts and hero on slow phones, and mobile lab runs counted them against LCP
+// (custom page 2.9 s). Links work before hydration: product cards are #hash
+// links that open their sheet once React is up.
+function afterPaintScripts(scripts) {
+  return `<script>(function(){var s=${JSON.stringify(scripts)};function go(){s.forEach(function(src){var e=document.createElement('script');e.src=src;e.async=false;document.body.appendChild(e);});}if(window.requestAnimationFrame)requestAnimationFrame(function(){setTimeout(go,0);});else setTimeout(go,0);})();</script>`;
+}
+
 function pageHtml(page, ogDim, mediaManifest, rendered, css) {
   const url = SITE.domain + page.canonical;
   const ogImage = SITE.domain + SITE.ogImage;
@@ -362,7 +372,7 @@ ${GTAG_HEAD}
 </head>
 <body>
 <div id="root">${rendered.html}</div>
-${scripts.map((s) => `<script defer src="${s}"></script>`).join('\n')}
+${afterPaintScripts(scripts)}
 </body>
 </html>
 `;
