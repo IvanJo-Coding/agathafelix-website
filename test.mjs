@@ -292,6 +292,18 @@ function landingPage() {
   }
   return { page, tel, wa, click };
 }
+test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip is no empty box', () => {
+  const html = read('dist/raporsekolah/index.html');
+  assert.match(html, /<title>Sampul Rapor &amp; Ijazah [^<]*<\/title>/);
+  assert.match(html, /<h1 [^>]*>Sampul Rapor &amp; Ijazah Custom Logo Sekolah /);
+  assert.match(html, /<summary>Bisa untuk map ijazah juga\?<\/summary>/);
+  // The build drops data-video for a clip that is not in the repo; CSS then shows a compact card.
+  for (const [card] of html.matchAll(/<a class="igvid"[^>]*>/g)) {
+    const clip = card.match(/data-video="([^"]+)"/);
+    if (clip) assert.ok(fs.existsSync(path.join('dist/raporsekolah', clip[1])), card);
+  }
+  assert.match(html, /\.igvid:not\(\[data-video\]\)\{display:flex\}/);
+});
 test('one phone click on the landing page sends one klik_telepon to GA4, with its button label', () => {
   const { page, tel, wa, click } = landingPage();
   const ga4 = page.AF_TRACKING.googleAnalyticsId;
