@@ -3,18 +3,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sampul Rapor &amp; Ijazah Custom Logo Sekolah dari Pabrik | Agatha Felix</title>
-<meta name="description" content="Pabrik sampul rapor &amp; ijazah custom logo sekolah di Bekasi. Minimal 50 pcs, ±Rp50.000/pcs untuk 100 pcs. Kirim foto contoh via WhatsApp, kami kirim harganya.">
+<meta name="description" content="Pabrik sampul rapor &amp; ijazah custom logo sekolah di Bekasi. Minimal 50 pcs, rata-rata Rp50.000/pcs untuk 100 pcs. Kirim foto contoh via WhatsApp, kami kirim harganya.">
 <meta name="theme-color" content="#FFF8EE">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <meta property="og:site_name" content="Agatha Felix">
 <meta property="og:title" content="Sampul Rapor &amp; Ijazah Custom Logo Sekolah — Langsung dari Pabrik">
-<meta property="og:description" content="Custom mulai 50 pcs. Sekitar Rp50.000/pcs untuk 100 pcs. Desain & mockup gratis.">
+<meta property="og:description" content="Custom mulai 50 pcs. Rata-rata Rp50.000/pcs untuk 100 pcs. Desain & mockup gratis.">
 <meta property="og:type" content="website"><meta property="og:locale" content="id_ID">
 <meta property="og:url" content="https://agatha-felix.com/raporsekolah/">
 <meta property="og:image" content="https://agatha-felix.com/raporsekolah/img/collection.webp">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Sampul Rapor &amp; Ijazah Custom Logo Sekolah — Langsung dari Pabrik">
-<meta name="twitter:description" content="Custom mulai 50 pcs. Sekitar Rp50.000/pcs untuk 100 pcs. Desain & mockup gratis.">
+<meta name="twitter:description" content="Custom mulai 50 pcs. Rata-rata Rp50.000/pcs untuk 100 pcs. Desain & mockup gratis.">
 <meta name="twitter:image" content="https://agatha-felix.com/raporsekolah/img/collection.webp">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://agatha-felix.com/raporsekolah/">
@@ -71,6 +71,7 @@ header .logo{display:flex;flex-shrink:0}
 .hero-cta .btn svg{width:22px;height:22px;flex:0 0 22px}
 .hero-cta .btn-lg{line-height:1.25;text-align:left}
 .cta-note{font-size:14px;color:var(--ink2);margin-top:12px;text-align:center}
+.cta-note u{text-decoration-color:var(--orange);text-decoration-thickness:2px;text-underline-offset:3px;color:var(--ink);font-weight:700}
 .cta-note strong{color:var(--ink)}
 .kirim{list-style:none;margin:18px 0 0;padding:14px 16px;max-width:520px;background:#fff;border:1px dashed var(--ink3);border-radius:16px;display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:14px;font-weight:600;color:var(--ink);line-height:1.45}
 .kirim .kirim-h{grid-column:1/-1;font-family:var(--fd);font-weight:800;font-size:15px;padding-left:0}
@@ -108,15 +109,12 @@ fieldset.f label:has(input:checked){border-color:var(--green)}
 .trust-n{font-family:var(--fd);font-weight:800;font-size:29px;color:var(--yellow);line-height:1}
 .trust-l{font-size:13px;color:rgba(255,255,255,.78);margin-top:4px}
 .clients{border-bottom:1px solid var(--line);background:var(--paper2);padding:18px 0}
-/* --- Client logos: a text pill by default, swapped for a logo image only once
-   that logo file is confirmed to load (see the upgrade script near the bottom).
-   Drop files into img/klien/ to light them up; a missing file is never broken. */
+/* --- Client logos: square WebP tiles (240 px, logo centred on white), in colour. */
 .clients-label{text-align:center;color:var(--ink3);font-weight:600;font-size:13.5px;margin-bottom:12px}
-.clients-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 14px;font-size:14px;font-weight:700;color:var(--ink)}
-.klien{display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:var(--pill);padding:7px 15px;line-height:1.2}
-.klien.has-logo{background:transparent;border-color:transparent;padding:0}
-.klien.has-logo img{height:42px;width:auto;max-width:150px;object-fit:contain;filter:grayscale(1);opacity:.72;transition:filter .18s,opacity .18s}
-.klien.has-logo:hover img{filter:none;opacity:1}
+.logos{list-style:none;margin:0 auto;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:820px}
+.logos li{width:96px;aspect-ratio:1;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.logos img{width:100%;height:100%;object-fit:contain;display:block}
+.clients-more{text-align:center;font-size:13.5px;color:var(--ink2);margin-top:14px}
 /* --- Instagram video testimonials -------------------------------------------
    The gradient placeholder is what renders until a real clip exists; the upgrade
    script injects <video> only after the MP4 has actually loaded. */
@@ -221,11 +219,11 @@ footer details p{color:rgba(255,255,255,.72)}
 .wabubble{position:fixed;right:20px;bottom:24px;z-index:65;width:60px;height:60px;border-radius:var(--pill);background:var(--wa);border:2px solid var(--ink);box-shadow:0 4px 0 var(--wa-deep);display:grid;place-items:center;color:#fff}
 .wabubble svg{width:30px;height:30px}
 @media (max-width:960px){.model{max-width:560px;justify-self:center}.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;grid-template-areas:"main" "photo" "more";gap:0;padding:38px 0 48px}.hero-photo{grid-template-columns:1fr 1fr;margin-top:24px}.models,.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}.trust-grid{grid-template-columns:1fr 1fr;gap:22px}}
-@media (max-width:700px){.sec{padding:42px 0}.igvid-grid{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.clients-row{gap:8px}.klien{font-size:12.5px;padding:6px 12px}.klien.has-logo img{height:34px}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}}
+@media (max-width:700px){.sec{padding:42px 0}.igvid-grid{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.logos{gap:8px}.logos li{width:calc((100% - 32px)/5);border-radius:12px}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}}
 /* 320px phones: the logo + WhatsApp button together still outrun the header. */
 @media (max-width:400px){header img{height:28px}.hdr-r .btn{font-size:13.5px;padding:9px 12px}header .wrap{gap:10px}}
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://agatha-felix.com/#organization","name":"Agatha Felix Stationery","description":"Pabrik sampul rapor custom logo sekolah dan map plastik custom.","telephone":"+6282219472613","url":"https://agatha-felix.com/","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","sameAs":["https://www.instagram.com/agathafelix_indonesia/"],"hasMap":"https://maps.app.goo.gl/GA1jHXYczEmmMN136","address":{"@type":"PostalAddress","streetAddress":"Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya","addressLocality":"Bekasi Timur","addressRegion":"Jawa Barat","postalCode":"17112","addressCountry":"ID"},"areaServed":["Jakarta","Bogor","Depok","Tangerang","Bekasi","Indonesia"],"openingHours":"Mo-Sa 08:00-17:00","priceRange":"$$"},{"@type":"Service","name":"Sampul Rapor & Ijazah Custom Logo Sekolah","description":"Custom mulai 50 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan teknik cetak.","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","serviceType":"Pembuatan sampul rapor, map ijazah, dan map custom","provider":{"@id":"https://agatha-felix.com/#organization"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Minimum ordernya berapa?","acceptedAnswer":{"@type":"Answer","text":"Minimal 50 pcs. Makin banyak makin ekonomis, jadi kami sarankan 100 pcs."}},{"@type":"Question","name":"Bisa untuk map ijazah juga?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Map ijazah kami buat dengan model jahit atau press, logo di-poly atau di-hot print emas atau silver, minimal 50 pcs per desain. Kirim foto map ijazah yang sekarang dipakai atau logo sekolah lewat WhatsApp, kami balas dengan harga per pcs."}},{"@type":"Question","name":"Saya tidak tahu nama bahan atau tekniknya. Bisa?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kirim saja foto map contoh, tampak luar dan dalam, lewat WhatsApp. Tim kami yang mencocokkan bahan dan teknik cetaknya dari foto, lalu mengirim harga per pcs sesuai jumlah Anda. Bila perlu, kami minta foto tambahan atau sampel fisiknya."}},{"@type":"Question","name":"Bisa untuk bimbel atau lembaga kursus?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kami juga membuat map, clear holder, dan zipper bag berlogo untuk bimbel dan lembaga kursus, dengan minimal pesan yang sama: 50 pcs per desain."}},{"@type":"Question","name":"Harga per pcs-nya berapa?","acceptedAnswer":{"@type":"Answer","text":"Untuk pesanan 100 pcs, perkiraannya sekitar Rp50.000/pcs. Harga akhir mengikuti model (jahit atau press), ketebalan bahan, dan teknik cetak. Pesanan di bawah 100 pcs memiliki biaya satuan lebih tinggi. Chat WhatsApp sambil menyebutkan jumlah kebutuhan untuk mendapatkan penawaran."}},{"@type":"Question","name":"Desain dan mockup benar-benar gratis?","acceptedAnswer":{"@type":"Answer","text":"Ya. Kirim logo sekolah, kami buatkan tata letak sampulnya dan revisi sampai Anda setuju — tanpa biaya dan tanpa kewajiban lanjut order. Untuk sekolah di Jabodetabek kami juga bisa kirim sampel fisik agar Anda cek langsung kualitas jahitan dan hasil cetaknya."}},{"@type":"Question","name":"Berapa lama produksinya?","acceptedAnswer":{"@type":"Answer","text":"5–14 hari kerja dihitung setelah desain di-ACC dan DP masuk. Kalau tanggal pembagian rapor Anda mepet, sebutkan di awal supaya kami atur prioritas slot produksi."}},{"@type":"Question","name":"Bisa untuk sekolah negeri dengan PO dan invoice?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kami melayani pesanan dengan surat pesanan (PO) resmi, invoice, dan kwitansi bermaterai sesuai kebutuhan administrasi sekolah. Sampaikan kebutuhan dokumennya saat konsultasi."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","@id":"https://agatha-felix.com/#organization","name":"Agatha Felix Stationery","description":"Pabrik sampul rapor custom logo sekolah dan map plastik custom.","telephone":"+6282219472613","url":"https://agatha-felix.com/","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","sameAs":["https://www.instagram.com/agathafelix_indonesia/"],"hasMap":"https://maps.app.goo.gl/GA1jHXYczEmmMN136","address":{"@type":"PostalAddress","streetAddress":"Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya","addressLocality":"Bekasi Timur","addressRegion":"Jawa Barat","postalCode":"17112","addressCountry":"ID"},"areaServed":["Jakarta","Bogor","Depok","Tangerang","Bekasi","Indonesia"],"openingHours":"Mo-Sa 08:00-17:00","priceRange":"$$"},{"@type":"Service","name":"Sampul Rapor & Ijazah Custom Logo Sekolah","description":"Custom mulai 50 pcs. Disarankan 100 pcs agar lebih ekonomis, dengan rata-rata sekitar Rp50.000/pcs untuk sampul rapor maupun map ijazah, sesuai model, bahan, dan teknik cetak.","image":"https://agatha-felix.com/raporsekolah/img/collection.webp","serviceType":"Pembuatan sampul rapor, map ijazah, dan map custom","provider":{"@id":"https://agatha-felix.com/#organization"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Minimum ordernya berapa?","acceptedAnswer":{"@type":"Answer","text":"Minimal 50 pcs. Makin banyak makin ekonomis, jadi kami sarankan 100 pcs."}},{"@type":"Question","name":"Bisa untuk map ijazah juga?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Map ijazah kami buat dengan model jahit atau press, logo di-poly atau di-hot print emas atau silver, minimal 50 pcs per desain. Untuk 100 pcs, harganya rata-rata sekitar Rp50.000/pcs, sama seperti sampul rapor. Kirim foto map ijazah yang sekarang dipakai atau logo sekolah lewat WhatsApp, kami balas dengan harga per pcs."}},{"@type":"Question","name":"Saya tidak tahu nama bahan atau tekniknya. Bisa?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kirim saja foto map contoh, tampak luar dan dalam, lewat WhatsApp. Tim kami yang mencocokkan bahan dan teknik cetaknya dari foto, lalu mengirim harga per pcs sesuai jumlah Anda. Bila perlu, kami minta foto tambahan atau sampel fisiknya."}},{"@type":"Question","name":"Bisa untuk bimbel atau lembaga kursus?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kami juga membuat map, clear holder, dan zipper bag berlogo untuk bimbel dan lembaga kursus, dengan minimal pesan yang sama: 50 pcs per desain."}},{"@type":"Question","name":"Harga per pcs-nya berapa?","acceptedAnswer":{"@type":"Answer","text":"Untuk pesanan 100 pcs, rata-rata sekitar Rp50.000/pcs, baik sampul rapor maupun map ijazah. Harga akhir mengikuti model (jahit atau press), ketebalan bahan, dan teknik cetak. Pesanan di bawah 100 pcs memiliki biaya satuan lebih tinggi. Chat WhatsApp sambil menyebutkan jumlah kebutuhan untuk mendapatkan penawaran."}},{"@type":"Question","name":"Desain dan mockup benar-benar gratis?","acceptedAnswer":{"@type":"Answer","text":"Ya. Kirim logo sekolah, kami buatkan tata letak sampulnya dan revisi sampai Anda setuju — tanpa biaya dan tanpa kewajiban lanjut order. Untuk sekolah di Jabodetabek kami juga bisa kirim sampel fisik agar Anda cek langsung kualitas jahitan dan hasil cetaknya."}},{"@type":"Question","name":"Berapa lama produksinya?","acceptedAnswer":{"@type":"Answer","text":"5–14 hari kerja dihitung setelah desain di-ACC dan DP masuk. Kalau tanggal pembagian rapor Anda mepet, sebutkan di awal supaya kami atur prioritas slot produksi."}},{"@type":"Question","name":"Bisa untuk sekolah negeri dengan PO dan invoice?","acceptedAnswer":{"@type":"Answer","text":"Bisa. Kami melayani pesanan dengan surat pesanan (PO) resmi, invoice, dan kwitansi bermaterai sesuai kebutuhan administrasi sekolah. Sampaikan kebutuhan dokumennya saat konsultasi."}}]}]}</script>
 </head>
 <body>
 
@@ -244,7 +242,7 @@ footer details p{color:rgba(255,255,255,.72)}
 <p class="hero-sub">Sudah punya contoh sampul rapor atau ijazah? Kirim fotonya lewat WhatsApp beserta jumlah dan tanggal dibutuhkan, kami balas dengan harga per pcs. Tidak perlu tahu nama bahan atau teknik cetaknya.</p>
 <div class="hero-cta">
 <a class="btn btn-wa btn-lg" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="hero"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Kirim Contoh &amp; Minta Harga via WhatsApp</a>
-<p class="cta-note"><strong>Minimal 50 pcs</strong> per desain · ±Rp50rb/pcs untuk 100 pcs · dibalas &lt; 1 jam di jam kerja</p>
+<p class="cta-note"><strong>Minimal 50 pcs</strong> per desain · <u>rata-rata Rp50rb/pcs</u> untuk 100 pcs · dibalas &lt; 1 jam di jam kerja</p>
 </div>
 </div>
 <div class="hero-photo">
@@ -262,7 +260,7 @@ footer details p{color:rgba(255,255,255,.72)}
 </ul>
 <p class="kirim-alt">Belum punya contoh? Kirim logo sekolah saja, atau <a href="#leadForm">isi form singkat</a>.</p>
 <div class="pricebar">
-<div><strong>±Rp 50rb</strong><span>/ pcs untuk 100 pcs</span></div>
+<div><strong>±Rp 50rb</strong><span>rata-rata / pcs untuk 100 pcs</span></div>
 <div><strong>50 pcs</strong><span>minimal pesan</span></div>
 <div><strong>Gratis</strong><span>desain &amp; mockup</span></div>
 </div>
@@ -282,16 +280,24 @@ footer details p{color:rgba(255,255,255,.72)}
 
 <div class="clients"><div class="wrap">
 <p class="clients-label">Sudah dipercaya sekolah, lembaga kursus, dan instansi</p>
-<div class="clients-row">
-<span class="klien" data-logo="img/klien/bpk-penabur.png">BPK Penabur</span>
-<span class="klien" data-logo="img/klien/al-azhar-kelapa-gading.png">Al-Azhar Kelapa Gading</span>
-<span class="klien" data-logo="img/klien/sph-lippo-cikarang.png">SPH Lippo Cikarang</span>
-<span class="klien" data-logo="img/klien/sekolah-alam-cikeas.png">Sekolah Alam Cikeas</span>
-<span class="klien" data-logo="img/klien/sdi-al-masnuniyah.png">SDI Al Masnuniyah</span>
-<span class="klien" data-logo="img/klien/bimbel-nurul-fikri.png">Bimbel Nurul Fikri</span>
-<span class="klien" data-logo="img/klien/robotics-education-center.png">Robotics Education Center</span>
-<span class="klien" data-logo="img/klien/badan-pertanahan-nasional.png">Badan Pertanahan Nasional</span>
-</div></div></div>
+<ul class="logos">
+<li><img src="img/klien/bpk-penabur.webp" width="240" height="240" loading="lazy" decoding="async" alt="BPK Penabur" title="BPK Penabur"></li>
+<li><img src="img/klien/al-azhar.webp" width="240" height="240" loading="lazy" decoding="async" alt="Al-Azhar Kelapa Gading (YPI Al Azhar)" title="Al-Azhar Kelapa Gading (YPI Al Azhar)"></li>
+<li><img src="img/klien/sekolah-santa-ursula-jakarta.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Santa Ursula Jakarta" title="Sekolah Santa Ursula Jakarta"></li>
+<li><img src="img/klien/sekolah-bunda-mulia.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Bunda Mulia" title="Sekolah Bunda Mulia"></li>
+<li><img src="img/klien/sekolah-dian-harapan.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Dian Harapan" title="Sekolah Dian Harapan"></li>
+<li><img src="img/klien/sekolah-harapan-bangsa.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Harapan Bangsa" title="Sekolah Harapan Bangsa"></li>
+<li><img src="img/klien/sekolah-methodist.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Methodist" title="Sekolah Methodist"></li>
+<li><img src="img/klien/sekolah-ora-et-labora.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Kristen Ora et Labora" title="Sekolah Kristen Ora et Labora"></li>
+<li><img src="img/klien/royal-wells-school.webp" width="240" height="240" loading="lazy" decoding="async" alt="Royal Wells School" title="Royal Wells School"></li>
+<li><img src="img/klien/sekolah-kak-seto.webp" width="240" height="240" loading="lazy" decoding="async" alt="Sekolah Kak Seto" title="Sekolah Kak Seto"></li>
+<li><img src="img/klien/yayasan-global-persada-mandiri.webp" width="240" height="240" loading="lazy" decoding="async" alt="Yayasan Global Persada Mandiri, Kota Bekasi" title="Yayasan Global Persada Mandiri, Kota Bekasi"></li>
+<li><img src="img/klien/bimbel-nurul-fikri.webp" width="240" height="240" loading="lazy" decoding="async" alt="Bimbel Nurul Fikri" title="Bimbel Nurul Fikri"></li>
+<li><img src="img/klien/robotics-education-centre.webp" width="240" height="240" loading="lazy" decoding="async" alt="Robotics Education Centre" title="Robotics Education Centre"></li>
+<li><img src="img/klien/badan-pertanahan-nasional.webp" width="240" height="240" loading="lazy" decoding="async" alt="Badan Pertanahan Nasional" title="Badan Pertanahan Nasional"></li>
+</ul>
+<p class="clients-more">Juga SPH Lippo Cikarang, Sekolah Alam Cikeas, dan SDI Al Masnuniyah.</p>
+</div></div>
 
 <section class="sec form-sec"><div class="wrap">
 <!-- Optional route. No phone field: the reply goes to the WhatsApp the visitor sends from. -->
@@ -368,8 +374,8 @@ Lanjut ke WhatsApp</button>
 </div>
 </div>
 <div class="soft harga">
-<div class="harga-n"><div>Perkiraan untuk 100 pcs</div><strong>±Rp 50rb</strong><div>per pcs, sesuai spesifikasi</div></div>
-<div><h3>Pesan 100 pcs agar lebih ekonomis</h3><p style="font-size:15px;margin-top:6px">Minimal pesan 50 pcs. Untuk 100 pcs, perkiraannya sekitar Rp50.000/pcs. Harga akhir mengikuti model, bahan, dan teknik cetak.</p></div>
+<div class="harga-n"><div>Rata-rata untuk 100 pcs</div><strong>±Rp 50rb</strong><div>per pcs, sesuai spesifikasi</div></div>
+<div><h3>Pesan 100 pcs agar lebih ekonomis</h3><p style="font-size:15px;margin-top:6px">Minimal pesan 50 pcs. Untuk 100 pcs, rata-rata sekitar Rp50.000/pcs, baik sampul rapor maupun map ijazah. Harga akhir mengikuti model, bahan, dan teknik cetak.</p></div>
 <a class="btn btn-wa" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="model">Minta Harga per Pcs</a>
 </div>
 </div></section>
@@ -418,7 +424,7 @@ Lanjut ke WhatsApp</button>
 <figure><img loading="lazy" decoding="async" src="img/jahit-red-800.webp" srcset="img/jahit-red-480.webp 480w, img/jahit-red-800.webp 800w, img/jahit-red.webp 887w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul rapor jahit maroon SMAK 1 Penabur Jakarta"><figcaption>SMAK 1 Penabur Jakarta<b>Jahit, logo emas + sudut logam</b></figcaption></figure>
 <figure><img loading="lazy" decoding="async" src="img/clearholder-480.webp" srcset="img/clearholder-480.webp 480w, img/clearholder.webp 778w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Clear holder custom kuning SMPK 3 Penabur Jakarta"><figcaption>SMPK 3 Penabur Jakarta<b>Clear holder custom sekolah</b></figcaption></figure>
 <figure><img loading="lazy" decoding="async" src="/assets/portfolio/rapor-press-bekasi-480.webp" srcset="/assets/portfolio/rapor-press-bekasi-480.webp 480w, /assets/portfolio/rapor-press-bekasi.webp 600w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Map rapor press hitam Dokumen Hasil Evaluasi Belajar Siswa SMP Negeri 5 Kota Bekasi"><figcaption>SMP Negeri 5 Kota Bekasi<b>Map rapor press · sekolah negeri</b></figcaption></figure>
-<figure><img loading="lazy" decoding="async" src="/assets/portfolio/zipperbag-robotics-480.webp" srcset="/assets/portfolio/zipperbag-robotics-480.webp 480w, /assets/portfolio/zipperbag-robotics-800.webp 800w, /assets/portfolio/zipperbag-robotics.webp 1000w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Zipper bag jaring bertali dengan logo Robotics Education Center"><figcaption>Robotics Education Center<b>Zipper bag + tali · lembaga kursus</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="/assets/portfolio/zipperbag-robotics-480.webp" srcset="/assets/portfolio/zipperbag-robotics-480.webp 480w, /assets/portfolio/zipperbag-robotics-800.webp 800w, /assets/portfolio/zipperbag-robotics.webp 1000w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Zipper bag jaring bertali dengan logo Robotics Education Centre"><figcaption>Robotics Education Centre<b>Zipper bag + tali · lembaga kursus</b></figcaption></figure>
 </div>
 </div></section>
 
@@ -454,10 +460,10 @@ Lanjut ke WhatsApp</button>
 <h2 style="margin-top:10px;text-align:center">Yang Paling Sering Ditanyakan</h2>
 <div class="faq">
 <details open><summary>Minimum ordernya berapa?</summary><p>Minimal 50 pcs. Makin banyak makin ekonomis, jadi kami sarankan 100 pcs.</p></details>
-<details><summary>Bisa untuk map ijazah juga?</summary><p>Bisa. Map ijazah kami buat dengan model jahit atau press, logo di-poly atau di-hot print emas atau silver, minimal 50 pcs per desain. Kirim foto map ijazah yang sekarang dipakai atau logo sekolah lewat WhatsApp, kami balas dengan harga per pcs.</p></details>
+<details><summary>Bisa untuk map ijazah juga?</summary><p>Bisa. Map ijazah kami buat dengan model jahit atau press, logo di-poly atau di-hot print emas atau silver, minimal 50 pcs per desain. Untuk 100 pcs, harganya rata-rata sekitar Rp50.000/pcs, sama seperti sampul rapor. Kirim foto map ijazah yang sekarang dipakai atau logo sekolah lewat WhatsApp, kami balas dengan harga per pcs.</p></details>
 <details><summary>Saya tidak tahu nama bahan atau tekniknya. Bisa?</summary><p>Bisa. Kirim saja foto map contoh, tampak luar dan dalam, lewat WhatsApp. Tim kami yang mencocokkan bahan dan teknik cetaknya dari foto, lalu mengirim harga per pcs sesuai jumlah Anda. Bila perlu, kami minta foto tambahan atau sampel fisiknya.</p></details>
 <details><summary>Bisa untuk bimbel atau lembaga kursus?</summary><p>Bisa. Kami juga membuat map, clear holder, dan zipper bag berlogo untuk bimbel dan lembaga kursus, dengan minimal pesan yang sama: 50 pcs per desain.</p></details>
-<details><summary>Harga per pcs-nya berapa?</summary><p>Untuk pesanan 100 pcs, perkiraannya sekitar Rp50.000/pcs. Harga akhir mengikuti model (jahit atau press), ketebalan bahan, dan teknik cetak. Pesanan di bawah 100 pcs memiliki biaya satuan lebih tinggi. Chat WhatsApp sambil menyebutkan jumlah kebutuhan untuk mendapatkan penawaran.</p></details>
+<details><summary>Harga per pcs-nya berapa?</summary><p>Untuk pesanan 100 pcs, rata-rata sekitar Rp50.000/pcs, baik sampul rapor maupun map ijazah. Harga akhir mengikuti model (jahit atau press), ketebalan bahan, dan teknik cetak. Pesanan di bawah 100 pcs memiliki biaya satuan lebih tinggi. Chat WhatsApp sambil menyebutkan jumlah kebutuhan untuk mendapatkan penawaran.</p></details>
 <details><summary>Desain dan mockup benar-benar gratis?</summary><p>Ya. Kirim logo sekolah, kami buatkan tata letak sampulnya dan revisi sampai Anda setuju — tanpa biaya dan tanpa kewajiban lanjut order. Untuk sekolah di Jabodetabek kami juga bisa kirim sampel fisik agar Anda cek langsung kualitas jahitan dan hasil cetaknya.</p></details>
 <details><summary>Berapa lama produksinya?</summary><p>5–14 hari kerja dihitung setelah desain di-ACC dan DP masuk. Kalau tanggal pembagian rapor Anda mepet, sebutkan di awal supaya kami atur prioritas slot produksi.</p></details>
 <details><summary>Bisa untuk sekolah negeri dengan PO dan invoice?</summary><p>Bisa. Kami melayani pesanan dengan surat pesanan (PO) resmi, invoice, dan kwitansi bermaterai sesuai kebutuhan administrasi sekolah. Sampaikan kebutuhan dokumennya saat konsultasi.</p></details>
@@ -531,19 +537,8 @@ var modal=document.getElementById('vidModal');
 function playsHere(a){return !!(modal&&modal.showModal&&a.getAttribute('data-video'))}
 document.querySelectorAll('[data-ig]').forEach(function(a){a.addEventListener('click',function(){if(!playsHere(a)&&typeof gtag==='function')gtag('event','klik_instagram')})});
 
-/* Progressive media upgrade. Both of these probe a file before touching the DOM,
-   so a logo or clip that has not been added yet simply leaves the placeholder in
-   place instead of rendering a broken image or an empty black video box. */
-document.querySelectorAll('.klien[data-logo]').forEach(function(el){
-  var probe=new Image();
-  probe.onload=function(){
-    var img=document.createElement('img');
-    img.src=probe.src;img.alt=el.textContent.trim();img.loading='lazy';
-    el.textContent='';el.appendChild(img);el.classList.add('has-logo');
-  };
-  probe.src=el.dataset.logo;
-});
-
+/* Progressive media upgrade: a clip is probed before it touches the DOM, so one
+   that has not been added yet leaves the card as it is, never an empty black box. */
 document.querySelectorAll('.igvid[data-video]').forEach(function(card){
   var v=document.createElement('video');
   v.muted=true;v.loop=true;v.playsInline=true;v.preload='metadata';

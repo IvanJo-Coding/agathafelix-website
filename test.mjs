@@ -310,6 +310,18 @@ test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip
   }
   assert.match(html, /\.igvid:not\(\[data-video\]\)\{display:flex\}/);
 });
+test('client logos are square 240 px tiles, light, and all present', async () => {
+  const sharp = (await import('sharp')).default;
+  const html = read('dist/raporsekolah/index.html');
+  const logos = [...html.matchAll(/<li><img src="(img\/klien\/[\w-]+\.webp)" width="240" height="240" loading="lazy" decoding="async" alt="([^"]+)"/g)];
+  assert.ok(logos.length >= 10, 'the client row shows the logos');
+  for (const [, src, alt] of logos) {
+    const file = path.join('dist/raporsekolah', src);
+    const { width, height } = await sharp(file).metadata();
+    assert.deepEqual([width, height], [240, 240], alt);
+    assert.ok(fs.statSync(file).size < 20e3, alt + ' logo is too heavy');
+  }
+});
 test('the landing photos follow the CTA on a phone, and the form follows the client list', () => {
   const html = read('dist/raporsekolah/index.html');
   const at = (marker) => html.indexOf(marker);
