@@ -6,11 +6,21 @@ const wrapPC = (extra = {}) => ({
   padding: '72px var(--container-pad)', ...extra,
 });
 
-// Hero WhatsApp message: a checklist of what a quote needs, so a buyer with a
-// sample can ask without knowing material or finishing terms.
-const CONTOH_WA = 'Halo Agatha Felix! Saya mau minta harga map / rapor custom.\n\n' +
-  'Saya kirim foto contoh produk yang kami mau (tampak luar & dalam) di chat ini.\n' +
-  '- Produk: ...\n- Jumlah: ... pcs (minimal 50)\n- Dibutuhkan tanggal: ...\n- Kota pengiriman: ...\n- Sekolah/instansi: ...';
+// Hero WhatsApp message: a checklist of what a quote needs, so a buyer can ask
+// without knowing material or finishing terms. A sample photo is optional: the
+// message must not say one was sent when the buyer has none.
+const CONTOH_WA = 'Halo Agatha Felix! Saya mau minta harga dan mockup map / rapor custom.\n\n' +
+  '- Produk: ...\n- Jumlah: ... pcs (minimal 50)\n- Dibutuhkan tanggal: ...\n- Kota pengiriman: ...\n- Sekolah/instansi: ...\n\n' +
+  'Kalau ada, saya kirim foto contohnya (tampak luar & dalam) di chat ini. Kalau belum ada, mohon dibantu pilih modelnya.';
+
+// Clients whose logos the /raporsekolah/ landing page already shows (files from
+// the owner, 2026-10-07): proof right under the hero, before the long simulator.
+const KLIEN_LOGO = [
+  ['bpk-penabur', 'BPK Penabur'], ['al-azhar', 'Al-Azhar Kelapa Gading (YPI Al Azhar)'],
+  ['sekolah-alam-cikeas', 'Sekolah Alam Cikeas'], ['sekolah-santa-ursula-jakarta', 'Sekolah Santa Ursula Jakarta'],
+  ['sekolah-bunda-mulia', 'Sekolah Bunda Mulia'], ['sekolah-dian-harapan', 'Sekolah Dian Harapan'],
+  ['bimbel-nurul-fikri', 'Bimbel Nurul Fikri'], ['robotics-education-centre', 'Robotics Education Centre'],
+];
 
 // Visible FAQ. build.mjs (CUSTOM_FAQ_ITEMS) publishes the same text as FAQPage
 // structured data, and test.mjs checks the two stay identical.
@@ -38,6 +48,16 @@ const PC_CSS_ID = 'af-produk-custom';
     .af-pc-steps h3 { font-size: 1.1rem !important; margin: 2px 0 4px !important; }
     .af-pc-hero-cta { width: 100%; max-width: 360px; }
     .af-pc-hero-cta .af-btn { flex: 1 1 100%; white-space: normal !important; padding-left: 20px !important; padding-right: 20px !important; line-height: 1.3; }
+  }
+  /* Base rules first, so the phone rules below win. */
+  .af-pc-klien { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 4px; }
+  .af-pc-klien > span { font-size: .8rem; font-weight: 700; color: var(--text-muted); }
+  .af-pc-klien ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .af-pc-klien li { width: 60px; height: 60px; background: #fff; border: 1px solid var(--af-line); border-radius: 12px; overflow: hidden; }
+  .af-pc-klien img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  @media (max-width: 680px) {
+    .af-pc-klien ul { gap: 6px; max-width: 250px; }
+    .af-pc-klien li { width: 56px; height: 56px; }
   }`;
   document.head.appendChild(tag);
 })();
@@ -65,14 +85,25 @@ function ProdukCustomPage() {
               <strong style={{ color: 'var(--af-ink)' }}>Minimal 50 pcs</strong> per desain · sekitar Rp50.000/pcs untuk 100 pcs, sesuai model, bahan, dan cetak
             </p>
             <div className="af-pc-hero-cta" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <Button color="wa" size="lg" href={window.waLink(CONTOH_WA)} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Kirim Contoh &amp; Minta Harga via WhatsApp</Button>
+              <Button color="wa" size="lg" data-wa="hero" href={window.waLink(CONTOH_WA)} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Minta Harga &amp; Mockup Gratis</Button>
               <Button variant="ghost" size="lg" href="#produk-custom">Lihat Pilihan Produk ↓</Button>
             </div>
+            <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-body)' }}>
+              Belum punya contoh? Kami bantu pilih model.
+            </p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>
               <Chip color="green">Bimbel &amp; Les</Chip>
               <Chip color="blue">Universitas</Chip>
               <Chip color="orange">Notaris · Lawyer · Korporat</Chip>
+            </div>
+            <div className="af-pc-klien">
+              <span>Dipercaya sekolah &amp; lembaga, antara lain:</span>
+              <ul>
+                {KLIEN_LOGO.map(([slug, name]) => (
+                  <li key={slug}><img src={'/raporsekolah/img/klien/' + slug + '.webp'} width="240" height="240" alt={name} title={name} loading="lazy" decoding="async" /></li>
+                ))}
+              </ul>
             </div>
           </div>
           <window.Wave fill="var(--af-yellow-tint)" />
@@ -80,9 +111,10 @@ function ProdukCustomPage() {
 
         <window.CustomProdukSection />
 
-        <window.SimulatorRapor />
-
+        {/* Real orders before the long simulator, so proof comes early. */}
         <window.PortfolioCustom />
+
+        <window.SimulatorRapor />
 
         {/* professionals */}
         <section id="profesional" style={{ background: 'var(--af-ink)', position: 'relative' }}>
@@ -94,7 +126,7 @@ function ProdukCustomPage() {
                 overflow: 'hidden', transform: 'rotate(-1.2deg)', boxShadow: '0 8px 0 rgba(0,0,0,.35)',
               }}
             >
-              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" loading="lazy" decoding="async" style={{ width: '100%', display: 'block' }} />
+              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" width="1080" height="1080" loading="lazy" decoding="async" style={{ width: '100%', height: 'auto', display: 'block' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
               <Badge color="yellow" dot>Untuk yang Serius-Serius</Badge>
@@ -118,7 +150,7 @@ function ProdukCustomPage() {
                 ))}
               </ul>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya tertarik dengan lini executive (document keeper foil emas).')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Lini Executive</Button>
+                <Button color="wa" size="lg" data-wa="executive" href={window.waLink('Halo Agatha Felix! Saya tertarik dengan lini executive (document keeper foil emas).')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Lini Executive</Button>
                 <Button variant="ghost" size="lg" href="#custom-map-executive" style={{ color: '#fff', borderColor: '#fff' }}>Lihat Pilihan Map Executive</Button>
               </div>
             </div>
@@ -157,12 +189,12 @@ function ProdukCustomPage() {
         <section style={{ background: 'var(--af-purple)', position: 'relative', overflow: 'hidden' }}>
           <window.ConfettiV2 />
           <div style={wrapPC({ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 })}>
-            <img src="../../assets/logo-mark-white.png" alt="" style={{ height: 56 }} />
+            <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 56, width: 'auto' }} />
             <h2 style={{ fontSize: 'var(--text-xl)', color: '#fff', maxWidth: 560 }}>Siap Bikin yang Versi Kamu?</h2>
             <p style={{ margin: 0, color: 'rgba(255,255,255,.9)', fontSize: '0.95rem', maxWidth: 440 }}>
               Kirim logo dan ceritamu — penawaran &amp; mockup gratis, tanpa komitmen.
             </p>
-            <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau mulai pesan map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Mulai dari WhatsApp</Button>
+            <Button color="wa" size="lg" data-wa="penutup" href={window.waLink('Halo Agatha Felix! Saya mau mulai pesan map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Mulai dari WhatsApp</Button>
           </div>
         </section>
       </main>

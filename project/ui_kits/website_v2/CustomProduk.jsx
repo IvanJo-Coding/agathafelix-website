@@ -135,13 +135,16 @@ const F = {
 
 const MAP_ISI = [F.innerTipe, F.innerJumlah, F.punggung, F.jendela, F.kantong, F.karton, F.busa];
 const FILE_LOGO = 'Logo dan desain sampul saya kirim di chat ini untuk dibuatkan mockup.';
+// Average for rapor and ijazah maps at 100 pcs (owner, 2026-10-07). Only those two
+// products show it; the others explain how the price is worked out instead.
+const KISARAN_RAPOR = 'Rp50.000';
 
 const CUSTOM_PRODUK = [
   {
     slug: 'map-jahit', name: 'Map Jahit', color: 'purple', fixed: { konstruksi: 'jahit' }, dasarKey: 'ukuran',
     desc: 'Tepi sampul dijahit rapi, logo di-poly. Pilihan favorit untuk rapor dan ijazah sekolah.',
     fields: [F.ukuran, F.bahan, F.warnaSampul, F.benang, F.poly, F.siku, ...MAP_ISI],
-    fileNote: FILE_LOGO, simulator: true,
+    fileNote: FILE_LOGO, simulator: true, kisaran100: KISARAN_RAPOR,
     photos: [
       [RI + 'jahit-hero.webp', 'Map jahit abu-abu SMAK 6 Penabur Jakarta dengan logo poly emas'],
       [RI + 'jahit-navy.webp', 'Map jahit navy SMAK 5 Penabur Jakarta dengan siku besi'],
@@ -154,7 +157,7 @@ const CUSTOM_PRODUK = [
     slug: 'map-press', name: 'Map Press', color: 'orange', fixed: { konstruksi: 'press' }, dasarKey: 'ukuran',
     desc: 'Sampul di-press rapat tanpa jahitan, logo dan tulisan di-poly. Tampilan resmi dan rapi.',
     fields: [F.ukuran, F.bahan, F.warnaSampul, F.poly, F.siku, ...MAP_ISI],
-    fileNote: FILE_LOGO, simulator: true,
+    fileNote: FILE_LOGO, simulator: true, kisaran100: KISARAN_RAPOR,
     photos: [
       [RI + 'press-hero.webp', 'Map press navy SMAK Penabur Kota Tangerang dengan poly emas'],
       [RI + 'almasnuniyah.webp', 'Map press hijau tua SDI Al Masnuniyah dengan poly emas'],
@@ -271,6 +274,30 @@ function pesanCustom(p, raw, jumlah, warnaCount, info = {}) {
   if (info.kota && info.kota.trim()) lines.push('Kota pengiriman: ' + info.kota.trim());
   if (info.waktu) lines.push('Dibutuhkan: ' + info.waktu);
   lines.push('', p.fileNote);
+  return lines.join('\n');
+}
+
+// The quick path ("Bantu pilihkan spesifikasi") for a buyer who does not know
+// materials or finishes yet. Only what they picked themselves goes in, never a
+// default presented as their choice, and the rest is left to us.
+function pesanBantu(p, raw, jumlah, warnaCount, info = {}) {
+  const sel = customSel(p, raw);
+  const lines = ['Halo Agatha Felix! Saya mau minta penawaran *' + p.name + '*.', '',
+    'Saya belum tahu bahan dan finishing-nya. Mohon dibantu pilihkan spesifikasi yang cocok, lalu kirim mockup dan harganya.'];
+  const picked = [];
+  for (const f of visibleFields(p, sel)) {
+    const own = raw[f.id];
+    if (own === undefined || (typeof own === 'string' && !own.trim())) continue;
+    if (f.group === 'tambahan' && sel[f.id] === 'tanpa') continue;
+    const v = describeField(f, sel);
+    if (v) picked.push('- ' + f.label + ': ' + v);
+  }
+  if (picked.length) lines.push('', 'Yang sudah saya pilih:', ...picked);
+  lines.push('', 'Jumlah: ' + jumlah + ' pcs' + (warnaCount > 1 ? ' (' + warnaCount + ' warna, minimal 50 pcs per warna)' : ''));
+  if (info.sekolah && info.sekolah.trim()) lines.push('Sekolah / instansi: ' + info.sekolah.trim());
+  if (info.kota && info.kota.trim()) lines.push('Kota pengiriman: ' + info.kota.trim());
+  if (info.waktu) lines.push('Dibutuhkan: ' + info.waktu);
+  lines.push('', 'Kalau ada, saya kirim foto contoh atau logo di chat ini.');
   return lines.join('\n');
 }
 
@@ -494,8 +521,25 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
   const [jumlah, setJumlah] = React.useState(100);
   const [info, setInfo] = React.useState({ sekolah: '', kota: '', waktu: '' });
   const [slide, setSlide] = React.useState(0);
+  // Quick path: the buyer leaves bahan, finishing and isi to us. Their picks
+  // stay in raw, so switching back to the detail path loses nothing.
+  const [bantu, setBantu] = React.useState(false);
+  const started = React.useRef(false);
 
-  React.useEffect(() => { setRaw({}); setSlide(0); }, [p.slug]);
+  React.useEffect(() => { setRaw({}); setSlide(0); setBantu(false); started.current = false; }, [p.slug]);
+
+  // quote_start, once per product shown: the first step toward a quote.
+  function mulai(mode) {
+    if (started.current) return;
+    started.current = true;
+    if (window.AFTracking && window.AFTracking.noteStep) window.AFTracking.noteStep('quote_start', { product_id: p.slug, quote_mode: mode || (bantu ? 'bantu' : 'detail') });
+  }
+  function pilihMode(cepat) {
+    setBantu(cepat);
+    mulai(cepat ? 'bantu' : 'detail');
+  }
+  function ubahJumlah(n) { mulai(); setJumlah(n); }
+  function ubahInfo(next) { mulai(); setInfo(next); }
 
   const sel = customSel(p, raw);
   const imgs = galleryCustom(p, sel);
@@ -503,6 +547,7 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
   const est = perkiraanCustom(p, raw, jumlah, window.HARGA_CUSTOM);
 
   function pick(f, op) {
+    mulai();
     let next;
     if (f.type === 'multi') {
       const cur = sel[f.id] || [];
@@ -517,6 +562,7 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
     setSlide(at >= 0 ? at : Math.min(slide, g.length - 1));
   }
   function setWarna(n) {
+    mulai();
     const v = Math.max(1, Math.min(MAX_WARNA, n));
     setWarnaCount(v);
     if (jumlah < MOQ_PER_WARNA * v) setJumlah(MOQ_PER_WARNA * v);
@@ -525,14 +571,14 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
   const fields = visibleFields(p, sel);
   const byGroup = (g) => fields.filter((f) => f.group === g);
   const lanjutan = byGroup('lanjutan');
-  const waText = pesanCustom(p, raw, Math.max(jumlah, minJumlah), warnaCount, info);
+  const waText = (bantu ? pesanBantu : pesanCustom)(p, raw, Math.max(jumlah, minJumlah), warnaCount, info);
   const waLain = 'Halo Agatha Felix! Saya tertarik ' + p.name + ', tapi modelnya berbeda dari pilihan di website. Saya kirim foto contohnya di chat ini.';
 
   return (
     <window.AfSheet
       pos={pos} total={total} onClose={onClose} onStep={onStep} resetKey={p.slug}
       footer={<>
-        <Button color="wa" size="lg" {...window.waPribadi(waText)} target="_blank" rel="noopener noreferrer">
+        <Button color="wa" size="lg" data-wa={bantu ? 'sheet-bantu' : 'sheet-detail'} {...window.waPribadi(waText)} target="_blank" rel="noopener noreferrer">
           <window.WaGlyph2 /> <span>Minta Penawaran<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
         </Button>
         <window.AfShareButton url={location.origin + location.pathname + '#custom-' + p.slug} title={p.name + ' — Agatha Felix'} />
@@ -556,7 +602,18 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
               : 'Pilih yang Anda tahu saja, sisanya bisa ditanyakan di chat. Kami kirim mockup gratis dulu, produksi setelah Anda setujui.'}
           </p>
 
-          {CUSTOM_GROUPS.map(([g, title]) => {
+          <div className="af-opts af-cp-mode" role="group" aria-label="Cara memilih spesifikasi">
+            <button type="button" className="af-opt" aria-pressed={!bantu} onClick={() => pilihMode(false)}>Saya pilih sendiri</button>
+            <button type="button" className="af-opt" aria-pressed={bantu} onClick={() => pilihMode(true)}>Bantu pilihkan spesifikasi</button>
+          </div>
+          {bantu ? (
+            <p className="af-cp-hint" style={{ margin: 0 }}>
+              Cukup isi jumlahnya; data pesanan boleh dikosongkan. Kami pilihkan bahan, finishing, dan isi yang cocok, lalu kirim mockup dan harganya.
+              {Object.keys(raw).length ? ' Pilihan yang sudah Anda buat tetap ikut terkirim.' : ''}
+            </p>
+          ) : null}
+
+          {!bantu && CUSTOM_GROUPS.map(([g, title]) => {
             const list = byGroup(g);
             if (!list.length) return null;
             return (
@@ -569,7 +626,7 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
             );
           })}
 
-          {lanjutan.length ? (
+          {!bantu && lanjutan.length ? (
             <details className="af-cp-details">
               <summary>Detail lanjutan <small>sudah kami pilihkan yang standar</small></summary>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -587,10 +644,10 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
             </div>
             <div>
               <div className="af-cp-field-h">Jumlah pesanan (pcs)</div>
-              <Stepper label="Jumlah pesanan" value={jumlah} min={minJumlah} step={MOQ_PER_WARNA} onChange={setJumlah} />
+              <Stepper label="Jumlah pesanan" value={jumlah} min={minJumlah} step={MOQ_PER_WARNA} onChange={ubahJumlah} />
               <div className="af-opts" style={{ marginTop: 10 }}>
                 {JUMLAH_CEPAT.filter((n) => n >= minJumlah).map((n) => (
-                  <button key={n} type="button" className="af-opt" aria-pressed={jumlah === n} onClick={() => setJumlah(n)}>
+                  <button key={n} type="button" className="af-opt" aria-pressed={jumlah === n} onClick={() => ubahJumlah(n)}>
                     {n} pcs{n === 100 ? <span className="af-opt-tag">Saran</span> : null}
                   </button>
                 ))}
@@ -602,10 +659,10 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
           <div className="af-cp-group" role="group" aria-label="Data pesanan">
             <h3>Data pesanan <small style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '.78rem', color: 'var(--text-muted)' }}>opsional</small></h3>
             <div className="af-cp-info">
-              <Input label="Sekolah / instansi" placeholder="cth: SDIT Al-Furqon" value={info.sekolah} onChange={(e) => setInfo({ ...info, sekolah: e.target.value })} />
-              <Input label="Kota pengiriman" placeholder="cth: Bekasi" value={info.kota} onChange={(e) => setInfo({ ...info, kota: e.target.value })} />
+              <Input label="Sekolah / instansi" placeholder="cth: SDIT Al-Furqon" value={info.sekolah} onChange={(e) => ubahInfo({ ...info, sekolah: e.target.value })} />
+              <Input label="Kota pengiriman" placeholder="cth: Bekasi" value={info.kota} onChange={(e) => ubahInfo({ ...info, kota: e.target.value })} />
             </div>
-            <Select label="Kapan dibutuhkan" value={info.waktu} onChange={(e) => setInfo({ ...info, waktu: e.target.value })}>
+            <Select label="Kapan dibutuhkan" value={info.waktu} onChange={(e) => ubahInfo({ ...info, waktu: e.target.value })}>
               <option value="">Pilih perkiraan waktu</option>
               {WAKTU.map((w) => <option key={w} value={w}>{w}</option>)}
             </Select>
@@ -621,9 +678,14 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
                 </div>
               </>
             ) : (
+              // No instant price yet (CustomHarga.jsx is empty until the owner sets it): explain
+              // how the price is worked out, with the average only where the owner gave one.
               <div style={{ fontSize: '.86rem', lineHeight: 1.55 }}>
-                <strong style={{ fontSize: '1rem', display: 'block' }}>Harga dikirim di penawaran</strong>
-                Tekan tombol di bawah: pilihan Anda terkirim lengkap ke WhatsApp. Di jam kerja kami balas di bawah 1 jam.
+                <strong style={{ fontSize: '1rem', display: 'block' }}>{p.kisaran100 ? 'Perkiraan harga' : 'Cara kami menghitung harga'}</strong>
+                {p.kisaran100
+                  ? <>Rata-rata sekitar <b>{p.kisaran100}/pcs untuk 100 pcs</b>. Harga final mengikuti model, bahan, cetak, dan jumlah yang Anda pilih; di bawah 100 pcs biasanya lebih mahal per pcs.</>
+                  : <>Harga per pcs mengikuti ukuran, bahan, cetak, dan jumlah: makin banyak, makin ekonomis. Minimal 50 pcs, disarankan 100 pcs.</>}
+                {' '}Kirim pilihan ini lewat WhatsApp, kami balas dengan rincian harga per pcs dan mockup gratis. Di jam kerja (Senin–Sabtu, 08.00–17.00 WIB) biasanya di bawah 1 jam.
               </div>
             )}
           </div>
@@ -634,7 +696,7 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
             </a>
           ) : null}
 
-          <a href={window.waLink(waLain)} target="_blank" rel="noopener noreferrer"
+          <a href={window.waLink(waLain)} data-wa="model-lain" target="_blank" rel="noopener noreferrer"
             style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'var(--af-ink)', background: 'var(--af-purple-tint)', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-md)', padding: '12px 14px' }}>
             <span style={{ flex: 1 }}>
               <strong style={{ fontFamily: 'var(--font-display)', display: 'block' }}>Model yang Anda mau tidak ada di pilihan?</strong>
@@ -652,6 +714,15 @@ function CustomProdukSection() {
   const { SectionHeader, Button } = DS2cp;
   const [openSlug, setOpenSlug] = React.useState(null);
   const idx = CUSTOM_PRODUK.findIndex((p) => p.slug === openSlug);
+  // How the shown product was opened, for product_detail_open: a card, a link
+  // or address with #custom-<slug>, or the sheet's prev/next.
+  const via = React.useRef('tautan');
+  React.useEffect(() => {
+    if (openSlug && window.AFTracking && window.AFTracking.noteStep) {
+      window.AFTracking.noteStep('product_detail_open', { product_id: openSlug, cta_position: via.current });
+    }
+    via.current = 'tautan';
+  }, [openSlug]);
 
   // #custom-<slug> opens a product: shareable, Back closes it, and plain links
   // elsewhere on the page (e.g. the executive band) can open one too.
@@ -668,6 +739,7 @@ function CustomProdukSection() {
   }, []);
 
   function open(slug) {
+    via.current = 'kartu';
     history.pushState({ afDetail: true }, '', '#custom-' + slug);
     setOpenSlug(slug);
   }
@@ -677,6 +749,7 @@ function CustomProdukSection() {
     setOpenSlug(null);
   }
   function step(dir) {
+    via.current = 'navigasi';
     const next = CUSTOM_PRODUK[(idx + dir + CUSTOM_PRODUK.length) % CUSTOM_PRODUK.length];
     history.replaceState(history.state, '', '#custom-' + next.slug);
     setOpenSlug(next.slug);
@@ -713,7 +786,7 @@ function CustomProdukSection() {
             <strong style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', display: 'block' }}>Model lain yang belum ada di sini?</strong>
             <span style={{ fontSize: '.88rem', color: 'var(--text-body)' }}>Kirim foto contohnya lewat WhatsApp, kami cek apakah bisa dibuat.</span>
           </div>
-          <Button color="wa" href={window.waLink('Halo Agatha Felix! Saya mau buat produk custom dengan model lain. Saya kirim foto contohnya di chat ini.')} target="_blank" rel="noopener noreferrer">
+          <Button color="wa" data-wa="model-lain" href={window.waLink('Halo Agatha Felix! Saya mau buat produk custom dengan model lain. Saya kirim foto contohnya di chat ini.')} target="_blank" rel="noopener noreferrer">
             <window.WaGlyph2 /> Kirim Foto Contoh
           </Button>
         </div>
@@ -728,5 +801,5 @@ function CustomProdukSection() {
 
 Object.assign(window, {
   CustomProdukSection,
-  AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, perkiraanCustom, ringSize },
+  AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize },
 });

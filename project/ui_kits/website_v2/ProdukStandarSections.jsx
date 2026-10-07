@@ -373,7 +373,7 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
     <window.AfSheet
       pos={pos} total={total} onClose={onClose} onStep={onStep} resetKey={fam.slug}
       footer={<>
-        <Button color="wa" size="lg" href={window.waLink(waText)} target="_blank" rel="noopener noreferrer">
+        <Button color="wa" size="lg" data-wa="sheet-standar" href={window.waLink(waText)} target="_blank" rel="noopener noreferrer">
           <window.WaGlyph2 /> <span>{harga.length ? 'Pesan' : 'Tanya Harga'}<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
         </Button>
         <window.AfShareButton url={location.origin + location.pathname + '#' + v.slug} title={fam.name + ' — Agatha Felix'} />
@@ -540,6 +540,16 @@ function ProdukStandarPage() {
   const shown = KATALOG.filter((f) => filter === 'semua' || f.aud.includes(filter));
   const open = openSlug ? findSlug(openSlug) : null;
   const typeCount = shown.reduce((n, f) => n + f.variants.length, 0);
+  // product_detail_open once per product family shown (not per variant), with
+  // how it was opened: a card, a link or address with its #slug, or prev/next.
+  const via = React.useRef('tautan');
+  const famSlug = open ? open.fam.slug : null;
+  React.useEffect(() => {
+    if (famSlug && window.AFTracking && window.AFTracking.noteStep) {
+      window.AFTracking.noteStep('product_detail_open', { product_id: famSlug, cta_position: via.current });
+    }
+    via.current = 'tautan';
+  }, [famSlug]);
 
   // The URL hash names the open product type: shareable, and Back closes the sheet.
   React.useEffect(() => {
@@ -553,6 +563,7 @@ function ProdukStandarPage() {
   }, []);
 
   function openProduct(slug) {
+    via.current = 'kartu';
     history.pushState({ afDetail: true }, '', '#' + slug);
     setOpenSlug(slug);
   }
@@ -567,6 +578,7 @@ function ProdukStandarPage() {
   }
   const navList = open && shown.includes(open.fam) ? shown : KATALOG;
   function step(dir) {
+    via.current = 'navigasi';
     const i = navList.indexOf(open.fam);
     goTo(navList[(i + dir + navList.length) % navList.length].slug);
   }
@@ -624,7 +636,7 @@ function ProdukStandarPage() {
               Mau pesan atau cek stok warna? Chat kami, sebutkan produk dan jumlahnya 👇
             </p>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Button color="wa" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau tanya katalog & daftar harga grosir.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Katalog &amp; Harga</Button>
+              <Button color="wa" size="lg" data-wa="penutup" href={window.waLink('Halo Agatha Felix! Saya mau tanya katalog & daftar harga grosir.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Katalog &amp; Harga</Button>
             </div>
           </div>
         </section>

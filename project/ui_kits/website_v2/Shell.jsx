@@ -145,7 +145,7 @@ function HeaderV2({ active }) {
         }}
       >
         <a href="index.html" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-          <img src="../../assets/logo-agatha-felix.png" alt="Agatha Felix" style={{ height: 48 }} />
+          <img src="../../assets/logo-agatha-felix.png" alt="Agatha Felix" width="480" height="108" style={{ height: 48, width: 'auto' }} />
         </a>
         <nav style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }} aria-label="Navigasi">
           {V2_LINKS.map(([href, label]) => {
@@ -170,7 +170,7 @@ function HeaderV2({ active }) {
           })}
         </nav>
         <div className="af-desktop-cta" style={{ display: 'flex' }}>
-          <Button color="wa" size="sm" href={waLink('Halo Agatha Felix! Saya mau tanya-tanya soal produk map.')} target="_blank" rel="noopener noreferrer"><WaGlyph2 size={15} /> Chat Kami</Button>
+          <Button color="wa" size="sm" data-wa="header" href={waLink('Halo Agatha Felix! Saya mau tanya-tanya soal produk map.')} target="_blank" rel="noopener noreferrer"><WaGlyph2 size={15} /> Chat Kami</Button>
         </div>
         {/* Hamburger — shown only on mobile via responsive CSS */}
         <button
@@ -219,7 +219,7 @@ function HeaderV2({ active }) {
               </a>
             );
           })}
-          <Button color="wa" size="lg" style={{ marginTop: 4 }} href={waLink('Halo Agatha Felix! Saya mau tanya-tanya soal produk map.')} target="_blank" rel="noopener noreferrer"><WaGlyph2 size={17} /> Chat Kami via WhatsApp</Button>
+          <Button color="wa" size="lg" data-wa="menu" style={{ marginTop: 4 }} href={waLink('Halo Agatha Felix! Saya mau tanya-tanya soal produk map.')} target="_blank" rel="noopener noreferrer"><WaGlyph2 size={17} /> Chat Kami via WhatsApp</Button>
         </div>
       ) : null}
     </header>
@@ -283,7 +283,7 @@ function MarqueeV2() {
 function FloatingWAV2() {
   return (
     <a
-      href={waLink('Halo Agatha Felix! Saya mau bertanya soal map / rapor custom.')} target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp"
+      href={waLink('Halo Agatha Felix! Saya mau bertanya soal map / rapor custom.')} target="_blank" rel="noopener noreferrer" aria-label="Chat WhatsApp" data-wa="bubble"
       style={{
         position: 'fixed', right: 22, bottom: 22, zIndex: 60, width: 60, height: 60, borderRadius: '50%',
         background: 'var(--af-wa)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -307,7 +307,7 @@ function FooterV2() {
         }}
       >
         <div>
-          <img src="../../assets/logo-mark-white.png" alt="Agatha Felix" style={{ height: 52, marginBottom: 14 }} />
+          <img src="../../assets/logo-mark-white.png" alt="Agatha Felix" width="192" height="192" style={{ height: 52, width: 'auto', marginBottom: 14 }} />
           <p style={{ fontSize: '0.84rem', lineHeight: 1.8, margin: 0, maxWidth: 260 }}>
             Pabrik map plastik yang bikin dokumen penting jadi kelihatan keren. Langsung dari pabrik — bukan reseller.
           </p>

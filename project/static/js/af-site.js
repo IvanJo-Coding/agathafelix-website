@@ -39,7 +39,36 @@
     window.clarity('event', 'putar_video');
     window.clarity('set', 'video', title);
   }
-  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo };
+  // Steps before contact. Only these names, and only enum values or a product
+  // slug from the code: nothing a visitor typed can be passed through here.
+  // quote_form_submit goes to Clarity only; GA4 already counts that handoff
+  // as generate_lead on the thank-you page. None of these is an Ads goal.
+  var STEPS = {
+    product_detail_open: { product_id: 'slug', cta_position: ['kartu', 'tautan', 'navigasi'] },
+    quote_start: { product_id: 'slug', quote_mode: ['detail', 'bantu', 'form'] },
+    quote_form_submit: {},
+  };
+  function noteStep(name, params) {
+    var spec = STEPS[name];
+    if (!spec) return false;
+    var clean = {};
+    for (var key in spec) {
+      var value = params && params[key];
+      var ok = spec[key] === 'slug' ? /^[a-z0-9-]{2,40}$/.test(value || '') : spec[key].indexOf(value) >= 0;
+      if (!ok) return false;
+      clean[key] = value;
+    }
+    if (name !== 'quote_form_submit' && production && config.googleAnalyticsId) {
+      clean.send_to = config.googleAnalyticsId;
+      window.gtag('event', name, clean);
+    }
+    if (useClarity) {
+      window.clarity('event', name);
+      if (clean.product_id) window.clarity('set', 'produk', clean.product_id);
+    }
+    return true;
+  }
+  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
