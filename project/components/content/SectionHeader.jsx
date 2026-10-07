@@ -17,7 +17,7 @@ export function SectionHeader({
 }) {
   const colors = {
     orange: 'var(--af-orange)', green: 'var(--af-green)',
-    yellow: 'var(--af-yellow-deep)', purple: 'var(--af-purple)', blue: 'var(--af-blue)',
+    yellow: 'var(--af-yellow-deep)', purple: 'var(--af-purple)', blue: 'var(--af-blue-deep)',
   };
   const parts = highlight && title.includes(highlight) ? title.split(highlight) : null;
   return (

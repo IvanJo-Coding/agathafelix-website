@@ -3,7 +3,7 @@ import React from 'react';
 const BADGE_COLORS = {
   orange: ['var(--af-orange-soft)', 'var(--af-orange-deep)'],
   green:  ['var(--af-green-soft)',  'var(--af-green-deep)'],
-  yellow: ['var(--af-yellow-soft)', 'var(--af-yellow-deep)'],
+  yellow: ['var(--af-yellow-soft)', 'var(--af-yellow-ink)'],
   purple: ['var(--af-purple-soft)', 'var(--af-purple-deep)'],
   blue:   ['var(--af-blue-soft)',   'var(--af-blue-deep)'],
   ink:    ['var(--af-paper-2)',     'var(--af-ink-2)'],
