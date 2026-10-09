@@ -549,9 +549,10 @@ test('standard prices point at real catalogue types and are shown on the page', 
   for (const [, row] of hs.clearHolder.isi) assert.equal(row.length, hs.clearHolder.ukuran.length);
   const html = read('dist/produk-standar/index.html');
   assert.match(html, /id="daftar-harga"/);
-  assert.match(html, /belum termasuk PPN/);
+  assert.ok(html.includes('Update <!-- -->' + hs.update), 'price list shows its date');
+  assert.doesNotMatch(html, /PPN/, 'prices are final, no PPN note');
   for (const [, nama, , , harga] of hs.daftar.flatMap((g) => g.barang)) assert.ok(html.includes('Rp' + harga.toLocaleString('id-ID')), nama);
-  assert.ok(html.includes('Mulai Rp13.500/pcs'), 'Clear Holder card shows its lowest price');
+  assert.ok(html.includes('Mulai Rp20.000/pcs'), 'Clear Holder card shows its lowest price');
 });
 // Custom products: load the built price table and product logic without a DOM.
 function customKit() {

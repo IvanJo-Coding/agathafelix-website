@@ -415,7 +415,7 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
                   </div>
                 ))}
               </div>
-              <p className="af-ps-note">Belum termasuk PPN · update {window.HARGA_STANDAR.update}. Harga dapat berubah sewaktu-waktu.</p>
+              <p className="af-ps-note">Update {window.HARGA_STANDAR.update}. Harga dapat berubah sewaktu-waktu.</p>
             </div>
           ) : null}
 
@@ -496,7 +496,7 @@ function DaftarHarga() {
     <div id="daftar-harga" className="af-ps-dh">
       <h2 style={{ fontSize: 'var(--text-lg)', textAlign: 'center' }}>Daftar Harga</h2>
       <p className="af-ps-note" style={{ textAlign: 'center', fontSize: '.8rem' }}>
-        Update {hs.update} · belum termasuk PPN · harga dapat berubah sewaktu-waktu
+        Update {hs.update} · harga dapat berubah sewaktu-waktu
       </p>
       <div className="af-ps-dh-grid">
         <div className="af-ps-box" style={{ gridColumn: '1 / -1' }}>
