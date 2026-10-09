@@ -2,6 +2,7 @@
 //  HARGA PRODUK STANDAR  (halaman Produk Standar)
 // -----------------------------------------------------------------------------
 //  Sumber: Daftar Harga Agatha Felix, update 24 September 2026, 15:13 WIB.
+//  Kolom Executive: harga offline baru 9 Oktober 2026.
 //
 //  Cara mengubah:
 //  - Tulis angka Rupiah TANPA titik: 15250, bukan 15.250. null = tidak ada (–).
@@ -16,17 +17,17 @@
 const CARRY_FILE = ['cf-1', 'cf-2', 'cf-3', 'cf-4', 'cf-5'];
 
 const HARGA_STANDAR = {
-  update: '24 September 2026',
+  update: '9 Oktober 2026',
 
   // Clear Holder: harga per pcs menurut ukuran dan isi kantong.
   clearHolder: {
     ukuran: [['b5', 'B5'], ['a4', 'A4'], ['folio', 'Folio'], ['a3', 'A3'], ['executive', 'Executive']],
     isi: [
       //    B5     A4     Folio  A3     Executive
-      [10, [13500, 15250, 15500, 45000, 65000]],
-      [20, [14000, 15500, 16000, 55000, 75000]],
-      [40, [20000, 23000, 24000, 60000, 95000]],
-      [60, [25000, 28000, 30000, 75000, 120000]],
+      [10, [13500, 15250, 15500, 45000, 60000]],
+      [20, [14000, 15500, 16000, 55000, 70000]],
+      [40, [20000, 23000, 24000, 60000, 87500]],
+      [60, [25000, 28000, 30000, 75000, 110000]],
       [80, [null, 42500, 45000, null, null]],
       [100, [null, 57500, 60000, null, null]],
       [120, [null, 70000, 75000, null, null]],
