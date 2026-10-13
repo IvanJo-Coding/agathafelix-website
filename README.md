@@ -83,7 +83,8 @@ on click only: nothing fires when a page opens.
 GA4 uses `SITE.googleAnalyticsId = G-F2P4YVFY6P`, verified in the existing
 **Agatha Felix DB** property (`464888556`), web stream `9867882952`. Both
 Google destinations use one `gtag.js` loader. GA4 receives `klik_whatsapp`
-and `klik_telepon` with `button_label` only, and `generate_lead` with
+(`button_label` and `cta_source`) and `klik_telepon` (`button_label`), the
+steps listed under **Events** below, and `generate_lead` with
 `method: whatsapp_form` on a fresh form handoff. A lead here means a prepared
 WhatsApp enquiry, not proof that the visitor sent the message. These events
 are routed explicitly to GA4; the existing Ads WhatsApp and thank-you URL
@@ -103,6 +104,8 @@ The existing Ads account (`378-871-5919`) is linked to that GA4 property,
 with app/web metrics enabled. Clarity project `ytbsysdvb4` is connected to
 both the same Ads account and GA4 property. GA4's event-scoped custom
 dimension **Tombol kontak** uses `button_label` for comparing contact buttons.
+To report on the other parameters, register `cta_source`, `model`,
+`error_type` and `sim_source` as event-scoped custom dimensions too.
 
 Campaign **Search | Sekolah | Rapor & Ijazah** (`24196852973`) has this
 campaign-level final URL suffix (keep auto-tagging ON for `gclid`):
@@ -127,15 +130,26 @@ Realtime](https://support.google.com/analytics/answer/9311124?hl=en).
 
 **Microsoft Clarity** (heatmaps, scroll depth, time on page, recordings) runs
 when `SITE.clarityId` holds the project ID; empty keeps it off. In the Clarity
-project, keep **Settings → Setup → Cookies OFF**: `af-site.js` also tells
-Clarity consent is denied, so it sets no cookies and each page view counts as
-its own session. This setting applies to Clarity, separately from the Google
-tag's storage settings. It starts after the `load` event,
+project, keep **Settings → Setup → Cookies OFF**: that is Microsoft's consent
+mode, in which Clarity sets no cookie and counts each page view as its own
+session until it receives a "granted" signal. `af-site.js` sends that signal
+through the [Consent API v2](https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-consent-api-v2):
+`consentv2` with `analytics_Storage` granted only when the visitor chose
+**Izinkan**, and `ad_Storage` always denied. The choice is asked in a small
+bar at the bottom of the screen (from the first scroll, above the WhatsApp
+bubble and the landing page's sticky bar, never a pop-up) and can be changed
+in the **Izin cookie Microsoft Clarity** section of `/kebijakan-privasi/`
+(`#izin-clarity`). It is kept in the visitor's `localStorage`
+(`af-clarity-consent`); with "granted", Clarity's `_clck` and `_clsk` cookies
+join that visitor's pages into one session. This applies to Clarity only; the
+Google tag's storage is unchanged. No element may have the id or name
+`clarity`: the browser would expose it as `window.clarity`. It starts after the `load` event,
 never on localhost, `/admin/` (recordings would show cost prices) or the
 thank-you page (its WhatsApp link holds the visitor's message). Input fields
 are always masked by Clarity. WhatsApp and phone clicks add the events
 `klik_whatsapp` / `klik_telepon` and the tags `tombol_whatsapp` /
-`tombol_telepon`, named by `data-wa` or the button text, never the link.
+`tombol_telepon`, named by `data-wa` or the button text, never the link;
+WhatsApp clicks also add `sumber_whatsapp` (the `cta_source` below).
 
 Clarity records every `href` in the page and the link of every click, and
 input masking does not cover either. So a WhatsApp message built from what a
@@ -162,14 +176,29 @@ inline loader (`afterPaintScripts` in `build.mjs`). In the mobile lab
 `button_label` = the button's `data-wa` (every WhatsApp button has one: `hero`,
 `header`, `bubble`, `sticky`, `footer`, `model`, `sheet-detail`, `sheet-bantu`,
 `sheet-standar`, `simulator`, `model-lain`, `portofolio`, `penutup`, ...), to
-GA4, plus Clarity tags `tombol_whatsapp` / `tombol_telepon`. Steps before
-contact go through `AFTracking.noteStep`, which accepts only these names and
-values (anything else is dropped): `product_detail_open` {`product_id` = a code
-slug, `cta_position` = `kartu` | `tautan` | `navigasi`}, `quote_start`
-{`product_id`, `quote_mode` = `detail` | `bantu` | `form`}, and
-`quote_form_submit` (Clarity only, sent once the rapor form is valid and handed
-to WhatsApp, before the thank-you page; GA4 already counts that handoff as
-`generate_lead`). None of these is, or should be imported as, a primary Ads
+GA4, plus Clarity tags `tombol_whatsapp` / `tombol_telepon`. `klik_whatsapp`
+also carries `cta_source`, where the button sits: `formulir` (the rapor form),
+`simulator`, `konfigurator` (`sheet-*`), `mengambang` (`bubble`, `sticky`),
+`header` (`header`, `menu`) or `halaman` (anything else). The rapor form opens
+WhatsApp without a link, so it reports its handoff through
+`AFTracking.noteWhatsApp('form')`: `klik_whatsapp` with `cta_source: formulir`
+to GA4 and Clarity, and no Ads WhatsApp conversion, since the thank-you URL
+goal already counts that lead.
+
+Steps before contact go through `AFTracking.noteStep`, which accepts only these
+names and values (anything else is dropped), and sends them to GA4 and Clarity:
+
+| Event | Parameters | When |
+|---|---|---|
+| `product_detail_open` | `product_id` (code slug), `cta_position` = `kartu` \| `tautan` \| `navigasi` | a product sheet opens |
+| `quote_start` | `product_id`, `quote_mode` = `detail` \| `bantu` \| `form` | first change in a sheet; first field of the rapor form |
+| `quote_form_error` | `error_type` = `data_kurang` \| `di_bawah_minimum` | a rapor form submit fails its check |
+| `quote_form_submit` | `model` = `jahit` \| `press` \| `belum` | the rapor form is valid and handed to WhatsApp (GA4 also gets `generate_lead` on the thank-you page) |
+| `model_select` | `model` = `jahit` \| `press` | a model is picked on `/raporsekolah/` (card or form) |
+| `simulator_start` | `sim_source` = `konfigurator` \| `langsung` | first change in the simulator, with or without a product draft |
+
+Clarity also tags `produk`, `model_rapor`, `form_error` and `simulator_dari`
+from these values. None of these is, or should be imported as, a primary Ads
 conversion.
 
 **Photo zoom.** `project/static/js/af-zoom.js` opens any `[data-zoom]` photo in
@@ -184,7 +213,11 @@ under the headline with the 50 pcs minimum and "rata-rata Rp50rb/pcs untuk
 it. Its prefilled message is a checklist (quantity, date needed, city, school),
 and a sample photo is optional: the message says "kalau ada", never that a
 photo was sent. The header link asks a plain question. There is no automatic
-pop-up.
+pop-up. In **Pilih Model** each card has a button (Rapor Jahit, Rapor Press /
+Hot Print) that sets the same choice as the form's **Model rapor** radio. Once
+a model is picked, every quote button's checklist starts with "- Model: ...",
+the shared button under the cards says "Minta Harga Rapor Jahit", and the form
+message names it; "Belum tahu" removes it again.
 
 On `/produk-custom/` each product sheet offers **Saya pilih sendiri** or
 **Bantu pilihkan spesifikasi**. The quick path hides the technical choices
@@ -193,10 +226,24 @@ picked, never defaults. Without instant prices (`CustomHarga.jsx` is still
 empty), the sheet explains how the price is worked out; Map Jahit and Map
 Press add the owner's average, about Rp50.000/pcs for 100 pcs.
 
+Each product keeps one order draft (picks, colour count, quantity, order data,
+quick path) in the page (`useCustomDrafts()` in `CustomProduk.jsx`, called by
+`ProdukCustomPage`), so closing a sheet, stepping to another product or going
+to the simulator loses nothing. Every colour needs 50 pcs: with 3 colours the
+quantity starts at 150 and the quick picks and advice follow
+(`jumlahSaran`). The simulator sends along the draft of the rapor product
+configured last (Map Jahit or Map Press, or the one whose "Coba simulator
+rapor" link was used): it shows "Map Press · 3 warna · 150 pcs" with a link
+back to the sheet, and its WhatsApp message is that sheet's message with the
+design added (`pesanSimulator` in `Simulator.jsx`). Without a draft it asks
+"Jumlah: ... pcs".
+
 The form is the optional route. It asks for school, quantity (50 pcs or more,
-or it points to the stock catalogue), city, timing, whether a sample exists,
-and an optional contact name. It has **no phone field**, since the reply goes to
-the WhatsApp the visitor writes from, and nothing from it is sent to Google.
+or it points to the stock catalogue), city, timing, the model (Jahit, Press /
+Hot Print or Belum tahu), whether a sample exists, and an optional contact
+name. It has **no phone field**, since the reply goes to the WhatsApp the
+visitor writes from, and nothing typed in it is sent to Google (only the
+fixed model and error values above).
 It prepares a WhatsApp message; it does **not** save a lead to a backend
 or confirm that a WhatsApp message was sent. The prepared message travels between
 pages in session storage (30-minute expiry), with a cleaned fragment fallback
