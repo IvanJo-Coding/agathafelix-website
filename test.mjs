@@ -979,6 +979,15 @@ test('Map Press, 3 colours, 150 pcs: the simulator message carries the whole she
   assert.match(kit.pesanDraft(press, { ...kit.DRAFT_BARU, warnaCount: 3, jumlah: 100 }), /Jumlah: 150 pcs \(3 warna/, 'raised to the colour minimum, as the sheet does');
   const bantu = sim.pesanSimulator({ sampul: 'Biru', tulisan: 'Putih', nama: 'SD Uji' }, press, { ...draft, bantu: true });
   assert.match(bantu, /belum tahu bahan[\s\S]*Jumlah: 150 pcs[\s\S]*- Nama sekolah di sampul: SD Uji\n\nKalau ada, saya kirim foto contoh atau logo/);
+  // One cover colour, never two: a colour typed in the sheet wins over the simulator's
+  // preview, and a swatch picked in the simulator is written into the sheet.
+  const navy = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Emas', nama: '' }, press, { ...draft, raw: { 'warna-sampul': 'Navy' } });
+  assert.deepEqual(navy.match(/Warna sampul: .*/g), ['Warna sampul: Navy']);
+  assert.match(navy, /Desain dari simulator rapor:\n- Warna tulisan: Emas\n/);
+  assert.deepEqual(msg.match(/Warna sampul: .*/g), ['Warna sampul: Hijau'], 'without a sheet colour, the simulator names it');
+  const simSrc = read('project/ui_kits/website_v2/Simulator.jsx');
+  assert.match(simSrc, /if \(dari\) order\.ubah\(dari, \{ raw: \{ \.\.\.draft\.raw, 'warna-sampul': SIM_COLORS\[i\]\[0\] \} \}\);/);
+  assert.match(simSrc, /onClick=\{\(\) => pilihSampul\(i\)\}/);
   // Straight to the simulator, no product: the quantity is asked for, never left blank.
   const lepas = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Kuning', nama: '' });
   assert.match(lepas, /\nJumlah: \.\.\. pcs \(minimal 50 pcs per warna\)\n/);
@@ -992,6 +1001,8 @@ test('Map Press, 3 colours, 150 pcs: the simulator message carries the whole she
   const sheet = read('project/ui_kits/website_v2/CustomProduk.jsx');
   const body = sheet.slice(sheet.indexOf('function CustomSheet('), sheet.indexOf('function CustomProdukSection('));
   assert.ok(!/React\.useState\((100|1|\{\}|false)\)/.test(body), 'the sheet keeps no order state of its own');
+  // Typing in a text field (cover colour, sheet count) starts the quote like a chip does.
+  assert.match(body, /const setRaw = \(next\) => \{ mulai\(\); onDraft\(\{ raw: next \}\); \};/);
   assert.match(read('project/ui_kits/website_v2/Simulator.jsx'), /<strong>\{dari\.name\} · \{C\.ringkasDraft\(draft\)\}<\/strong>/, 'the simulator shows what it sends along');
 });
 test('a rapor model picked on the landing page goes into the form and every quote message', () => {

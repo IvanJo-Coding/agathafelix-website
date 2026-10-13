@@ -557,7 +557,8 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo, draft, onDraft
   // bantu is the quick path: the buyer leaves bahan, finishing and isi to us.
   // Their picks stay in raw, so switching back to the detail path loses nothing.
   const { raw, warnaCount, jumlah, info, bantu } = draft;
-  const setRaw = (next) => onDraft({ raw: next });
+  // Text fields (cover colour, a sheet count) start the quote too; mulai() counts it once.
+  const setRaw = (next) => { mulai(); onDraft({ raw: next }); };
   const [slide, setSlide] = React.useState(0);
   const started = React.useRef(false);
 

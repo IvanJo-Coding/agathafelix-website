@@ -47,9 +47,13 @@ const SIM_CSS_ID = 'af-simulator';
 
 // The WhatsApp message. Linked to a rapor product (p, with its draft d from the
 // product sheet), it is that sheet's own message with the design added, so the
-// model, specification, colour count and quantity all carry over.
+// model, specification, colour count and quantity all carry over. The cover
+// colour is named once: the sheet's when it has one (a swatch picked here is
+// written into the sheet), otherwise the simulator's.
 function pesanSimulator(desain, p, d) {
-  const lines = ['- Warna sampul: ' + desain.sampul, '- Warna tulisan: ' + desain.tulisan];
+  const sampulSheet = p && (d.raw['warna-sampul'] || '').trim();
+  const lines = sampulSheet ? [] : ['- Warna sampul: ' + desain.sampul];
+  lines.push('- Warna tulisan: ' + desain.tulisan);
   if (desain.nama) lines.push('- Nama sekolah di sampul: ' + desain.nama);
   if (!p) {
     return ['Halo Agatha Felix! Saya mau pesan rapor custom sesuai simulator:', ...lines,
@@ -75,7 +79,14 @@ function SimulatorRapor({ order }) {
 
   const dari = order && order.simDari ? C.CUSTOM_PRODUK.find((x) => x.slug === order.simDari) : null;
   const draft = dari ? order.drafts[dari.slug] || C.DRAFT_BARU : null;
-  const [, base, deep] = SIM_COLORS[color];
+  // Linked to a product, the cover colour is the sheet's: a swatch picked here
+  // is written into the draft, and a sheet colour that names a swatch shows it.
+  // One with no swatch (e.g. "navy") keeps the preview as it is.
+  const sampulDraft = draft ? (draft.raw['warna-sampul'] || '').trim() : '';
+  const iDraft = SIM_COLORS.findIndex(([label]) => label.toLowerCase() === sampulDraft.toLowerCase());
+  const shown = iDraft >= 0 ? iDraft : color;
+  const sampulLain = !!sampulDraft && iDraft < 0;
+  const [, base, deep] = SIM_COLORS[shown];
   const [, accentColor] = SIM_ACCENTS[accent];
 
   // simulator_start, once: the first change to the design.
@@ -83,6 +94,11 @@ function SimulatorRapor({ order }) {
     if (started.current) return;
     started.current = true;
     if (window.AFTracking && window.AFTracking.noteStep) window.AFTracking.noteStep('simulator_start', { sim_source: dari ? 'konfigurator' : 'langsung' });
+  }
+  function pilihSampul(i) {
+    mulai();
+    setColor(i);
+    if (dari) order.ubah(dari, { raw: { ...draft.raw, 'warna-sampul': SIM_COLORS[i][0] } });
   }
 
   const onLogo = (e) => {
@@ -94,7 +110,7 @@ function SimulatorRapor({ order }) {
     reader.readAsDataURL(f);
   };
 
-  const pesanWA = pesanSimulator({ sampul: SIM_COLORS[color][0], tulisan: SIM_ACCENTS[accent][0], nama: nama.trim() }, dari, draft);
+  const pesanWA = pesanSimulator({ sampul: SIM_COLORS[shown][0], tulisan: SIM_ACCENTS[accent][0], nama: nama.trim() }, dari, draft);
 
   const swatchStyle = (bg, isOn) => ({
     width: 44, height: 44, borderRadius: '50%', background: bg, cursor: 'pointer',
@@ -118,10 +134,10 @@ function SimulatorRapor({ order }) {
           {/* controls */}
           <div className="af-sim-controls" style={{ background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)', boxShadow: '0 5px 0 var(--af-ink)', padding: 26, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_COLORS[color][0]}</span></div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {sampulLain ? 'sesuai pilihan produk' : SIM_COLORS[shown][0]}</span></div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {SIM_COLORS.map(([label, bg], i) => (
-                  <button key={label} type="button" title={label} aria-label={'Warna sampul ' + label} aria-pressed={color === i} onClick={() => { mulai(); setColor(i); }} style={swatchStyle(bg, color === i)}></button>
+                  <button key={label} type="button" title={label} aria-label={'Warna sampul ' + label} aria-pressed={!sampulLain && shown === i} onClick={() => pilihSampul(i)} style={swatchStyle(bg, !sampulLain && shown === i)}></button>
                 ))}
               </div>
             </div>

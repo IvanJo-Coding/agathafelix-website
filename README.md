@@ -235,8 +235,10 @@ quantity starts at 150 and the quick picks and advice follow
 configured last (Map Jahit or Map Press, or the one whose "Coba simulator
 rapor" link was used): it shows "Map Press · 3 warna · 150 pcs" with a link
 back to the sheet, and its WhatsApp message is that sheet's message with the
-design added (`pesanSimulator` in `Simulator.jsx`). Without a draft it asks
-"Jumlah: ... pcs".
+design added (`pesanSimulator` in `Simulator.jsx`). It names one cover
+colour: a swatch picked in the simulator is written into the sheet's "Warna
+sampul", and a colour typed in the sheet (say "Navy") replaces the
+simulator's own. Without a draft it asks "Jumlah: ... pcs".
 
 The form is the optional route. It asks for school, quantity (50 pcs or more,
 or it points to the stock catalogue), city, timing, the model (Jahit, Press /
