@@ -35,6 +35,12 @@ main{padding:44px 0 64px;background:linear-gradient(180deg,var(--orange-tint),va
 .tool h3{margin:0;font-family:var(--fd);font-size:18px;color:var(--ink)}
 .tool p{margin-top:6px;font-size:15px}
 .tag{display:inline-block;font-size:13px;font-weight:700;border:1.5px solid var(--ink);border-radius:999px;padding:1px 10px;margin-top:8px;background:var(--orange-tint)}
+#izin-clarity{scroll-margin-top:16px}
+.consent{margin-top:16px;background:#fff;border:2px solid var(--ink);border-radius:16px;padding:16px 18px}
+.consent p{margin:0}
+.consent div{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.consent button{min-height:44px;padding:9px 22px;border-radius:999px;border:2px solid var(--ink);background:#fff;color:var(--ink);font:800 15px/1 var(--fd);cursor:pointer}
+.consent button[aria-pressed="true"]{background:var(--ink);color:#fff}
 footer{background:var(--ink);color:rgba(255,255,255,.7);font-size:14px;padding:24px 0;text-align:center}
 footer a{color:#fff}
 </style>
@@ -43,7 +49,7 @@ footer a{color:#fff}
 <header><div class="wrap"><a href="/"><img src="/raporsekolah/img/logo.webp" width="420" height="94" alt="Agatha Felix Stationery, ke Beranda"></a></div></header>
 <main><div class="wrap">
 <h1>Kebijakan Privasi</h1>
-<p class="date">Berlaku sejak 7 Oktober 2026</p>
+<p class="date">Diperbarui 13 Oktober 2026</p>
 <p>Agatha Felix Stationery adalah pabrik map plastik dan sampul rapor di Kota Bekasi. Halaman ini menjelaskan data apa yang kami terima saat Anda memakai agatha-felix.com, untuk apa data itu dipakai, dan alat ukur apa saja yang terpasang di situs ini.</p>
 
 <h2>Data yang Anda kirim ke kami</h2>
@@ -58,13 +64,21 @@ footer a{color:#fff}
 <p>Kami memakai tiga layanan untuk memahami cara situs ini dipakai dan mengukur iklan kami:</p>
 <div class="tools">
 <div class="tool"><h3>Google Ads</h3><p>Mengukur iklan: berapa pengunjung dari iklan yang menekan tombol WhatsApp atau mengirim formulir permintaan harga.</p><span class="tag">Memakai cookie</span></div>
-<div class="tool"><h3>Google Analytics</h3><p>Menghitung kunjungan, asal kunjungan (misalnya pencarian Google, iklan, atau Instagram), halaman yang dibuka, dan tombol WhatsApp atau telepon yang diklik.</p><span class="tag">Memakai cookie</span></div>
-<div class="tool"><h3>Microsoft Clarity</h3><p>Membuat peta klik dan gulir serta rekaman cara halaman dipakai (klik, gerakan kursor, dan gulir), agar tampilan situs bisa kami perbaiki. Rekaman terhapus otomatis setelah 30 hari, dan Clarity tidak dipasang di halaman konfirmasi formulir.</p><span class="tag">Tanpa cookie</span></div>
+<div class="tool"><h3>Google Analytics</h3><p>Menghitung kunjungan, asal kunjungan (misalnya pencarian Google, iklan, atau Instagram), halaman yang dibuka, tombol WhatsApp atau telepon yang diklik, dan langkah seperti membuka produk, memakai simulator, atau mengirim formulir (tanpa isi yang Anda ketik).</p><span class="tag">Memakai cookie</span></div>
+<div class="tool"><h3>Microsoft Clarity</h3><p>Membuat peta klik dan gulir serta rekaman cara halaman dipakai (klik, gerakan kursor, dan gulir), agar tampilan situs bisa kami perbaiki. Rekaman terhapus otomatis setelah 30 hari, dan Clarity tidak dipasang di halaman konfirmasi formulir.</p><span class="tag">Cookie hanya dengan izin Anda</span></div>
 </div>
 <p>Isi kolom formulir, teks yang Anda ketik, isi pesan WhatsApp, dan logo yang Anda unggah tidak kami kirim ke layanan-layanan ini. Kami melihat data dari alat ukur ini sebagai angka gabungan dan rekaman tanpa nama. Cara Google dan Microsoft mengolah data dijelaskan di <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">kebijakan Google</a> dan <a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener">pernyataan privasi Microsoft</a>.</p>
 
+<h2 id="izin-clarity">Izin cookie Microsoft Clarity</h2>
+<p>Clarity berjalan tanpa cookie sampai Anda mengizinkannya. Tanpa izin, setiap halaman yang Anda buka tercatat sebagai kunjungan terpisah. Dengan izin, Clarity menyimpan dua cookie di browser Anda, <code>_clck</code> (1 tahun) dan <code>_clsk</code> (1 hari), sehingga halaman-halaman yang Anda buka tersambung dalam satu rekaman. Izin ini hanya untuk analitik, bukan untuk iklan, dan pilihan Anda disimpan di browser ini saja.</p>
+<div class="consent">
+<p>Status: <strong data-af-consent-status>Belum dipilih (tanpa cookie)</strong></p>
+<div><button type="button" data-af-consent="granted" aria-pressed="false">Izinkan</button><button type="button" data-af-consent="denied" aria-pressed="false">Tolak</button></div>
+</div>
+
 <h2>Pilihan Anda</h2>
 <ul>
+<li>Izin cookie Clarity bisa Anda ubah kapan saja di bagian <a href="#izin-clarity">Izin cookie Microsoft Clarity</a> di atas.</li>
 <li>Anda dapat menolak atau menghapus cookie lewat pengaturan browser. Situs ini tetap bisa dipakai tanpa cookie.</li>
 <li>Untuk tidak dihitung Google Analytics di semua situs, pasang <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.</li>
 <li>Untuk mengatur iklan yang dipersonalisasi dari Google, buka <a href="https://myadcenter.google.com/" target="_blank" rel="noopener">My Ad Center</a>.</li>
