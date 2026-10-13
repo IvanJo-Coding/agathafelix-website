@@ -35,37 +35,82 @@ const SIM_CSS_ID = 'af-simulator';
     .af-sim-preview { height: 312px; align-items: flex-start; }
     .af-sim-book { transform: scale(.72) rotate(1.5deg) !important; transform-origin: top center; }
     .af-sim-controls { padding: 20px !important; gap: 16px !important; }
-  }`;
+  }
+  .af-sim-konfig { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 10px 12px; border-radius: 12px;
+    background: var(--af-purple-tint); border: 1.5px solid var(--af-ink); font-size: .86rem; line-height: 1.45; color: var(--af-ink); }
+  .af-sim-konfig span { width: 100%; font-size: .78rem; font-weight: 600; color: var(--text-muted); }
+  .af-sim-konfig strong { font-family: var(--font-display); font-weight: 800; }
+  .af-sim-konfig a, .af-sim-hint a { font-weight: 700; color: var(--af-purple-deep); }
+  .af-sim-hint { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--text-body); }`;
   document.head.appendChild(tag);
 })();
 
-function SimulatorRapor() {
+// The WhatsApp message. Linked to a rapor product (p, with its draft d from the
+// product sheet), it is that sheet's own message with the design added, so the
+// model, specification, colour count and quantity all carry over. The cover
+// colour is named once: the sheet's when it has one (a swatch picked here is
+// written into the sheet), otherwise the simulator's.
+function pesanSimulator(desain, p, d) {
+  const sampulSheet = p && (d.raw['warna-sampul'] || '').trim();
+  const lines = sampulSheet ? [] : ['- Warna sampul: ' + desain.sampul];
+  lines.push('- Warna tulisan: ' + desain.tulisan);
+  if (desain.nama) lines.push('- Nama sekolah di sampul: ' + desain.nama);
+  if (!p) {
+    return ['Halo Agatha Felix! Saya mau pesan rapor custom sesuai simulator:', ...lines,
+      'Jumlah: ... pcs (minimal 50 pcs per warna)', '', 'Logo sekolah saya kirim di chat ini.'].join('\n');
+  }
+  const pesan = window.AfCustom.pesanDraft(p, d).split('\n');
+  // Before the closing note about the logo or sample photo.
+  pesan.splice(pesan.length - 2, 0, '', 'Desain dari simulator rapor:', ...lines);
+  return pesan.join('\n');
+}
+
+// order: useCustomDrafts() from the page. Its simDari is the rapor product
+// the visitor configured last, whose draft goes along with the design.
+function SimulatorRapor({ order }) {
   const { Button, Input } = DS2s;
+  const C = window.AfCustom;
   const [color, setColor] = React.useState(0);
   const [accent, setAccent] = React.useState(0);
   // Empty by default: a prefilled sample name used to travel into real enquiries.
   const [nama, setNama] = React.useState('');
   const [logo, setLogo] = React.useState(null);
+  const started = React.useRef(false);
 
-  const [, base, deep] = SIM_COLORS[color];
+  const dari = order && order.simDari ? C.CUSTOM_PRODUK.find((x) => x.slug === order.simDari) : null;
+  const draft = dari ? order.drafts[dari.slug] || C.DRAFT_BARU : null;
+  // Linked to a product, the cover colour is the sheet's: a swatch picked here
+  // is written into the draft, and a sheet colour that names a swatch shows it.
+  // One with no swatch (e.g. "navy") keeps the preview as it is.
+  const sampulDraft = draft ? (draft.raw['warna-sampul'] || '').trim() : '';
+  const iDraft = SIM_COLORS.findIndex(([label]) => label.toLowerCase() === sampulDraft.toLowerCase());
+  const shown = iDraft >= 0 ? iDraft : color;
+  const sampulLain = !!sampulDraft && iDraft < 0;
+  const [, base, deep] = SIM_COLORS[shown];
   const [, accentColor] = SIM_ACCENTS[accent];
+
+  // simulator_start, once: the first change to the design.
+  function mulai() {
+    if (started.current) return;
+    started.current = true;
+    if (window.AFTracking && window.AFTracking.noteStep) window.AFTracking.noteStep('simulator_start', { sim_source: dari ? 'konfigurator' : 'langsung' });
+  }
+  function pilihSampul(i) {
+    mulai();
+    setColor(i);
+    if (dari) order.ubah(dari, { raw: { ...draft.raw, 'warna-sampul': SIM_COLORS[i][0] } });
+  }
 
   const onLogo = (e) => {
     const f = e.target.files && e.target.files[0];
     if (!f) return;
+    mulai();
     const reader = new FileReader();
     reader.onload = (ev) => setLogo(ev.target.result);
     reader.readAsDataURL(f);
   };
 
-  const pesanWA = [
-    'Halo Agatha Felix! Saya mau pesan rapor custom sesuai simulator:',
-    '- Warna sampul: ' + SIM_COLORS[color][0],
-    '- Warna tulisan: ' + SIM_ACCENTS[accent][0],
-    ...(nama.trim() ? ['- Nama sekolah: ' + nama.trim()] : []),
-    'Jumlah: ',
-    'Logo sekolah saya kirim di chat ini.',
-  ].join('\n');
+  const pesanWA = pesanSimulator({ sampul: SIM_COLORS[shown][0], tulisan: SIM_ACCENTS[accent][0], nama: nama.trim() }, dari, draft);
 
   const swatchStyle = (bg, isOn) => ({
     width: 44, height: 44, borderRadius: '50%', background: bg, cursor: 'pointer',
@@ -89,10 +134,10 @@ function SimulatorRapor() {
           {/* controls */}
           <div className="af-sim-controls" style={{ background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)', boxShadow: '0 5px 0 var(--af-ink)', padding: 26, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_COLORS[color][0]}</span></div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>1 · Warna sampul <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {sampulLain ? 'sesuai pilihan produk' : SIM_COLORS[shown][0]}</span></div>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {SIM_COLORS.map(([label, bg], i) => (
-                  <button key={label} type="button" title={label} aria-label={'Warna sampul ' + label} aria-pressed={color === i} onClick={() => setColor(i)} style={swatchStyle(bg, color === i)}></button>
+                  <button key={label} type="button" title={label} aria-label={'Warna sampul ' + label} aria-pressed={!sampulLain && shown === i} onClick={() => pilihSampul(i)} style={swatchStyle(bg, !sampulLain && shown === i)}></button>
                 ))}
               </div>
             </div>
@@ -100,13 +145,13 @@ function SimulatorRapor() {
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>2 · Warna tulisan <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_ACCENTS[accent][0]}</span></div>
               <div style={{ display: 'flex', gap: 10 }}>
                 {SIM_ACCENTS.map(([label, bg], i) => (
-                  <button key={label} type="button" title={label} aria-label={'Warna tulisan ' + label} aria-pressed={accent === i} onClick={() => setAccent(i)} style={swatchStyle(bg, accent === i)}></button>
+                  <button key={label} type="button" title={label} aria-label={'Warna tulisan ' + label} aria-pressed={accent === i} onClick={() => { mulai(); setAccent(i); }} style={swatchStyle(bg, accent === i)}></button>
                 ))}
               </div>
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>3 · Nama sekolah / les</div>
-              <Input placeholder="cth: SD Ceria Nusantara" aria-label="Nama sekolah atau tempat les" value={nama} onChange={(e) => setNama(e.target.value)} />
+              <Input placeholder="cth: SD Ceria Nusantara" aria-label="Nama sekolah atau tempat les" value={nama} onChange={(e) => { mulai(); setNama(e.target.value); }} />
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>4 · Logo sekolah (opsional)</div>
@@ -121,6 +166,18 @@ function SimulatorRapor() {
                 {logo ? '✓ Logo terpasang — klik untuk ganti' : '⬆ Unggah logo (PNG/JPG)'}
               </label>
             </div>
+            {/* Only the product name and counts are shown here: nothing typed lands in the page. */}
+            {dari ? (
+              <div className="af-sim-konfig">
+                <span>Ikut terkirim dari pilihan produk:</span>
+                <strong>{dari.name} · {C.ringkasDraft(draft)}</strong>
+                <a href={'#custom-' + dari.slug}>Ubah pilihan</a>
+              </div>
+            ) : (
+              <p className="af-sim-hint">
+                Sudah tahu modelnya? Atur <a href="#custom-map-jahit">Map Jahit</a> atau <a href="#custom-map-press">Map Press</a> dulu: jumlah dan spesifikasinya ikut terkirim bersama desain ini.
+              </p>
+            )}
             <Button color="wa" size="lg" data-wa="simulator" {...window.waPribadi(pesanWA)} target="_blank" rel="noopener noreferrer">
               <window.WaGlyph2 /> Pesan Desain Ini via WA
             </Button>
@@ -161,4 +218,4 @@ function SimulatorRapor() {
   );
 }
 
-Object.assign(window, { SimulatorRapor });
+Object.assign(window, { SimulatorRapor, AfSimulator: { pesanSimulator } });

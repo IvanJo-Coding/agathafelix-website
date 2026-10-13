@@ -9,15 +9,18 @@ const tag = read('project/static/js/af-site.js');
 const handoff = read('project/static/js/lead-handoff.js');
 const config = { googleAdsId: 'AW-18374325686', waConversionLabel: 'AW-18374325686/elV-CN2Bhe4cELbrx7lE' };
 // Pass the window from prepare() to run both scripts on one page, as the browser does.
-function tracking(hostname = 'localhost', pathname = '/', window = {}, settings = config) {
-  const listeners = [], scripts = [], timers = [], navigations = [], loads = [], windowListeners = {};
+// consent: the Clarity choice already stored in localStorage ('granted', 'denied' or null).
+function tracking(hostname = 'localhost', pathname = '/', window = {}, settings = config, consent = null) {
+  const listeners = [], scripts = [], timers = [], navigations = [], loads = [], windowListeners = {}, bars = [], stored = {};
   window.AF_TRACKING = settings;
   window.addEventListener = (type, fn) => { (windowListeners[type] ||= []).push(fn); if (type === 'load') loads.push(fn); };
   window.requestIdleCallback = (fn) => fn();
   const context = vm.createContext({ window, URL, Date,
     location: { hostname, pathname, origin: 'https://' + hostname, assign: (url) => navigations.push(url) },
-    document: { readyState: 'interactive', createElement: () => ({}), head: { appendChild: (el) => scripts.push(el) },
-      addEventListener: (_, fn) => listeners.push(fn) },
+    document: { readyState: 'interactive', createElement: () => ({ setAttribute() {} }), head: { appendChild: (el) => scripts.push(el) },
+      body: { appendChild: (el) => { el.parentNode = { removeChild: () => bars.splice(bars.indexOf(el), 1) }; bars.push(el); } },
+      querySelectorAll: () => [], addEventListener: (_, fn) => listeners.push(fn) },
+    localStorage: { getItem: (key) => (key in stored ? stored[key] : consent), setItem: (key, value) => { stored[key] = value; } },
     setTimeout: (fn) => timers.push(fn),
   });
   vm.runInContext(tag, context);
@@ -28,11 +31,13 @@ function tracking(hostname = 'localhost', pathname = '/', window = {}, settings 
     listeners[0](event);
     return event;
   }
-  return { context, window, listeners, scripts, timers, navigations, loads, windowListeners, click };
+  return { context, window, listeners, scripts, timers, navigations, loads, windowListeners, bars, stored, click };
 }
 const withClarity = { ...config, clarityId: 'tq1clarity' };
 // Clarity's queue holds `arguments` objects from the page's realm; compare them as plain arrays.
 const clarityCalls = (window) => JSON.parse(JSON.stringify(window.clarity.q.map((call) => Array.from(call))));
+const withAnalytics = { ...withClarity, googleAnalyticsId: 'G-F2P4YVFY6P' };
+const googleCalls = (window) => JSON.parse(JSON.stringify(window.dataLayer.map((call) => Array.from(call))));
 
 test('production tag retains its Ads ID; previews do not contact Google', () => {
   assert.equal(tracking().scripts.length, 0);
@@ -75,6 +80,7 @@ test('Clarity starts after load, cookieless, only in production and never on the
   assert.equal(live.scripts.length, 0, 'nothing loads before the page has loaded');
   assert.deepEqual(clarityCalls(live.window)[0], ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' }]);
   assert.equal(live.loads.length, 1);
+  assert.equal(live.bars.length, 0, 'the consent bar waits for the page too');
   live.loads[0]();
   assert.ok(live.scripts[0].src.includes('googletagmanager.com/gtag/js'));
   assert.equal(live.scripts[1].src, 'https://www.clarity.ms/tag/tq1clarity');
@@ -84,22 +90,104 @@ test('Clarity starts after load, cookieless, only in production and never on the
     for (const fn of off.loads) fn();
     assert.equal(off.window.clarity, undefined, host + page);
     assert.ok(!off.scripts.some((el) => String(el.src).includes('clarity')), host + page);
+    assert.equal(off.bars.length, 0, 'no consent bar where Clarity does not run: ' + host + page);
+  }
+});
+// A click on one of the consent buttons (the bar's or the privacy page's).
+const consentClick = (live, value) => live.listeners[0]({ target: { closest: (sel) => (sel === '[data-af-consent]'
+  ? { getAttribute: (name) => (name === 'data-af-consent' ? value : null) } : null) }, preventDefault() {} });
+// The visitor scrolls (after the page has loaded).
+const scroll = (live) => { for (const fn of live.windowListeners.scroll || []) fn(); };
+test('Clarity consent: a bar until the visitor chooses; only "Izinkan" lets Clarity set its analytics cookies', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withClarity);
+  live.loads[0]();
+  assert.equal(live.bars.length, 0, 'the first screen stays clear');
+  scroll(live);
+  assert.equal(live.bars.length, 1, 'a first visit shows the bar once the visitor scrolls');
+  assert.equal(live.bars[0].id, 'af-consent');
+  assert.match(live.bars[0].innerHTML, /data-af-consent="granted">Izinkan<[\s\S]*data-af-consent="denied">Tidak</);
+  assert.match(live.bars[0].innerHTML, /href="\/kebijakan-privasi\/#izin-clarity"/);
+  assert.ok(!/position:fixed;[^}]*(top|inset):/.test(live.bars[0].innerHTML), 'a bottom bar, never a full-screen pop-up');
+  consentClick(live, 'granted');
+  assert.equal(live.stored['af-clarity-consent'], 'granted');
+  assert.deepEqual(clarityCalls(live.window).at(-1), ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' }], 'analytics only, never ads');
+  assert.equal(live.bars.length, 0, 'the bar goes once a choice is made');
+  assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, 0, 'a consent click is no WhatsApp conversion');
+  // Next page: the stored choice is sent before Clarity loads, and no bar returns.
+  const next = tracking('agatha-felix.com', '/raporsekolah/', {}, withClarity, 'granted');
+  assert.deepEqual(clarityCalls(next.window)[0], ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' }]);
+  next.loads[0]();
+  scroll(next);
+  assert.equal(next.bars.length, 0);
+  // Withdrawing it on the privacy page sends "denied", which makes Clarity drop its cookies.
+  consentClick(next, 'denied');
+  assert.equal(next.stored['af-clarity-consent'], 'denied');
+  assert.deepEqual(clarityCalls(next.window).at(-1), ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' }]);
+  const refused = tracking('agatha-felix.com', '/', {}, withClarity, 'denied');
+  refused.loads[0]();
+  scroll(refused);
+  assert.equal(refused.bars.length, 0, '"Tidak" is remembered too');
+  assert.deepEqual(clarityCalls(refused.window)[0], ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' }]);
+  // An element with id="clarity" is window.clarity in a browser; the queue must still be made.
+  const named = tracking('agatha-felix.com', '/kebijakan-privasi/', { clarity: { tagName: 'H2' } }, withClarity);
+  assert.deepEqual(clarityCalls(named.window)[0], ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' }]);
+  // Storage blocked: no choice can be kept, so Clarity stays cookieless.
+  const blocked = tracking('agatha-felix.com', '/', {}, withClarity);
+  blocked.context.localStorage = { getItem() { throw Error('blocked'); }, setItem() { throw Error('blocked'); } };
+  consentClick(blocked, 'granted');
+  assert.deepEqual(clarityCalls(blocked.window).at(-1), ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' }], 'this page still follows the choice');
+});
+test('the privacy page offers the Clarity choice and the bar explains it', () => {
+  const html = read('dist/kebijakan-privasi/index.html');
+  assert.match(html, /<h2 id="izin-clarity">Izin cookie Microsoft Clarity<\/h2>/);
+  assert.match(html, /data-af-consent-status/);
+  assert.match(html, /<button type="button" data-af-consent="granted"[^>]*>Izinkan<\/button><button type="button" data-af-consent="denied"[^>]*>Tolak<\/button>/);
+  assert.match(html, /<h3>Microsoft Clarity<\/h3>[\s\S]*?Cookie hanya dengan izin Anda/);
+  assert.ok(!html.includes('Tanpa cookie</span>'), 'Clarity is no longer described as always cookieless');
+  assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Clarity hanya memakai cookie bila Anda mengizinkannya/);
+  // Browsers expose an element's id as a window property, and Clarity's own loader reads window.clarity.
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'kebijakan-privasi/index.html']) {
+    assert.ok(!/\b(id|name)="clarity"/.test(read('dist/' + file)), file + ' has an element named "clarity"');
   }
 });
 test('contact clicks are counted per button in Clarity, never with the message in the link', () => {
   const live = tracking('agatha-felix.com', '/raporsekolah/', {}, withClarity);
   const queued = () => clarityCalls(live.window).slice(1);
   live.click('https://wa.me/6282219472613?text=Nama%20PIC%3A%20Budi', '_blank', { 'data-wa': 'hero', text: 'Kirim Contoh' });
-  assert.deepEqual(queued(), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'hero']]);
+  assert.deepEqual(queued(), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'hero'], ['set', 'sumber_whatsapp', 'halaman']]);
   assert.ok(!JSON.stringify(live.window.clarity.q).includes('Budi'));
   assert.equal(live.window.dataLayer.at(-1)[2].send_to, config.waConversionLabel, 'the Ads conversion still fires');
   const ads = live.window.dataLayer.length;
   const call = live.click('tel:+6282219472613', '', { text: '\n  Telepon  ' });
   assert.equal(call.defaultPrevented, undefined, 'a phone link opens as usual');
-  assert.deepEqual(queued().slice(2), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon']]);
+  assert.deepEqual(queued().slice(3), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon']]);
   assert.equal(live.window.dataLayer.length, ads, 'a phone call is not an Ads conversion');
   live.click('https://example.com/', '_blank', { text: 'Lainnya' });
-  assert.equal(queued().length, 4);
+  assert.equal(queued().length, 5);
+});
+test('every WhatsApp click says where its button sits: form, simulator, product sheet, floating or page', () => {
+  const live = tracking('agatha-felix.com', '/produk-custom/', {}, withAnalytics);
+  const source = (label) => {
+    live.click('https://wa.me/6282219472613', '_blank', { 'data-wa': label });
+    return [live.window.dataLayer.at(-2)[2].cta_source, clarityCalls(live.window).at(-1)];
+  };
+  assert.deepEqual(source('simulator'), ['simulator', ['set', 'sumber_whatsapp', 'simulator']]);
+  assert.deepEqual(source('sheet-bantu')[0], 'konfigurator');
+  assert.deepEqual(source('bubble')[0], 'mengambang');
+  assert.deepEqual(source('sticky')[0], 'mengambang');
+  assert.deepEqual(source('header')[0], 'header');
+  assert.deepEqual(source('penutup')[0], 'halaman');
+  // The rapor form's handoff opens WhatsApp without a link: GA4 and Clarity
+  // count it from the form, and Ads does not (its thank-you URL goal does).
+  const ads = live.window.dataLayer.filter((e) => e[1] === 'conversion').length;
+  live.window.AFTracking.noteWhatsApp('form');
+  assert.deepEqual(googleCalls(live.window).at(-1), ['event', 'klik_whatsapp',
+    { send_to: withAnalytics.googleAnalyticsId, button_label: 'form', cta_source: 'formulir' }]);
+  assert.deepEqual(clarityCalls(live.window).slice(-3), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'form'], ['set', 'sumber_whatsapp', 'formulir']]);
+  assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, ads);
+  const before = live.window.dataLayer.length;
+  live.window.AFTracking.noteWhatsApp('SD Budi');
+  assert.equal(live.window.dataLayer.length, before, 'only the form label is accepted');
 });
 test('a typed message kept out of the page opens in full and counts once', () => {
   const live = tracking('agatha-felix.com', '/produk-custom/', {}, withClarity);
@@ -112,7 +200,8 @@ test('a typed message kept out of the page opens in full and counts once', () =>
   // React cancelled the click before it bubbled up to the document listener.
   live.listeners[0]({ target: { closest: () => link }, defaultPrevented: true, preventDefault() {} });
   assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, 1);
-  assert.deepEqual(clarityCalls(live.window).slice(1), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'Minta Penawaran via WhatsApp']]);
+  assert.deepEqual(clarityCalls(live.window).slice(1), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'Minta Penawaran via WhatsApp'],
+    ['set', 'sumber_whatsapp', 'halaman']]);
   live.window.AFTracking.openWhatsApp(link, 'https://evil.example/?text=x');
   assert.equal(opened.length, 1, 'only WhatsApp links are opened');
 });
@@ -154,8 +243,6 @@ const thanks = 'https://agatha-felix.com/raporsekolah/terima-kasih.html';
 const thanksPath = '/raporsekolah/terima-kasih.html';
 const wa = 'https://wa.me/6282219472613?text=Local%20test';
 
-const withAnalytics = { ...withClarity, googleAnalyticsId: 'G-F2P4YVFY6P' };
-const googleCalls = (window) => JSON.parse(JSON.stringify(window.dataLayer.map((call) => Array.from(call))));
 
 test('GA4 shares the Google loader and contact events never carry the WhatsApp message', () => {
   const live = tracking('agatha-felix.com', '/produk-custom/', {}, withAnalytics);
@@ -169,7 +256,7 @@ test('GA4 shares the Google loader and contact events never carry the WhatsApp m
   live.click('tel:+6282219472613', '', { text: 'Telepon' });
   const events = googleCalls(live.window).filter((e) => e[0] === 'event');
   assert.deepEqual(events.filter((e) => e[1] !== 'conversion'), [
-    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero' }],
+    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero', cta_source: 'halaman' }],
     ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: 'Telepon' }],
   ]);
   assert.equal(events.filter((e) => e[1] === 'conversion').length, 1);
@@ -259,7 +346,7 @@ test('expired or redirected handoffs are rejected', () => {
 });
 
 // Runs the landing page's own inline script against a stub form.
-function landingForm(fields, { blocked = false } = {}) {
+function landingForm(fields, { blocked = false, before } = {}) {
   const html = read('project/static/raporsekolah/index.html');
   const code = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((match) => match[1]).find((script) => script.includes("getElementById('leadForm')"));
@@ -271,7 +358,10 @@ function landingForm(fields, { blocked = false } = {}) {
   const link = (wa, msg) => ({ href: '', addEventListener() {}, getAttribute: (k) => ({ 'data-wa': wa, 'data-msg': msg }[k] ?? null) });
   out.links = [link('header', 'tanya'), link('hero', null)];
   const location = { set href(v) { out.steps.push('navigate'); out.location.href = v; }, get href() { return out.location.href; } };
-  const AFTracking = { noteStep: (name, params) => out.steps.push(name + (params && params.quote_mode ? ':' + params.quote_mode : '')) };
+  const AFTracking = {
+    noteStep: (name, params) => { const v = params && (params.quote_mode || params.error_type || params.model); out.steps.push(v ? name + ':' + v : name); },
+    noteWhatsApp: (label) => out.steps.push('wa:' + label),
+  };
   vm.runInNewContext(code, { window: { open: (url) => { out.opened = url; }, AFTracking }, AFTracking, location,
     document: { addEventListener() {}, querySelectorAll: (sel) => sel === '[data-wa]' ? out.links : [],
       getElementById: (id) => id === 'leadForm' ? form : id === 'leadErr' ? (out.err = element) : element },
@@ -279,10 +369,12 @@ function landingForm(fields, { blocked = false } = {}) {
     sessionStorage: { setItem: (_, value) => { if (blocked) throw Error('storage blocked'); out.saved = JSON.parse(value); } },
     FormData: class { get(key) { return fields[key]; } },
   });
+  // before(out): what the visitor does before submitting, e.g. picking a model.
+  if (before) before(out);
   out.submit({ preventDefault() {} });
   return out;
 }
-const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', waktu: 'Test', contoh: 'ada', pic: '' };
+const leadFields = { sekolah: 'Test School', jumlah: '120', kota: 'Test City', waktu: 'Test', contoh: 'ada', pic: '', model: 'belum' };
 
 // Runs the built landing page's inline scripts and af-site.js on one shared
 // window in production, as the browser does. A click reaches the link's own
@@ -386,7 +478,7 @@ test('one phone click on the landing page sends one klik_telepon to GA4, with it
   // WhatsApp on the same page still counts one Ads conversion and one GA4 event.
   click(wa[0]);
   assert.equal(events('conversion').length, 1);
-  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp', { send_to: ga4, button_label: 'hero' }]]);
+  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp', { send_to: ga4, button_label: 'hero', cta_source: 'halaman' }]]);
   assert.equal(events('klik_telepon').length, 1, 'a WhatsApp click adds no phone event');
 });
 test('the real form prepares the message and hands off even when storage is blocked', () => {
@@ -782,12 +874,19 @@ test('steps before contact send only known names and enum values, never typed te
   const step = live.window.AFTracking.noteStep;
   assert.equal(step('product_detail_open', { product_id: 'map-jahit', cta_position: 'kartu' }), true);
   assert.equal(step('quote_start', { product_id: 'map-jahit', quote_mode: 'bantu' }), true);
-  assert.equal(step('quote_form_submit'), true);
+  assert.equal(step('quote_form_submit', { model: 'jahit' }), true);
+  assert.equal(step('quote_form_error', { error_type: 'di_bawah_minimum' }), true);
+  assert.equal(step('simulator_start', { sim_source: 'konfigurator' }), true);
+  assert.equal(step('model_select', { model: 'press' }), true);
   for (const [name, params] of [
     ['product_detail_open', { product_id: 'SD Budi Luhur', cta_position: 'kartu' }],
     ['product_detail_open', { product_id: 'map-jahit', cta_position: 'tombol lain' }],
     ['quote_start', { product_id: 'map-jahit', quote_mode: 'detail', sekolah: 'SD Budi' }],
     ['klik_bebas', { product_id: 'map-jahit' }],
+    ['quote_form_submit', {}],
+    ['quote_form_error', { error_type: 'Test School kurang' }],
+    ['model_select', { model: 'bordir' }],
+    ['simulator_start', { sim_source: 'SD Budi' }],
   ]) {
     const before = live.window.dataLayer.length;
     const sent = step(name, params);
@@ -801,28 +900,33 @@ test('steps before contact send only known names and enum values, never typed te
     }
   }
   const events = googleCalls(live.window).filter((e) => e[0] === 'event');
-  assert.deepEqual(events.slice(0, 2), [
+  assert.deepEqual(events.slice(0, 6), [
     ['event', 'product_detail_open', { product_id: 'map-jahit', cta_position: 'kartu', send_to: ga4 }],
     ['event', 'quote_start', { product_id: 'map-jahit', quote_mode: 'bantu', send_to: ga4 }],
+    ['event', 'quote_form_submit', { model: 'jahit', send_to: ga4 }],
+    ['event', 'quote_form_error', { error_type: 'di_bawah_minimum', send_to: ga4 }],
+    ['event', 'simulator_start', { sim_source: 'konfigurator', send_to: ga4 }],
+    ['event', 'model_select', { model: 'press', send_to: ga4 }],
   ]);
-  assert.ok(!events.some((e) => e[1] === 'quote_form_submit'), 'the form submit goes to Clarity only');
   assert.ok(events.every((e) => e[2].send_to === ga4), 'never an Ads destination');
-  assert.deepEqual(clarityCalls(live.window).slice(1, 6), [['event', 'product_detail_open'], ['set', 'produk', 'map-jahit'],
-    ['event', 'quote_start'], ['set', 'produk', 'map-jahit'], ['event', 'quote_form_submit']]);
+  assert.deepEqual(clarityCalls(live.window).slice(1, 14), [['event', 'product_detail_open'], ['set', 'produk', 'map-jahit'],
+    ['event', 'quote_start'], ['set', 'produk', 'map-jahit'], ['event', 'quote_form_submit'], ['set', 'model_rapor', 'jahit'],
+    ['event', 'quote_form_error'], ['set', 'form_error', 'di_bawah_minimum'], ['event', 'simulator_start'], ['set', 'simulator_dari', 'konfigurator'],
+    ['event', 'model_select'], ['set', 'model_rapor', 'press'], ['event', 'quote_start']]);
   const preview = tracking('localhost', '/produk-custom/', {}, withAnalytics);
   preview.window.AFTracking.noteStep('quote_start', { product_id: 'map-jahit', quote_mode: 'detail' });
   assert.ok(!googleCalls(preview.window).some((e) => e[1] === 'quote_start'), 'previews send nothing');
 });
 
-test('the rapor form counts quote_form_submit once it is valid and handed off, before leaving', () => {
+test('the rapor form tells apart starting, a failed check, and a valid handoff to WhatsApp', () => {
   // landingForm() submits once, as a visitor would.
   const ok = landingForm(leadFields);
-  assert.deepEqual(ok.steps, ['quote_form_submit', 'navigate'], 'counted after the handoff, before leaving the page');
+  assert.deepEqual(ok.steps, ['quote_form_submit:belum', 'wa:form', 'navigate'], 'counted after the handoff, before leaving the page');
   ok.focusin();
   assert.equal(ok.steps.at(-1), 'quote_start:form', 'the first field starts the quote');
-  for (const fields of [{ ...leadFields, jumlah: '20' }, { ...leadFields, sekolah: '' }]) {
+  for (const [fields, error] of [[{ ...leadFields, jumlah: '20' }, 'di_bawah_minimum'], [{ ...leadFields, sekolah: '' }, 'data_kurang']]) {
     const bad = landingForm(fields);
-    assert.deepEqual(bad.steps, [], 'an invalid submit is not counted');
+    assert.deepEqual(bad.steps, ['quote_form_error:' + error], 'a failed check is its own event, never a submit');
     assert.equal(bad.location.href, undefined);
   }
 });
@@ -842,6 +946,83 @@ test('the quick quote path sends only what the buyer picked, never defaults as t
   // Only rapor/ijazah maps quote the owner's 100 pcs average.
   assert.deepEqual(JSON.parse(JSON.stringify(kit.CUSTOM_PRODUK.filter((p) => p.kisaran100).map((p) => p.slug))), ['map-jahit', 'map-press']);
   assert.ok(!read('project/ui_kits/website_v2/CustomProduk.jsx').includes('Harga dikirim di penawaran'));
+});
+
+// --- 2026-10-13: configurator drafts, simulator handoff, rapor model, tracking ----
+
+const plain = (value) => JSON.parse(JSON.stringify(value));
+test('the quantity advice follows the colour minimum: 3 colours start at 150 pcs, without "Disarankan 100 pcs"', () => {
+  const { kit } = customKit();
+  assert.deepEqual(plain(kit.jumlahSaran(1)), { min: 50, pilihan: [50, 100, 300, 500], teks: 'Disarankan 100 pcs agar harga per pcs lebih ekonomis.' });
+  assert.deepEqual(plain(kit.jumlahSaran(2)).pilihan, [100, 300, 500], '100 pcs is still allowed, so it stays the advice');
+  const tiga = plain(kit.jumlahSaran(3));
+  assert.deepEqual([tiga.min, tiga.pilihan], [150, [150, 300, 500]], 'the quick picks start at the minimum');
+  assert.ok(!tiga.teks.includes('100') && tiga.teks.includes('150 pcs untuk 3 warna'), tiga.teks);
+  assert.deepEqual(plain(kit.jumlahSaran(20)).pilihan, [1000]);
+  const sheet = read('project/ui_kits/website_v2/CustomProduk.jsx');
+  assert.match(sheet, /<p className="af-cp-hint">\{saran\.teks\}<\/p>/);
+  assert.ok(!sheet.includes('>Disarankan 100 pcs agar harga per pcs lebih ekonomis.<'), 'no fixed advice left in the sheet');
+});
+test('Map Press, 3 colours, 150 pcs: the simulator message carries the whole sheet, and the page keeps the draft', () => {
+  const window = {};
+  const context = vm.createContext({ window, console });
+  for (const f of ['dist/js/CustomHarga.js', 'dist/js/CustomProduk.js', 'dist/js/Simulator.js']) vm.runInContext(read(f), context);
+  const kit = window.AfCustom, sim = window.AfSimulator;
+  const press = kit.CUSTOM_PRODUK.find((p) => p.slug === 'map-press');
+  const draft = { ...kit.DRAFT_BARU, warnaCount: 3, jumlah: 150, raw: { ukuran: 'a4' }, info: { sekolah: 'SD Uji', kota: 'Bekasi', waktu: '' } };
+  assert.equal(kit.ringkasDraft(draft), '3 warna · 150 pcs');
+  assert.equal(kit.pesanDraft(press, draft), kit.pesanCustom(press, draft.raw, 150, 3, draft.info), 'the same message as the sheet');
+  const msg = sim.pesanSimulator({ sampul: 'Hijau', tulisan: 'Emas', nama: '' }, press, draft);
+  assert.match(msg, /^Halo Agatha Felix! Saya mau minta penawaran \*Map Press\*/);
+  assert.match(msg, /- Ukuran: A4[\s\S]*\nJumlah: 150 pcs \(3 warna, minimal 50 pcs per warna\)\nSekolah \/ instansi: SD Uji\nKota pengiriman: Bekasi\n\nDesain dari simulator rapor:\n- Warna sampul: Hijau\n- Warna tulisan: Emas\n\n/);
+  assert.equal(msg.split('\n').at(-1), press.fileNote, 'the logo note still closes the message');
+  assert.match(kit.pesanDraft(press, { ...kit.DRAFT_BARU, warnaCount: 3, jumlah: 100 }), /Jumlah: 150 pcs \(3 warna/, 'raised to the colour minimum, as the sheet does');
+  const bantu = sim.pesanSimulator({ sampul: 'Biru', tulisan: 'Putih', nama: 'SD Uji' }, press, { ...draft, bantu: true });
+  assert.match(bantu, /belum tahu bahan[\s\S]*Jumlah: 150 pcs[\s\S]*- Nama sekolah di sampul: SD Uji\n\nKalau ada, saya kirim foto contoh atau logo/);
+  // One cover colour, never two: a colour typed in the sheet wins over the simulator's
+  // preview, and a swatch picked in the simulator is written into the sheet.
+  const navy = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Emas', nama: '' }, press, { ...draft, raw: { 'warna-sampul': 'Navy' } });
+  assert.deepEqual(navy.match(/Warna sampul: .*/g), ['Warna sampul: Navy']);
+  assert.match(navy, /Desain dari simulator rapor:\n- Warna tulisan: Emas\n/);
+  assert.deepEqual(msg.match(/Warna sampul: .*/g), ['Warna sampul: Hijau'], 'without a sheet colour, the simulator names it');
+  const simSrc = read('project/ui_kits/website_v2/Simulator.jsx');
+  assert.match(simSrc, /if \(dari\) order\.ubah\(dari, \{ raw: \{ \.\.\.draft\.raw, 'warna-sampul': SIM_COLORS\[i\]\[0\] \} \}\);/);
+  assert.match(simSrc, /onClick=\{\(\) => pilihSampul\(i\)\}/);
+  // Straight to the simulator, no product: the quantity is asked for, never left blank.
+  const lepas = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Kuning', nama: '' });
+  assert.match(lepas, /\nJumlah: \.\.\. pcs \(minimal 50 pcs per warna\)\n/);
+  assert.ok(!/^Jumlah: *$/m.test(lepas));
+  // The drafts live in the page and both the sheets and the simulator read them,
+  // so reopening a sheet shows the same colours and quantity.
+  const page = read('project/ui_kits/website_v2/ProdukCustomSections.jsx');
+  assert.match(page, /const order = window\.useCustomDrafts\(\);/);
+  assert.match(page, /<window\.CustomProdukSection order=\{order\} \/>/);
+  assert.match(page, /<window\.SimulatorRapor order=\{order\} \/>/);
+  const sheet = read('project/ui_kits/website_v2/CustomProduk.jsx');
+  const body = sheet.slice(sheet.indexOf('function CustomSheet('), sheet.indexOf('function CustomProdukSection('));
+  assert.ok(!/React\.useState\((100|1|\{\}|false)\)/.test(body), 'the sheet keeps no order state of its own');
+  // Typing in a text field (cover colour, sheet count) starts the quote like a chip does.
+  assert.match(body, /const setRaw = \(next\) => \{ mulai\(\); onDraft\(\{ raw: next \}\); \};/);
+  assert.match(read('project/ui_kits/website_v2/Simulator.jsx'), /<strong>\{dari\.name\} · \{C\.ringkasDraft\(draft\)\}<\/strong>/, 'the simulator shows what it sends along');
+});
+test('a rapor model picked on the landing page goes into the form and every quote message', () => {
+  const html = read('project/static/raporsekolah/index.html');
+  for (const m of ['jahit', 'press']) assert.match(html, new RegExp('<button class="btn btn-pilih" type="button" data-model="' + m + '" aria-pressed="false">'));
+  const form = html.slice(html.indexOf('<form class="lead'), html.indexOf('</form>'));
+  assert.match(form, /name="model" value="jahit"[\s\S]*name="model" value="press"[\s\S]*name="model" value="belum" checked/);
+  // The visitor picks Jahit (a card or the form both land here), then submits.
+  const out = landingForm({ ...leadFields, model: 'jahit' }, { before: (o) => o.change({ target: { name: 'model', value: 'jahit' } }) });
+  assert.match(decodeURIComponent(out.opened), /Sekolah\/lembaga: Test School\nModel: Rapor Jahit\nJumlah: 120 pcs/);
+  assert.deepEqual(out.steps, ['model_select:jahit', 'quote_form_submit:jahit', 'wa:form', 'navigate']);
+  const [header, hero] = out.links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
+  assert.match(hero, /\n- Model: Rapor Jahit\n- Jumlah: \.\.\. pcs/, 'the shared quote buttons name the model');
+  assert.ok(!hero.includes('mohon dibantu pilih modelnya'), 'no request to pick a model once one is picked');
+  assert.ok(!header.includes('Model'), 'the header question stays plain');
+  // Back to "Belum tahu": the model line goes again.
+  const reset = landingForm(leadFields, { before: (o) => { o.change({ target: { name: 'model', value: 'press' } }); o.change({ target: { name: 'model', value: 'belum' } }); } });
+  assert.ok(!decodeURIComponent(reset.links[1].href).includes('- Model:'));
+  assert.match(decodeURIComponent(reset.opened), /Model: belum tahu, mohon disarankan/);
+  assert.deepEqual(reset.steps.slice(0, 2), ['model_select:press', 'quote_form_submit:belum'], '"Belum tahu" is no model choice');
 });
 
 test('product and portfolio photos open large; every zoom target exists and is reachable by keyboard', () => {

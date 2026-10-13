@@ -301,6 +301,44 @@ function pesanBantu(p, raw, jumlah, warnaCount, info = {}) {
   return lines.join('\n');
 }
 
+// Quantity choices for a colour count. Every colour needs 50 pcs, so 3 colours
+// start at 150: the quick picks start at that minimum, and the 100 pcs advice
+// only shows while 100 pcs is still allowed.
+function jumlahSaran(warnaCount) {
+  const min = MOQ_PER_WARNA * warnaCount;
+  return {
+    min,
+    pilihan: [min, ...JUMLAH_CEPAT.filter((n) => n > min)],
+    teks: min > 100
+      ? 'Mulai ' + min + ' pcs untuk ' + warnaCount + ' warna; makin banyak, makin ekonomis harga per pcs.'
+      : 'Disarankan 100 pcs agar harga per pcs lebih ekonomis.',
+  };
+}
+
+// One order draft per product: picks, colour count, quantity, order data and
+// the quick path. useCustomDrafts() keeps them in the page, so closing a sheet,
+// stepping to another product or trying the simulator loses nothing.
+const DRAFT_BARU = { raw: {}, warnaCount: 1, jumlah: 100, info: { sekolah: '', kota: '', waktu: '' }, bantu: false };
+
+// The message a product sheet sends for its draft.
+function pesanDraft(p, d) {
+  const send = d.bantu ? pesanBantu : pesanCustom;
+  return send(p, d.raw, Math.max(d.jumlah, MOQ_PER_WARNA * d.warnaCount), d.warnaCount, d.info);
+}
+const ringkasDraft = (d) => (d.warnaCount > 1 ? d.warnaCount + ' warna · ' : '') + Math.max(d.jumlah, MOQ_PER_WARNA * d.warnaCount) + ' pcs';
+
+// simDari: the rapor product (Map Jahit or Map Press) whose draft the simulator
+// sends along, set by the sheet's simulator link or by the latest change to it.
+function useCustomDrafts() {
+  const [drafts, setDrafts] = React.useState({});
+  const [simDari, setSimDari] = React.useState(null);
+  const ubah = React.useCallback((p, patch) => {
+    setDrafts((all) => ({ ...all, [p.slug]: { ...DRAFT_BARU, ...all[p.slug], ...patch } }));
+    if (p.simulator) setSimDari(p.slug);
+  }, []);
+  return { drafts, ubah, simDari };
+}
+
 // Price estimate from CustomHarga.jsx. Returns null until every number it needs
 // is filled in: the base price for the size/type and quantity tier, and the
 // add-on of every priced option chosen. A "lain" choice is always quoted by hand.
@@ -514,19 +552,17 @@ function Stepper({ label, value, min, max = Infinity, step, onChange }) {
   );
 }
 
-function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
+function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo, draft, onDraft }) {
   const { Badge, Button, Select, Input } = DS2cp;
-  const [raw, setRaw] = React.useState({});
-  const [warnaCount, setWarnaCount] = React.useState(1);
-  const [jumlah, setJumlah] = React.useState(100);
-  const [info, setInfo] = React.useState({ sekolah: '', kota: '', waktu: '' });
+  // bantu is the quick path: the buyer leaves bahan, finishing and isi to us.
+  // Their picks stay in raw, so switching back to the detail path loses nothing.
+  const { raw, warnaCount, jumlah, info, bantu } = draft;
+  // Text fields (cover colour, a sheet count) start the quote too; mulai() counts it once.
+  const setRaw = (next) => { mulai(); onDraft({ raw: next }); };
   const [slide, setSlide] = React.useState(0);
-  // Quick path: the buyer leaves bahan, finishing and isi to us. Their picks
-  // stay in raw, so switching back to the detail path loses nothing.
-  const [bantu, setBantu] = React.useState(false);
   const started = React.useRef(false);
 
-  React.useEffect(() => { setRaw({}); setSlide(0); setBantu(false); started.current = false; }, [p.slug]);
+  React.useEffect(() => { setSlide(0); started.current = false; }, [p.slug]);
 
   // quote_start, once per product shown: the first step toward a quote.
   function mulai(mode) {
@@ -535,15 +571,16 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
     if (window.AFTracking && window.AFTracking.noteStep) window.AFTracking.noteStep('quote_start', { product_id: p.slug, quote_mode: mode || (bantu ? 'bantu' : 'detail') });
   }
   function pilihMode(cepat) {
-    setBantu(cepat);
+    onDraft({ bantu: cepat });
     mulai(cepat ? 'bantu' : 'detail');
   }
-  function ubahJumlah(n) { mulai(); setJumlah(n); }
-  function ubahInfo(next) { mulai(); setInfo(next); }
+  function ubahJumlah(n) { mulai(); onDraft({ jumlah: n }); }
+  function ubahInfo(next) { mulai(); onDraft({ info: next }); }
 
   const sel = customSel(p, raw);
   const imgs = galleryCustom(p, sel);
-  const minJumlah = MOQ_PER_WARNA * warnaCount;
+  const saran = jumlahSaran(warnaCount);
+  const minJumlah = saran.min;
   const est = perkiraanCustom(p, raw, jumlah, window.HARGA_CUSTOM);
 
   function pick(f, op) {
@@ -564,14 +601,13 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
   function setWarna(n) {
     mulai();
     const v = Math.max(1, Math.min(MAX_WARNA, n));
-    setWarnaCount(v);
-    if (jumlah < MOQ_PER_WARNA * v) setJumlah(MOQ_PER_WARNA * v);
+    onDraft({ warnaCount: v, jumlah: Math.max(jumlah, MOQ_PER_WARNA * v) });
   }
 
   const fields = visibleFields(p, sel);
   const byGroup = (g) => fields.filter((f) => f.group === g);
   const lanjutan = byGroup('lanjutan');
-  const waText = (bantu ? pesanBantu : pesanCustom)(p, raw, Math.max(jumlah, minJumlah), warnaCount, info);
+  const waText = pesanDraft(p, draft);
   const waLain = 'Halo Agatha Felix! Saya tertarik ' + p.name + ', tapi modelnya berbeda dari pilihan di website. Saya kirim foto contohnya di chat ini.';
 
   return (
@@ -646,13 +682,13 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
               <div className="af-cp-field-h">Jumlah pesanan (pcs)</div>
               <Stepper label="Jumlah pesanan" value={jumlah} min={minJumlah} step={MOQ_PER_WARNA} onChange={ubahJumlah} />
               <div className="af-opts" style={{ marginTop: 10 }}>
-                {JUMLAH_CEPAT.filter((n) => n >= minJumlah).map((n) => (
+                {saran.pilihan.map((n) => (
                   <button key={n} type="button" className="af-opt" aria-pressed={jumlah === n} onClick={() => ubahJumlah(n)}>
                     {n} pcs{n === 100 ? <span className="af-opt-tag">Saran</span> : null}
                   </button>
                 ))}
               </div>
-              <p className="af-cp-hint">Disarankan 100 pcs agar harga per pcs lebih ekonomis.</p>
+              <p className="af-cp-hint">{saran.teks}</p>
             </div>
           </div>
 
@@ -684,15 +720,16 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
                 <strong style={{ fontSize: '1rem', display: 'block' }}>{p.kisaran100 ? 'Perkiraan harga' : 'Cara kami menghitung harga'}</strong>
                 {p.kisaran100
                   ? <>Rata-rata sekitar <b>{p.kisaran100}/pcs untuk 100 pcs</b>. Harga final mengikuti model, bahan, cetak, dan jumlah yang Anda pilih; di bawah 100 pcs biasanya lebih mahal per pcs.</>
-                  : <>Harga per pcs mengikuti ukuran, bahan, cetak, dan jumlah: makin banyak, makin ekonomis. Minimal 50 pcs, disarankan 100 pcs.</>}
+                  : <>Harga per pcs mengikuti ukuran, bahan, cetak, dan jumlah: makin banyak, makin ekonomis. {minJumlah > 100 ? 'Minimal ' + minJumlah + ' pcs untuk ' + warnaCount + ' warna.' : 'Minimal 50 pcs, disarankan 100 pcs.'}</>}
                 {' '}Kirim pilihan ini lewat WhatsApp, kami balas dengan rincian harga per pcs dan mockup gratis. Di jam kerja (Senin–Sabtu, 08.00–17.00 WIB) biasanya di bawah 1 jam.
               </div>
             )}
           </div>
 
           {p.simulator ? (
-            <a href="#simulator" onClick={(e) => { e.preventDefault(); onLeaveTo('simulator'); }} style={{ fontSize: '.86rem', fontWeight: 700, color: 'var(--af-purple-deep)' }}>
-              🎨 Mau lihat dulu warna dan logonya? Coba simulator rapor
+            // onDraft({}) links the simulator to this draft even if nothing was changed yet.
+            <a href="#simulator" onClick={(e) => { e.preventDefault(); onDraft({}); onLeaveTo('simulator'); }} style={{ fontSize: '.86rem', fontWeight: 700, color: 'var(--af-purple-deep)' }}>
+              🎨 Mau lihat dulu warna dan logonya? Coba simulator rapor, pilihan ini ikut terbawa
             </a>
           ) : null}
 
@@ -710,7 +747,8 @@ function CustomSheet({ p, pos, total, onClose, onStep, onLeaveTo }) {
   );
 }
 
-function CustomProdukSection() {
+// order: useCustomDrafts() from the page, shared with the simulator.
+function CustomProdukSection({ order }) {
   const { SectionHeader, Button } = DS2cp;
   const [openSlug, setOpenSlug] = React.useState(null);
   const idx = CUSTOM_PRODUK.findIndex((p) => p.slug === openSlug);
@@ -793,13 +831,15 @@ function CustomProdukSection() {
       </div>
     </section>
     {idx >= 0 ? (
-      <CustomSheet p={CUSTOM_PRODUK[idx]} pos={idx} total={CUSTOM_PRODUK.length} onClose={close} onStep={step} onLeaveTo={leaveTo} />
+      <CustomSheet p={CUSTOM_PRODUK[idx]} pos={idx} total={CUSTOM_PRODUK.length} onClose={close} onStep={step} onLeaveTo={leaveTo}
+        draft={order.drafts[CUSTOM_PRODUK[idx].slug] || DRAFT_BARU} onDraft={(patch) => order.ubah(CUSTOM_PRODUK[idx], patch)} />
     ) : null}
     </>
   );
 }
 
 Object.assign(window, {
-  CustomProdukSection,
-  AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize },
+  CustomProdukSection, useCustomDrafts,
+  AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize,
+    jumlahSaran, pesanDraft, ringkasDraft, DRAFT_BARU },
 });

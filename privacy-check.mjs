@@ -196,6 +196,19 @@ await click(`[...document.querySelectorAll('#simulator a')].find((a) => a.href.s
 await settle();
 checkOpened(await tracked(), [MARK.simulasi]);
 
+console.log('/produk-custom/ sheet to simulator (Map Press, 3 colours)');
+await visit(`http://agatha-felix.com/produk-custom/#custom-map-press`, `!!document.querySelector('.af-sheet')`);
+await type('.af-sheet input[placeholder="cth: SDIT Al-Furqon"]', MARK.sekolah);
+for (let i = 0; i < 2; i++) await click(`document.querySelector('.af-sheet button[aria-label="Jumlah warna tambah"]')`);
+await click(`[...document.querySelectorAll('.af-sheet a')].find((a) => /Coba simulator rapor/.test(a.textContent))`);
+await poll(() => evaluate(`!document.querySelector('.af-sheet') && !!document.querySelector('#simulator .af-sim-konfig')`), 5000, 'the linked simulator');
+check(await evaluate(`document.querySelector('#simulator .af-sim-konfig strong').textContent`) === 'Map Press · 3 warna · 150 pcs',
+  'the simulator shows the product, colours and quantity it sends along');
+check((await markedAttributes()).length === 0, 'the school typed in the sheet stays out of the page: ' + JSON.stringify(await markedAttributes()));
+await click(`[...document.querySelectorAll('#simulator a')].find((a) => a.href.startsWith(${JSON.stringify(WA)}))`);
+await settle();
+checkOpened(await tracked(), [MARK.sekolah, '*Map Press*', 'Jumlah: 150 pcs (3 warna']);
+
 console.log('/raporsekolah/ form');
 await visit('http://agatha-felix.com/raporsekolah/', `!!document.querySelector('form.lead')`);
 await type('form.lead input[name=sekolah]', MARK.formSekolah);

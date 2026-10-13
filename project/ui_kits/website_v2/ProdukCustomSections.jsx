@@ -64,6 +64,8 @@ const PC_CSS_ID = 'af-produk-custom';
 
 function ProdukCustomPage() {
   const { Badge, Button, Step, Chip, FAQItem, SectionHeader } = DS2c;
+  // Order drafts shared by the product sheets and the simulator.
+  const order = window.useCustomDrafts();
   return (
     <div data-screen-label="Produk Custom">
       <window.HeaderV2 active="produk-custom.html" />
@@ -109,12 +111,12 @@ function ProdukCustomPage() {
           <window.Wave fill="var(--af-yellow-tint)" />
         </section>
 
-        <window.CustomProdukSection />
+        <window.CustomProdukSection order={order} />
 
         {/* Real orders before the long simulator, so proof comes early. */}
         <window.PortfolioCustom />
 
-        <window.SimulatorRapor />
+        <window.SimulatorRapor order={order} />
 
         {/* professionals */}
         <section id="profesional" style={{ background: 'var(--af-ink)', position: 'relative' }}>
