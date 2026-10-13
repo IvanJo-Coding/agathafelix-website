@@ -81,7 +81,7 @@
     if (label === 'form') noteButton(label, true);
   }
   window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep,
-    noteWhatsApp: noteWhatsApp };
+    noteWhatsApp: noteWhatsApp, setClarityConsent: setConsent };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
@@ -131,20 +131,82 @@
   }
 
   // Microsoft Clarity: click, scroll and attention heatmaps, time on page, and
-  // recordings with form fields masked. The project keeps its cookies off and
-  // this call says so too, so a visitor is never followed across pages or
-  // visits. It skips the thank-you page, whose WhatsApp link carries the
-  // visitor's message, and waits for the load event so it never competes with
-  // the first paint.
+  // recordings with form fields masked. It skips the thank-you page, whose
+  // WhatsApp link carries the visitor's message, and waits for the load event
+  // so it never competes with the first paint.
+  //
+  // Consent (Clarity Consent API v2): the project keeps Cookies OFF, which is
+  // Microsoft's consent mode, so without a "granted" signal Clarity sets no
+  // cookie and every page view is its own session. A visitor who taps Izinkan
+  // in the bar below, or on /kebijakan-privasi/, grants analytics storage only:
+  // Clarity's first-party cookies then join their pages into one session. Ads
+  // storage stays denied. The choice lives in this browser's localStorage.
+  var CONSENT_KEY = 'af-clarity-consent';
   var useClarity = production && !!config.clarityId && !thankYou;
+  var bar = null;
+  function readConsent() {
+    try {
+      var value = localStorage.getItem(CONSENT_KEY);
+      return value === 'granted' || value === 'denied' ? value : null;
+    } catch (_) { return null; }
+  }
+  function sendConsent(granted) {
+    window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: granted ? 'granted' : 'denied' });
+  }
+  // Also the bar's and the privacy page's buttons. Denying after a grant makes
+  // Clarity delete its cookies and start a new cookieless session.
+  function setConsent(granted) {
+    try { localStorage.setItem(CONSENT_KEY, granted ? 'granted' : 'denied'); } catch (_) {}
+    if (useClarity) sendConsent(granted);
+    if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+    bar = null;
+    showChoice();
+  }
+  // The privacy page shows the current choice next to its buttons.
+  function showChoice() {
+    var value = readConsent();
+    var text = value === 'granted' ? 'Diizinkan' : value === 'denied' ? 'Ditolak (tanpa cookie)' : 'Belum dipilih (tanpa cookie)';
+    document.querySelectorAll('[data-af-consent-status]').forEach(function (el) { el.textContent = text; });
+    document.querySelectorAll('button[data-af-consent]').forEach(function (el) {
+      el.setAttribute('aria-pressed', String(el.getAttribute('data-af-consent') === value));
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showChoice);
+  else showChoice();
+  // A small bar, never a pop-up: fixed at the bottom, clear of the WhatsApp
+  // bubble and the landing page's sticky bar, shown from the first scroll on
+  // each page until a choice is made.
+  var BAR_CSS = '#af-consent{position:fixed;z-index:58;left:16px;bottom:16px;max-width:440px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;' +
+    'padding:12px 14px;background:#fff;color:#2B2A28;border:2px solid #2B2A28;border-radius:16px;box-shadow:0 4px 0 #2B2A28;' +
+    'font:500 13.5px/1.45 "Plus Jakarta Sans","Plus Jakarta Sans Fallback",system-ui,sans-serif}' +
+    '#af-consent p{margin:0;flex:1 1 220px}#af-consent a{color:#13668F;font-weight:700}#af-consent div{display:flex;gap:8px}' +
+    '#af-consent button{min-height:40px;padding:8px 18px;border-radius:999px;border:2px solid #2B2A28;background:#fff;color:#2B2A28;cursor:pointer;' +
+    'font:800 14px/1 "Baloo 2","Baloo 2 Fallback",sans-serif}#af-consent button[data-af-consent="granted"]{background:#2B2A28;color:#fff}' +
+    '@media (max-width:680px){#af-consent{left:12px;right:12px;bottom:94px;max-width:none}}' +
+    '@media (max-width:700px){body:has(.stickybar) #af-consent{left:12px;right:12px;bottom:84px;max-width:none}}';
+  function showBar() {
+    if (bar || readConsent()) return;
+    bar = document.createElement('div');
+    bar.id = 'af-consent';
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Izin cookie Microsoft Clarity');
+    bar.innerHTML = '<style>' + BAR_CSS + '</style><p>Boleh kami pakai cookie Microsoft Clarity untuk menyambungkan kunjungan Anda antarhalaman? ' +
+      'Isi formulir tetap disamarkan. <a href="/kebijakan-privasi/#izin-clarity">Detail</a></p>' +
+      '<div><button type="button" data-af-consent="granted">Izinkan</button><button type="button" data-af-consent="denied">Tidak</button></div>';
+    document.body.appendChild(bar);
+  }
   if (useClarity) {
-    window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
-    window.clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
+    // typeof, not ||: an element with id="clarity" is also window.clarity.
+    if (typeof window.clarity !== 'function') window.clarity = function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+    sendConsent(readConsent() === 'granted');
     later.push(function () {
       var clarity = document.createElement('script');
       clarity.async = true;
       clarity.src = 'https://www.clarity.ms/tag/' + encodeURIComponent(config.clarityId);
       document.head.appendChild(clarity);
+    }, function () {
+      // Not before the first scroll, so the first screen of an ad landing page stays clear.
+      window.addEventListener('scroll', showBar, { once: true, passive: true });
     });
   }
   // Tags that wait for the page: started together after the load event, once
@@ -190,10 +252,16 @@
   }
 
   document.addEventListener('click', function (event) {
+    var target = event.target.closest ? event.target : event.target.parentElement;
+    var choice = target && target.closest('[data-af-consent]');
+    var consent = choice && choice.getAttribute('data-af-consent');
+    if (consent === 'granted' || consent === 'denied') {
+      setConsent(consent === 'granted');
+      return;
+    }
     // The prepared form already uses the thank-you URL conversion. Its retry
     // button continues that same lead; it must not add a second WhatsApp goal.
     if (thankYou && window.AF_LEAD_URL) return;
-    var target = event.target.closest ? event.target : event.target.parentElement;
     var link = target && target.closest('a[href]');
     if (!link || event.defaultPrevented) return;
     var url;
