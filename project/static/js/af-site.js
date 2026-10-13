@@ -41,13 +41,19 @@
   }
   // Steps before contact. Only these names, and only enum values or a product
   // slug from the code: nothing a visitor typed can be passed through here.
-  // quote_form_submit goes to Clarity only; GA4 already counts that handoff
-  // as generate_lead on the thank-you page. None of these is an Ads goal.
+  // The rapor form: quote_start (first field), quote_form_error (a failed
+  // submit), quote_form_submit (valid, handed to WhatsApp; GA4 also counts it
+  // as generate_lead on the thank-you page). None of these is an Ads goal.
   var STEPS = {
     product_detail_open: { product_id: 'slug', cta_position: ['kartu', 'tautan', 'navigasi'] },
     quote_start: { product_id: 'slug', quote_mode: ['detail', 'bantu', 'form'] },
-    quote_form_submit: {},
+    quote_form_error: { error_type: ['data_kurang', 'di_bawah_minimum'] },
+    quote_form_submit: { model: ['jahit', 'press', 'belum'] },
+    model_select: { model: ['jahit', 'press'] },
+    simulator_start: { sim_source: ['konfigurator', 'langsung'] },
   };
+  // Clarity tags for the values worth filtering recordings by.
+  var TAGS = { product_id: 'produk', model: 'model_rapor', error_type: 'form_error', sim_source: 'simulator_dari' };
   function noteStep(name, params) {
     var spec = STEPS[name];
     if (!spec) return false;
@@ -58,17 +64,24 @@
       if (!ok) return false;
       clean[key] = value;
     }
-    if (name !== 'quote_form_submit' && production && config.googleAnalyticsId) {
+    if (useClarity) {
+      window.clarity('event', name);
+      for (var tag in TAGS) if (clean[tag]) window.clarity('set', TAGS[tag], clean[tag]);
+    }
+    if (production && config.googleAnalyticsId) {
       clean.send_to = config.googleAnalyticsId;
       window.gtag('event', name, clean);
     }
-    if (useClarity) {
-      window.clarity('event', name);
-      if (clean.product_id) window.clarity('set', 'produk', clean.product_id);
-    }
     return true;
   }
-  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep };
+  // A WhatsApp chat opened without a link click: the rapor form's handoff,
+  // which Google Ads counts through the thank-you page instead. GA4 and
+  // Clarity get it as klik_whatsapp from the form.
+  function noteWhatsApp(label) {
+    if (label === 'form') noteButton(label, true);
+  }
+  window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep,
+    noteWhatsApp: noteWhatsApp };
 
   // A thank-you page view is the form conversion (a URL rule in Google Ads), so
   // only a fresh handoff that has not been measured yet may send one. Direct
@@ -157,16 +170,23 @@
     var name = link.getAttribute('data-wa') || link.getAttribute('aria-label') || link.textContent || '';
     return name.replace(/\s+/g, ' ').trim().slice(0, 60) || 'tanpa label';
   }
+  // Where a WhatsApp button sits, from its data-wa label: the rapor form, the
+  // simulator, a product sheet, the floating bubble or the landing page's
+  // sticky bar, the header, or anywhere else on the page.
+  var SOURCES = { form: 'formulir', simulator: 'simulator', 'sheet-detail': 'konfigurator', 'sheet-bantu': 'konfigurator',
+    'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header' };
   // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
   function noteContact(link, whatsapp) {
-    var name = buttonName(link);
-    if (production && config.googleAnalyticsId) window.gtag('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon', {
-      send_to: config.googleAnalyticsId,
-      button_label: name,
-    });
+    noteButton(buttonName(link), whatsapp);
+  }
+  function noteButton(name, whatsapp) {
+    var params = { send_to: config.googleAnalyticsId, button_label: name };
+    if (whatsapp) params.cta_source = SOURCES[name] || 'halaman';
+    if (production && config.googleAnalyticsId) window.gtag('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon', params);
     if (!useClarity) return;
     window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
     window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', name);
+    if (whatsapp) window.clarity('set', 'sumber_whatsapp', params.cta_source);
   }
 
   document.addEventListener('click', function (event) {
