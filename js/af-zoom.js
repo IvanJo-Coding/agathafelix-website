@@ -14,13 +14,14 @@
   style.textContent =
     '[data-zoom]{cursor:zoom-in}' +
     '[data-zoom]:focus-visible{outline:3px solid #1D87BD;outline-offset:2px}' +
-    '.afz{padding:0;border:0;margin:0;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;background:#141210;overflow:hidden}' +
+    '.afz{padding:0;border:0;margin:0;width:100%;height:100vh;height:100dvh;max-width:none;max-height:none;background:#141210;overflow:hidden}' +
     '.afz::backdrop{background:rgba(20,18,16,.92)}' +
     '.afz-fig{margin:0;height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:68px 16px 76px}' +
     '.afz-img{max-width:100%;max-height:100%;min-height:0;object-fit:contain;border-radius:12px;background:#fff;touch-action:pan-y pinch-zoom}' +
     '.afz-cap{color:#fff;font:600 14px/1.45 system-ui,sans-serif;text-align:center;max-width:640px}' +
     '.afz-btn{position:absolute;width:48px;height:48px;border-radius:999px;border:2px solid #2B2A28;background:#fff;color:#2B2A28;' +
-      'font:700 28px/1 system-ui,sans-serif;cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 0 rgba(0,0,0,.35)}' +
+      'padding:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 3px 0 rgba(0,0,0,.35)}' +
+    '.afz-btn svg{display:block;width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.75;stroke-linecap:round;stroke-linejoin:round}' +
     '.afz-btn[hidden]{display:none}' +
     '.afz-btn:focus-visible{outline:3px solid #F5D920;outline-offset:2px}' +
     '.afz-close{top:12px;right:12px}' +
@@ -36,6 +37,12 @@
     return (pic && pic.getAttribute('alt')) || '';
   }
 
+  // Drawn icons, not the ‹ › × characters: a glyph sits on its font's
+  // baseline, so it lands off-centre in the circle, by a different amount per phone font.
+  function icon(d) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>';
+  }
+
   function build() {
     dialog = document.createElement('dialog');
     dialog.className = 'afz';
@@ -43,9 +50,9 @@
     dialog.innerHTML =
       '<figure class="afz-fig"><img class="afz-img" alt="" decoding="async"><figcaption class="afz-cap"></figcaption></figure>' +
       '<span class="afz-count" aria-live="polite"></span>' +
-      '<button type="button" class="afz-btn afz-prev" aria-label="Foto sebelumnya">&#8249;</button>' +
-      '<button type="button" class="afz-btn afz-next" aria-label="Foto berikutnya">&#8250;</button>' +
-      '<button type="button" class="afz-btn afz-close" aria-label="Tutup foto">&times;</button>';
+      '<button type="button" class="afz-btn afz-prev" aria-label="Foto sebelumnya">' + icon('M15.5 5 8.5 12l7 7') + '</button>' +
+      '<button type="button" class="afz-btn afz-next" aria-label="Foto berikutnya">' + icon('M8.5 5l7 7-7 7') + '</button>' +
+      '<button type="button" class="afz-btn afz-close" aria-label="Tutup foto">' + icon('M6.5 6.5l11 11m0-11-11 11') + '</button>';
     document.body.appendChild(dialog);
     img = dialog.querySelector('.afz-img');
     caption = dialog.querySelector('.afz-cap');
