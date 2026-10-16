@@ -1,12 +1,15 @@
 // Minimal static server for previewing dist/ locally with clean-URL support.
 // Mirrors how GitHub Pages serves folders: /produk-standar -> /produk-standar/index.html
+// PREVIEW_DIST serves another folder and PORT=0 picks a free port (both for test.mjs).
 import http from 'http';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const DIST = path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist');
-const PORT = Number(process.env.PORT) || 4173;
+const DIST = process.env.PREVIEW_DIST
+  ? path.resolve(process.env.PREVIEW_DIST)
+  : path.join(path.dirname(fileURLToPath(import.meta.url)), 'dist');
+const PORT = process.env.PORT ? Number(process.env.PORT) : 4173;
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -18,6 +21,14 @@ const TYPES = {
   '.mp4': 'video/mp4', '.webm': 'video/webm',
 };
 
+// Inside DIST only. A prefix check is not enough: DIST + '-backup' and
+// '/..%5Cdist-x' (a backslash on Windows) both start with the DIST string.
+function insideDist(abs) {
+  const rel = path.relative(DIST, abs);
+  return rel !== '' && rel !== '..' && !rel.startsWith('..' + path.sep) && !path.isAbsolute(rel);
+}
+
+// Throws URIError for a malformed escape such as /%; the handler answers 400.
 async function resolve(urlPath) {
   let p = decodeURIComponent(urlPath.split('?')[0]);
   if (p.endsWith('/')) p += 'index.html';
@@ -25,7 +36,7 @@ async function resolve(urlPath) {
   if (!path.extname(p)) candidates.push(p + '.html', p + '/index.html');
   for (const c of candidates) {
     const abs = path.join(DIST, c);
-    if (!abs.startsWith(DIST)) continue; // path traversal guard
+    if (!insideDist(abs)) continue;
     try {
       const st = await fs.stat(abs);
       if (st.isFile()) return abs;
@@ -34,7 +45,7 @@ async function resolve(urlPath) {
   return null;
 }
 
-const server = http.createServer(async (req, res) => {
+async function respond(req, res) {
   const file = await resolve(req.url);
   if (file) {
     const body = await fs.readFile(file);
@@ -49,6 +60,17 @@ const server = http.createServer(async (req, res) => {
   } catch {
     res.writeHead(404); res.end('Not found');
   }
+}
+
+// One bad request must never stop the preview for the requests after it.
+const server = http.createServer(async (req, res) => {
+  try {
+    await respond(req, res);
+  } catch (err) {
+    const bad = err instanceof URIError;
+    if (!res.headersSent) res.writeHead(bad ? 400 : 500, { 'content-type': 'text/plain; charset=utf-8' });
+    res.end(bad ? 'Bad request' : 'Server error');
+  }
 });
 
-server.listen(PORT, () => console.log(`▶ Preview: http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`▶ Preview: http://localhost:${server.address().port}`));

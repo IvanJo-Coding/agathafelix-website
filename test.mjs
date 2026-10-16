@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import os from 'node:os';
+import http from 'node:http';
+import { spawn } from 'node:child_process';
 
 const read = (file) => fs.readFileSync(file, 'utf8');
 const tag = read('project/static/js/af-site.js');
@@ -1126,4 +1129,57 @@ test('landing rapor has one main landmark; the custom page shows proof before th
   assert.ok(at('class="af-pc-klien"') > 0 && at('class="af-pc-klien"') < at('id="produk-custom"'), 'client logos under the hero');
   assert.ok(at('id="karya"') > 0 && at('id="karya"') < at('id="simulator"'), 'portfolio before the simulator');
   for (const [, src] of custom.matchAll(/<img src="(\/raporsekolah\/img\/klien\/[\w-]+\.webp)"/g)) assert.ok(fs.existsSync(path.join('dist', src)), src);
+});
+
+// Runs preview.mjs on a free port over a throwaway dist/, with a "dist-…" file
+// and folder beside it that must stay unreadable.
+async function previewServer() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'af-preview-'));
+  const dist = path.join(root, 'dist');
+  fs.mkdirSync(path.join(dist, 'produk-custom'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'dist-backup'));
+  fs.writeFileSync(path.join(dist, 'index.html'), '<p>beranda</p>');
+  fs.writeFileSync(path.join(dist, 'produk-custom', 'index.html'), '<p>custom</p>');
+  fs.writeFileSync(path.join(dist, '404.html'), '<p>tidak ada</p>');
+  fs.writeFileSync(path.join(root, 'dist-audit-marker.txt'), 'RAHASIA-LUAR');
+  fs.writeFileSync(path.join(root, 'dist-backup', 'secret.txt'), 'RAHASIA-BACKUP');
+  const child = spawn(process.execPath, ['preview.mjs'], { env: { ...process.env, PORT: '0', PREVIEW_DIST: dist } });
+  const stop = () => { child.kill(); fs.rmSync(root, { recursive: true, force: true }); };
+  let port;
+  try {
+    port = await new Promise((ok, fail) => {
+      let out = '';
+      child.stdout.on('data', (d) => { out += d; const m = out.match(/localhost:(\d+)/); if (m) ok(Number(m[1])); });
+      child.on('exit', (code) => fail(new Error('preview exited with ' + code)));
+    });
+  } catch (err) { stop(); throw err; }
+  // http.get sends the path exactly as written; fetch would normalise it first.
+  const get = (p) => new Promise((ok, fail) => http.get({ host: '127.0.0.1', port, path: p }, (res) => {
+    let body = '';
+    res.setEncoding('utf8');
+    res.on('data', (d) => { body += d; });
+    res.on('end', () => ok({ status: res.statusCode, body }));
+  }).on('error', fail));
+  return { get, child, stop };
+}
+test('the preview server serves dist/ only: no traversal, no "dist-…" sibling', async () => {
+  const server = await previewServer();
+  try {
+    assert.deepEqual(await server.get('/'), { status: 200, body: '<p>beranda</p>' });
+    assert.deepEqual(await server.get('/produk-custom'), { status: 200, body: '<p>custom</p>' });
+    for (const p of ['/..%5Cdist-audit-marker.txt', '/%2E%2E/dist-audit-marker.txt', '/%2E%2E%2Fdist-audit-marker.txt',
+      '/../dist-audit-marker.txt', '/..%5Cdist-backup%5Csecret.txt', '/%2E%2E/dist-backup/secret.txt']) {
+      const res = await server.get(p);
+      assert.equal(res.status, 404, p);
+      assert.ok(!res.body.includes('RAHASIA'), p);
+    }
+  } finally { server.stop(); }
+});
+test('a malformed URL gets 400 and the preview keeps serving the requests after it', async () => {
+  const server = await previewServer();
+  try {
+    for (const p of ['/%', '/%E0%A4%A', '/produk%ZZ']) assert.equal((await server.get(p)).status, 400, p);
+    assert.deepEqual(await server.get('/'), { status: 200, body: '<p>beranda</p>' });
+    assert.equal(server.child.exitCode, null, 'the process is still running');
+  } finally { server.stop(); }
 });
