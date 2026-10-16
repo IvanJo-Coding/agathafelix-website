@@ -324,6 +324,18 @@ test('direct and expired thank-you visits deliver WhatsApp clicks without a form
     assert.equal(result.window.dataLayer.at(-1)[2].send_to, config.waConversionLabel);
   }
 });
+test('on a prepared thank-you page a phone call still counts; the WhatsApp retry adds no second goal', () => {
+  const visit = prepare(thanks, { url: wa, created: Date.now(), measured: false });
+  const live = tracking('agatha-felix.com', thanksPath, visit.window, withAnalytics);
+  const before = googleCalls(live.window).length;
+  const retry = live.click(wa, '', { text: 'Buka WhatsApp Sekarang' });
+  assert.ok(!retry.defaultPrevented, 'the button opens WhatsApp by itself');
+  assert.equal(googleCalls(live.window).length, before, 'no Ads conversion and no klik_whatsapp for the lead the form already counted');
+  live.click('tel:+6282219472613', '', { text: '0822-1947-2613' });
+  assert.deepEqual(googleCalls(live.window).slice(before), [
+    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: '0822-1947-2613' }],
+  ]);
+});
 test('storage fallback and old links remove contact details before tracking', () => {
   const fallback = prepare(thanks + '#wa=' + encodeURIComponent(wa), null, false);
   assert.equal(fallback.window.AF_LEAD_URL, wa);

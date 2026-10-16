@@ -259,14 +259,15 @@
       setConsent(consent === 'granted');
       return;
     }
-    // The prepared form already uses the thank-you URL conversion. Its retry
-    // button continues that same lead; it must not add a second WhatsApp goal.
-    if (thankYou && window.AF_LEAD_URL) return;
     var link = target && target.closest('a[href]');
     if (!link || event.defaultPrevented) return;
     var url;
     try { url = new URL(link.href); } catch (_) { return; }
     var whatsapp = url.protocol === 'https:' && /^(wa\.me|api\.whatsapp\.com)$/.test(url.hostname);
+    // The prepared form already uses the thank-you URL conversion. Its retry
+    // button continues that same lead; it must not add a second WhatsApp goal.
+    // A phone call from that page is still counted.
+    if (whatsapp && thankYou && window.AF_LEAD_URL) return;
     if (whatsapp || url.protocol === 'tel:') noteContact(link, whatsapp);
     if (!whatsapp) return;
     if (link.target === '_blank' || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {

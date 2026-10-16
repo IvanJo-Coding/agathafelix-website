@@ -257,7 +257,8 @@ conversion counts; direct visits and refreshes load it with
 loads, so a failed or blocked load is retried on reload (within the 30 minutes)
 and a measured one is never sent twice. The existing Google Ads URL-based
 conversion handles the form; its WhatsApp retry button does not add a second
-WhatsApp conversion for the same prepared lead. The URL-based
+WhatsApp conversion for the same prepared lead. The footer's phone link there
+still sends `klik_telepon`. The URL-based
 conversion rule was verified in Ads: URL starts with
 `agatha-felix.com/raporsekolah/terima-kasih.html`. End-to-end delivery still needs
 verification after deployment; local tests never send real conversions.
