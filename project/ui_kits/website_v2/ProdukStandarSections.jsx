@@ -169,6 +169,13 @@ function findSlug(slug) {
   }
   return null;
 }
+// The type or product an address hash names, or null. A malformed escape such
+// as #% cannot be decoded: it opens nothing, the page still renders.
+function slugFromHash(hash) {
+  let slug;
+  try { slug = decodeURIComponent(hash.slice(1)); } catch (_) { return null; }
+  return findSlug(slug) ? slug : null;
+}
 // Card photos first, then the chosen colour, then real-life shots.
 function gallery(fam, v, colour) {
   const title = fam.name + (v.title ? ' ' + v.title : '');
@@ -553,10 +560,7 @@ function ProdukStandarPage() {
 
   // The URL hash names the open product type: shareable, and Back closes the sheet.
   React.useEffect(() => {
-    const sync = () => {
-      const slug = decodeURIComponent(location.hash.slice(1));
-      setOpenSlug(findSlug(slug) ? slug : null);
-    };
+    const sync = () => setOpenSlug(slugFromHash(location.hash));
     sync();
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
@@ -669,4 +673,4 @@ function ProdukStandarPage() {
   );
 }
 
-Object.assign(window, { ProdukStandarPage });
+Object.assign(window, { ProdukStandarPage, AfStandar: { slugFromHash } });

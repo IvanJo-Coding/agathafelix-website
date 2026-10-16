@@ -240,6 +240,15 @@ function customSel(p, raw) {
 }
 const visibleFields = (p, sel) => p.fields.filter((f) => !(f.when && !f.when(sel)));
 
+// The product an address hash (#custom-<slug>) opens, or null. A malformed
+// escape such as #% cannot be decoded: it opens nothing, the page still renders.
+function slugFromHash(hash) {
+  let h;
+  try { h = decodeURIComponent(hash.slice(1)); } catch (_) { return null; }
+  const slug = h.startsWith('custom-') ? h.slice(7) : null;
+  return CUSTOM_PRODUK.some((p) => p.slug === slug) ? slug : null;
+}
+
 function describeField(f, sel) {
   if (f.type === 'teks') return (sel[f.id] || '').trim();
   const opts = optionsOf(f, sel);
@@ -765,11 +774,7 @@ function CustomProdukSection({ order }) {
   // #custom-<slug> opens a product: shareable, Back closes it, and plain links
   // elsewhere on the page (e.g. the executive band) can open one too.
   React.useEffect(() => {
-    const sync = () => {
-      const h = decodeURIComponent(location.hash.slice(1));
-      const slug = h.startsWith('custom-') ? h.slice(7) : null;
-      setOpenSlug(CUSTOM_PRODUK.some((p) => p.slug === slug) ? slug : null);
-    };
+    const sync = () => setOpenSlug(slugFromHash(location.hash));
     sync();
     window.addEventListener('popstate', sync);
     window.addEventListener('hashchange', sync);
@@ -841,5 +846,5 @@ function CustomProdukSection({ order }) {
 Object.assign(window, {
   CustomProdukSection, useCustomDrafts,
   AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize,
-    jumlahSaran, pesanDraft, ringkasDraft, DRAFT_BARU },
+    jumlahSaran, pesanDraft, ringkasDraft, DRAFT_BARU, slugFromHash },
 });

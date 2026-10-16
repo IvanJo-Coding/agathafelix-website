@@ -730,6 +730,24 @@ test('custom WhatsApp message carries the full specification', () => {
   const zip = kit.pesanCustom(find('zipper-bag-print'), { tipe: 'polos', 'warna-zipper': 'ungu', sisi: ['depan', 'belakang'] }, 100, 1);
   assert.ok(zip.includes('- Tipe zipper bag: Polos') && zip.includes('- Warna zipper bag: Ungu') && zip.includes('- Sisi yang dicetak: Depan, Belakang'), zip);
 });
+test('a malformed address hash (#%) opens no product instead of blanking the page; deep links still open', () => {
+  const { kit } = customKit();
+  assert.equal(kit.slugFromHash('#custom-map-press'), 'map-press');
+  assert.equal(kit.slugFromHash('#custom-map%2Dpress'), 'map-press', 'an escaped link still decodes');
+  for (const hash of ['', '#', '#%', '#custom-%', '#custom-%E0%A4%A', '#custom-tidak-ada', '#map-press']) assert.equal(kit.slugFromHash(hash), null, hash);
+  const window = {};
+  vm.runInNewContext(read('dist/js/ProdukStandarSections.js'), { window });
+  const standar = window.AfStandar;
+  assert.equal(standar.slugFromHash('#clear-holder'), 'clear-holder');
+  assert.equal(standar.slugFromHash('#clear-holder-a4'), 'clear-holder-a4');
+  for (const hash of ['', '#%', '#clear-holder%', '#%E0%A4%A', '#tidak-ada']) assert.equal(standar.slugFromHash(hash), null, hash);
+  // The hash is decoded nowhere else, so no URIError can escape a React effect and empty #root.
+  for (const f of ['CustomProduk', 'ProdukStandarSections']) {
+    const src = read('project/ui_kits/website_v2/' + f + '.jsx');
+    assert.equal((src.match(/decodeURIComponent\(/g) || []).length, 1, f);
+    assert.match(src, /const sync = \(\) => setOpenSlug\(slugFromHash\(location\.hash\)\);/, f);
+  }
+});
 // Admin HPP calculator: product definitions + calculator logic, without a DOM.
 // Every number below is a test value, never a real cost.
 function adminKit() {
