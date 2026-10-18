@@ -111,6 +111,9 @@ test('Clarity consent: a bar until the visitor chooses; only "Izinkan" lets Clar
   assert.match(live.bars[0].innerHTML, /data-af-consent="granted">Izinkan<[\s\S]*data-af-consent="denied">Tidak</);
   assert.match(live.bars[0].innerHTML, /href="\/kebijakan-privasi\/#izin-clarity"/);
   assert.ok(!/position:fixed;[^}]*(top|inset):/.test(live.bars[0].innerHTML), 'a bottom bar, never a full-screen pop-up');
+  // Text and buttons share one row (156px tall at 360px before), and the bar steps aside while a field has the keyboard.
+  assert.ok(!/#af-consent\{[^}]*flex-wrap/.test(live.bars[0].innerHTML), 'one row, not two');
+  assert.match(live.bars[0].innerHTML, /body:has\(input:focus,select:focus,textarea:focus\) #af-consent\{display:none\}/);
   consentClick(live, 'granted');
   assert.equal(live.stored['af-clarity-consent'], 'granted');
   assert.deepEqual(clarityCalls(live.window).at(-1), ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' }], 'analytics only, never ads');

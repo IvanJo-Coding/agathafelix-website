@@ -137,7 +137,8 @@ through the [Consent API v2](https://learn.microsoft.com/en-us/clarity/setup-and
 `consentv2` with `analytics_Storage` granted only when the visitor chose
 **Izinkan**, and `ad_Storage` always denied. The choice is asked in a small
 bar at the bottom of the screen (from the first scroll, above the WhatsApp
-bubble and the landing page's sticky bar, never a pop-up) and can be changed
+bubble and the landing page's sticky bar, never a pop-up; text and buttons in
+one row, about 75px tall on a phone, hidden while a form field is focused) and can be changed
 in the **Izin cookie Microsoft Clarity** section of `/kebijakan-privasi/`
 (`#izin-clarity`). It is kept in the visitor's `localStorage`
 (`af-clarity-consent`); with "granted", Clarity's `_clck` and `_clsk` cookies
