@@ -601,6 +601,18 @@ test('every WhatsApp link on the site uses the business number', () => {
   assert.ok(!/^Saya kirim foto/m.test(heroText));
 });
 
+test('the footer number is a WhatsApp link, and iPhone Safari leaves the page text alone', () => {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    // Safari wraps a plain phone number in a tel: link before React hydrates; the HTML then
+    // no longer matches and React re-renders the page (errors #418, #425, #423).
+    assert.match(html, /<meta name="format-detection" content="telephone=no"\/?>/, file);
+    const footer = html.slice(html.lastIndexOf('<footer'));
+    assert.match(footer, /<a href="https:\/\/wa\.me\/6282219472613[^"]*"[^>]*data-wa="kontak-footer"[^>]*>WhatsApp:? (\+62 822-1947-2613|0822-1947-2613)<\/a>/, file);
+  }
+  assert.match(read('project/static/js/af-site.js'), /'kontak-footer': 'footer'/, 'GA4 reports these clicks as cta_source footer');
+});
+
 test('built routes expose content, metadata, styles, and valid local assets in raw HTML', () => {
   for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
     const html = read('dist/' + file);
@@ -888,14 +900,16 @@ test('largest portfolio photos are served as compact WebP assets', () => {
 // The React pages list their hydration scripts in one inline loader that starts
 // them after the first paint.
 const afterPaint = (html) => JSON.parse(html.match(/<script>\(function\(\)\{var s=(\[[^\]]*\]);/)[1]);
+// Scripts started at the same moment that need no React and run as soon as they arrive.
+const afterPaintAlone = (html) => JSON.parse(html.match(/<script>\(function\(\)\{var s=\[[^\]]*\];var a=(\[[^\]]*\]);/)[1]);
 test('React pages load their hydration scripts after the first paint, in order, and every one exists', () => {
   for (const [file, page] of [['index.html', 'index'], ['produk-standar/index.html', 'produk-standar'], ['produk-custom/index.html', 'produk-custom']]) {
     const html = read('dist/' + file);
     assert.ok(!/<script defer src=/.test(html), file + ' still requests a script at parse time');
     const list = afterPaint(html);
     assert.deepEqual(list.slice(0, 3), ['/vendor/react.production.min.js', '/vendor/react-dom.production.min.js', '/_ds_bundle.js']);
-    assert.equal(list.at(-2), '/js/page-' + page + '.js', 'the page glue runs after every module it uses');
-    for (const src of list) assert.ok(fs.existsSync(path.join('dist', src)), file + ': missing ' + src);
+    assert.equal(list.at(-1), '/js/page-' + page + '.js', 'the page glue runs after every module it uses');
+    for (const src of [...list, ...afterPaintAlone(html)]) assert.ok(fs.existsSync(path.join('dist', src)), file + ': missing ' + src);
     assert.match(html, /e\.async=false/, 'dynamic scripts keep their order');
     assert.match(html, /requestAnimationFrame\(function\(\)\{setTimeout\(go,0\);\}\)/);
   }
@@ -1059,11 +1073,17 @@ test('a rapor model picked on the landing page goes into the form and every quot
 });
 
 test('product and portfolio photos open large; every zoom target exists and is reachable by keyboard', () => {
-  assert.ok(afterPaint(read('dist/index.html')).includes('/js/af-zoom.js'));
+  // The zoom script works on the prerendered HTML, so it runs on its own: queued
+  // behind React, a photo tapped before hydration did nothing (a Clarity dead click).
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html']) {
+    const html = read('dist/' + file);
+    assert.deepEqual(afterPaintAlone(html), ['/js/af-zoom.js'], file);
+    assert.ok(!afterPaint(html).includes('/js/af-zoom.js'), file + ' still waits for React');
+  }
   assert.match(read('project/ui_kits/website_v2/Sheet.jsx'), /data-zoom=\{src\} role="button" tabIndex=\{i === slide \? 0 : -1\}/, 'sheet photos zoom; only the one in view takes focus');
   for (const [file, min] of [['raporsekolah/index.html', 15], ['produk-custom/index.html', 8]]) {
     const html = read('dist/' + file);
-    assert.ok(file.startsWith('raporsekolah') ? /<script defer src="\/js\/af-zoom\.js"><\/script>/.test(html) : afterPaint(html).includes('/js/af-zoom.js'), file);
+    assert.ok(file.startsWith('raporsekolah') ? /<script defer src="\/js\/af-zoom\.js"><\/script>/.test(html) : afterPaintAlone(html).includes('/js/af-zoom.js'), file);
     const triggers = [...html.matchAll(/<img [^>]*data-zoom="([^"]+)"[^>]*>/g)];
     assert.ok(triggers.length >= min, `${file}: ${triggers.length} zoomable photos`);
     for (const [tag, src] of triggers) {

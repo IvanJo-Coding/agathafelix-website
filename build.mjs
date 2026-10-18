@@ -322,9 +322,11 @@ function ldScript(obj) {
 // their order (async=false). Requested at parse time they competed with the
 // fonts and hero on slow phones, and mobile lab runs counted them against LCP
 // (custom page 2.9 s). Links work before hydration: product cards are #hash
-// links that open their sheet once React is up.
-function afterPaintScripts(scripts) {
-  return `<script>(function(){var s=${JSON.stringify(scripts)};function go(){s.forEach(function(src){var e=document.createElement('script');e.src=src;e.async=false;document.body.appendChild(e);});}if(window.requestAnimationFrame)requestAnimationFrame(function(){setTimeout(go,0);});else setTimeout(go,0);})();</script>`;
+// links that open their sheet once React is up. Scripts in `alone` need no
+// React (photo zoom works on the prerendered HTML), so they start at the same
+// moment but run as soon as they arrive, not after React and every section.
+function afterPaintScripts(scripts, alone = []) {
+  return `<script>(function(){var s=${JSON.stringify(scripts)};var a=${JSON.stringify(alone)};function go(){a.forEach(function(src){var e=document.createElement('script');e.src=src;document.body.appendChild(e);});s.forEach(function(src){var e=document.createElement('script');e.src=src;e.async=false;document.body.appendChild(e);});}if(window.requestAnimationFrame)requestAnimationFrame(function(){setTimeout(go,0);});else setTimeout(go,0);})();</script>`;
 }
 
 function pageHtml(page, ogDim, mediaManifest, rendered, css) {
@@ -336,14 +338,16 @@ function pageHtml(page, ogDim, mediaManifest, rendered, css) {
     '/_ds_bundle.js',
     ...page.sections.map((s) => `/js/${s}.js`),
     `/js/page-${page.canonical === '/' ? 'index' : page.canonical.replace(/\//g, '')}.js`,
-    // Photo zoom (project/static/js/af-zoom.js): any [data-zoom] photo.
-    '/js/af-zoom.js',
   ];
+  // format-detection: iOS Safari turns a phone number in plain text into a link
+  // before React hydrates, so the HTML no longer matches and React re-renders
+  // the whole page (errors #418, #425, #423). Every number on these pages is a link.
   return `<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="format-detection" content="telephone=no"/>
 <title>${page.title}</title>
 <meta name="description" content="${esc(page.description)}"/>
 <link rel="canonical" href="${url}"/>
@@ -374,7 +378,7 @@ ${GTAG_HEAD}
 </head>
 <body>
 <div id="root">${rendered.html}</div>
-${afterPaintScripts(scripts)}
+${afterPaintScripts(scripts, ['/js/af-zoom.js'])}
 </body>
 </html>
 `;

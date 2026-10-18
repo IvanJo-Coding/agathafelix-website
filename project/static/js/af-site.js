@@ -234,9 +234,10 @@
   }
   // Where a WhatsApp button sits, from its data-wa label: the rapor form, the
   // simulator, a product sheet, the floating bubble or the landing page's
-  // sticky bar, the header, or anywhere else on the page.
+  // sticky bar, the header, the footer's contact line, or anywhere else on the page.
   var SOURCES = { form: 'formulir', simulator: 'simulator', 'sheet-detail': 'konfigurator', 'sheet-bantu': 'konfigurator',
-    'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header' };
+    'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header',
+    'kontak-footer': 'footer' };
   // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
   function noteContact(link, whatsapp) {
     noteButton(buttonName(link), whatsapp);

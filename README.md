@@ -174,12 +174,14 @@ inline loader (`afterPaintScripts` in `build.mjs`). In the mobile lab
 
 **Events.** Contact clicks: `klik_whatsapp` / `klik_telepon` with
 `button_label` = the button's `data-wa` (every WhatsApp button has one: `hero`,
-`header`, `bubble`, `sticky`, `footer`, `model`, `sheet-detail`, `sheet-bantu`,
-`sheet-standar`, `simulator`, `model-lain`, `portofolio`, `penutup`, ...), to
+`header`, `bubble`, `sticky`, `footer`, `model`, `kontak-footer`, `sheet-detail`,
+`sheet-bantu`, `sheet-standar`, `simulator`, `model-lain`, `portofolio`,
+`penutup`, ...), to
 GA4, plus Clarity tags `tombol_whatsapp` / `tombol_telepon`. `klik_whatsapp`
 also carries `cta_source`, where the button sits: `formulir` (the rapor form),
 `simulator`, `konfigurator` (`sheet-*`), `mengambang` (`bubble`, `sticky`),
-`header` (`header`, `menu`) or `halaman` (anything else). The rapor form opens
+`header` (`header`, `menu`), `footer` (`kontak-footer`, the number in the page
+footer) or `halaman` (anything else). The rapor form opens
 WhatsApp without a link, so it reports its handoff through
 `AFTracking.noteWhatsApp('form')`: `klik_whatsapp` with `cta_source: formulir`
 to GA4 and Clarity, and no Ads WhatsApp conversion, since the thank-you URL
@@ -205,7 +207,13 @@ conversion.
 a `<dialog>`, fetching the large file only then; `[data-zoom-group]` adds
 prev/next, arrow keys and swipes. Escape stays inside it, so a product sheet
 underneath stays open. Product sheet photos, the portfolio and the landing
-page photos use it; the simulator preview never does.
+page photos use it; the simulator preview never does. On the React pages it
+starts with the hydration scripts but runs on its own as soon as it arrives
+(`afterPaintScripts(scripts, alone)` in `build.mjs`), so a photo tapped
+before React is up still opens. The React pages and `/raporsekolah/` carry
+`<meta name="format-detection" content="telephone=no">`: iOS Safari otherwise
+turns a plain phone number into a link before hydration, the HTML stops
+matching, and React re-renders the page (errors #418, #425, #423).
 
 On `/raporsekolah/` the main action is **Minta Harga & Mockup Gratis**, right
 under the headline with the 50 pcs minimum and "rata-rata Rp50rb/pcs untuk

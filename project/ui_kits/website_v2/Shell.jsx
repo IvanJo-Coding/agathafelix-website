@@ -38,6 +38,8 @@ const V2_RESPONSIVE_ID = 'af-v2-responsive-shell';
 (function injectV2Responsive() {
   if (typeof document === 'undefined' || document.getElementById(V2_RESPONSIVE_ID)) return;
   const css = `
+  /* An in-page link (#produk-custom, #simulator, #faq) lands below the 74px sticky header. */
+  main section[id] { scroll-margin-top: 74px; }
   /* Tablet & below: collapse 2-col text/feature sections + 4-col grids */
   @media (max-width: 900px) {
     [style*="grid-template-columns: 1.1fr 1fr"],
@@ -332,7 +334,8 @@ function FooterV2() {
         <div>
           <div style={head}>Hubungi Kami</div>
           <p style={{ fontSize: '0.84rem', lineHeight: 2, margin: 0 }}>
-            WhatsApp: +62 822-1947-2613<br />
+            <a href={waLink('Halo Agatha Felix! Saya mau bertanya soal map / rapor custom.')} data-wa="kontak-footer" target="_blank" rel="noopener noreferrer"
+              style={{ color: '#fff', fontWeight: 700, textUnderlineOffset: 3 }}>WhatsApp: +62 822-1947-2613</a><br />
             Senin–Sabtu, 08.00–17.00 WIB<br />
             Pabrik di Kota Bekasi, Jawa Barat<br />
             Pengiriman ke seluruh Indonesia
