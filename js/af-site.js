@@ -175,14 +175,17 @@
   else showChoice();
   // A small bar, never a pop-up: fixed at the bottom, clear of the WhatsApp
   // bubble and the landing page's sticky bar, shown from the first scroll on
-  // each page until a choice is made.
-  var BAR_CSS = '#af-consent{position:fixed;z-index:58;left:16px;bottom:16px;max-width:440px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;' +
-    'padding:12px 14px;background:#fff;color:#2B2A28;border:2px solid #2B2A28;border-radius:16px;box-shadow:0 4px 0 #2B2A28;' +
-    'font:500 13.5px/1.45 "Plus Jakarta Sans","Plus Jakarta Sans Fallback",system-ui,sans-serif}' +
-    '#af-consent p{margin:0;flex:1 1 220px}#af-consent a{color:#13668F;font-weight:700}#af-consent div{display:flex;gap:8px}' +
-    '#af-consent button{min-height:40px;padding:8px 18px;border-radius:999px;border:2px solid #2B2A28;background:#fff;color:#2B2A28;cursor:pointer;' +
-    'font:800 14px/1 "Baloo 2","Baloo 2 Fallback",sans-serif}#af-consent button[data-af-consent="granted"]{background:#2B2A28;color:#fff}' +
-    '@media (max-width:680px){#af-consent{left:12px;right:12px;bottom:94px;max-width:none}}' +
+  // each page until a choice is made. Text and buttons share one row, so on a
+  // phone it stays about 70px tall (it was 156px at 360px and covered the
+  // product cards). It steps aside while a form field has the keyboard.
+  var BAR_CSS = '#af-consent{position:fixed;z-index:58;left:16px;bottom:16px;max-width:440px;display:flex;align-items:center;gap:10px;' +
+    'padding:9px 10px 9px 14px;background:#fff;color:#2B2A28;border:2px solid #2B2A28;border-radius:14px;box-shadow:0 3px 0 #2B2A28;' +
+    'font:500 13px/1.4 "Plus Jakarta Sans","Plus Jakarta Sans Fallback",system-ui,sans-serif}' +
+    '#af-consent p{margin:0;flex:1 1 auto;min-width:0}#af-consent a{color:#13668F;font-weight:700}#af-consent div{display:flex;gap:6px;flex:none}' +
+    '#af-consent button{min-height:36px;padding:6px 12px;border-radius:999px;border:2px solid #2B2A28;background:#fff;color:#2B2A28;cursor:pointer;' +
+    'font:800 13.5px/1 "Baloo 2","Baloo 2 Fallback",sans-serif}#af-consent button[data-af-consent="granted"]{background:#2B2A28;color:#fff}' +
+    'body:has(input:focus,select:focus,textarea:focus) #af-consent{display:none}' +
+    '@media (max-width:680px){#af-consent{left:12px;right:12px;bottom:94px;max-width:none;font-size:12.5px}}' +
     '@media (max-width:700px){body:has(.stickybar) #af-consent{left:12px;right:12px;bottom:84px;max-width:none}}';
   function showBar() {
     if (bar || readConsent()) return;
@@ -190,8 +193,8 @@
     bar.id = 'af-consent';
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Izin cookie Microsoft Clarity');
-    bar.innerHTML = '<style>' + BAR_CSS + '</style><p>Boleh kami pakai cookie Microsoft Clarity untuk menyambungkan kunjungan Anda antarhalaman? ' +
-      'Isi formulir tetap disamarkan. <a href="/kebijakan-privasi/#izin-clarity">Detail</a></p>' +
+    bar.innerHTML = '<style>' + BAR_CSS + '</style><p>Boleh pakai cookie Microsoft Clarity untuk analisis kunjungan? ' +
+      '<a href="/kebijakan-privasi/#izin-clarity">Detail</a></p>' +
       '<div><button type="button" data-af-consent="granted">Izinkan</button><button type="button" data-af-consent="denied">Tidak</button></div>';
     document.body.appendChild(bar);
   }
@@ -234,9 +237,10 @@
   }
   // Where a WhatsApp button sits, from its data-wa label: the rapor form, the
   // simulator, a product sheet, the floating bubble or the landing page's
-  // sticky bar, the header, or anywhere else on the page.
+  // sticky bar, the header, the footer's contact line, or anywhere else on the page.
   var SOURCES = { form: 'formulir', simulator: 'simulator', 'sheet-detail': 'konfigurator', 'sheet-bantu': 'konfigurator',
-    'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header' };
+    'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header',
+    'kontak-footer': 'footer' };
   // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
   function noteContact(link, whatsapp) {
     noteButton(buttonName(link), whatsapp);
