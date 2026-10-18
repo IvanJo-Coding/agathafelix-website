@@ -211,6 +211,9 @@ checkOpened(await tracked(), [MARK.sekolah, '*Map Press*', 'Jumlah: 150 pcs (3 w
 
 console.log('/raporsekolah/ form');
 await visit('http://agatha-felix.com/raporsekolah/', `!!document.querySelector('form.lead')`);
+// The form starts closed; a visitor opens it with "Isi detail pesanan".
+await click(`document.getElementById('formToggle')`);
+check(await evaluate(`!document.getElementById('leadForm').hidden`), 'the button opens the form');
 await type('form.lead input[name=sekolah]', MARK.formSekolah);
 await type('form.lead input[name=jumlah]', '120');
 await type('form.lead input[name=kota]', MARK.formKota);

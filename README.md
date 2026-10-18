@@ -137,7 +137,8 @@ through the [Consent API v2](https://learn.microsoft.com/en-us/clarity/setup-and
 `consentv2` with `analytics_Storage` granted only when the visitor chose
 **Izinkan**, and `ad_Storage` always denied. The choice is asked in a small
 bar at the bottom of the screen (from the first scroll, above the WhatsApp
-bubble and the landing page's sticky bar, never a pop-up) and can be changed
+bubble and the landing page's sticky bar, never a pop-up; text and buttons in
+one row, about 75px tall on a phone, hidden while a form field is focused) and can be changed
 in the **Izin cookie Microsoft Clarity** section of `/kebijakan-privasi/`
 (`#izin-clarity`). It is kept in the visitor's `localStorage`
 (`af-clarity-consent`); with "granted", Clarity's `_clck` and `_clsk` cookies
@@ -174,12 +175,14 @@ inline loader (`afterPaintScripts` in `build.mjs`). In the mobile lab
 
 **Events.** Contact clicks: `klik_whatsapp` / `klik_telepon` with
 `button_label` = the button's `data-wa` (every WhatsApp button has one: `hero`,
-`header`, `bubble`, `sticky`, `footer`, `model`, `sheet-detail`, `sheet-bantu`,
-`sheet-standar`, `simulator`, `model-lain`, `portofolio`, `penutup`, ...), to
+`header`, `bubble`, `sticky`, `footer`, `model`, `hero-bantu`, `kontak-footer`,
+`sheet-detail`, `sheet-bantu`, `sheet-standar`, `simulator`, `model-lain`,
+`portofolio`, `penutup`, ...), to
 GA4, plus Clarity tags `tombol_whatsapp` / `tombol_telepon`. `klik_whatsapp`
 also carries `cta_source`, where the button sits: `formulir` (the rapor form),
 `simulator`, `konfigurator` (`sheet-*`), `mengambang` (`bubble`, `sticky`),
-`header` (`header`, `menu`) or `halaman` (anything else). The rapor form opens
+`header` (`header`, `menu`), `footer` (`kontak-footer`, the number in the page
+footer) or `halaman` (anything else). The rapor form opens
 WhatsApp without a link, so it reports its handoff through
 `AFTracking.noteWhatsApp('form')`: `klik_whatsapp` with `cta_source: formulir`
 to GA4 and Clarity, and no Ads WhatsApp conversion, since the thank-you URL
@@ -205,19 +208,35 @@ conversion.
 a `<dialog>`, fetching the large file only then; `[data-zoom-group]` adds
 prev/next, arrow keys and swipes. Escape stays inside it, so a product sheet
 underneath stays open. Product sheet photos, the portfolio and the landing
-page photos use it; the simulator preview never does.
+page photos use it; the simulator preview never does. On the React pages it
+starts with the hydration scripts but runs on its own as soon as it arrives
+(`afterPaintScripts(scripts, alone)` in `build.mjs`), so a photo tapped
+before React is up still opens. The React pages and `/raporsekolah/` carry
+`<meta name="format-detection" content="telephone=no">`: iOS Safari otherwise
+turns a plain phone number into a link before hydration, the HTML stops
+matching, and React re-renders the page (errors #418, #425, #423).
 
-On `/raporsekolah/` the main action is **Minta Harga & Mockup Gratis**, right
+On `/raporsekolah/` the main action is **Kirim Contoh Map & Minta Harga**
+(owner, 2026-10-17: the page is for schools that already have a sample), right
 under the headline with the 50 pcs minimum and "rata-rata Rp50rb/pcs untuk
-100 pcs" beside it, and "Belum punya contoh? Kami bantu pilih model." under
-it. Its prefilled message is a checklist (quantity, date needed, city, school),
-and a sample photo is optional: the message says "kalau ada", never that a
-photo was sent. The header link asks a plain question. There is no automatic
-pop-up. In **Pilih Model** each card has a button (Rapor Jahit, Rapor Press /
-Hot Print) that sets the same choice as the form's **Model rapor** radio. Once
-a model is picked, every quote button's checklist starts with "- Model: ...",
-the shared button under the cards says "Minta Harga Rapor Jahit", and the form
-message names it; "Belum tahu" removes it again.
+100 pcs" beside it. Its prefilled message is one short line, "...minta harga
+map rapor / ijazah custom. Saya kirim foto contohnya ya."; quantity, date and
+city follow in the chat, so nothing is a questionnaire first. Under it,
+"Belum punya contoh? Kami bantu pilih model." is a WhatsApp link of its own
+(`data-wa="hero-bantu"`, `data-msg="bantu"`) asking for help instead. The
+header and footer contact links (`data-msg="tanya"`) ask a plain question.
+There is no automatic pop-up.
+
+Order on a phone: hero, the client logos (the label carries "500+ sekolah &
+institusi" and "20 Juta+ unit"; phones show ten, `li.lg-extra` hides the other
+five), then **Jahit atau Press?**: two small cards side by side, each with a
+button that sets the same choice as the form's **Model rapor** radio. Picking
+is optional. Once a model is picked, every quote message names it, the
+WhatsApp button under the cards says "Minta Harga Rapor Jahit", and the form
+message names it; "Belum tahu" removes it again. Next to that button,
+**Isi detail pesanan (opsional)** opens the form, which starts closed; any
+`#leadForm` link or address opens it too. While a form field is focused the
+sticky bar and the consent bar step aside.
 
 On `/produk-custom/` each product sheet offers **Saya pilih sendiri** or
 **Bantu pilihkan spesifikasi**. The quick path hides the technical choices

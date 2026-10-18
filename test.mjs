@@ -111,6 +111,9 @@ test('Clarity consent: a bar until the visitor chooses; only "Izinkan" lets Clar
   assert.match(live.bars[0].innerHTML, /data-af-consent="granted">Izinkan<[\s\S]*data-af-consent="denied">Tidak</);
   assert.match(live.bars[0].innerHTML, /href="\/kebijakan-privasi\/#izin-clarity"/);
   assert.ok(!/position:fixed;[^}]*(top|inset):/.test(live.bars[0].innerHTML), 'a bottom bar, never a full-screen pop-up');
+  // Text and buttons share one row (156px tall at 360px before), and the bar steps aside while a field has the keyboard.
+  assert.ok(!/#af-consent\{[^}]*flex-wrap/.test(live.bars[0].innerHTML), 'one row, not two');
+  assert.match(live.bars[0].innerHTML, /body:has\(input:focus,select:focus,textarea:focus\) #af-consent\{display:none\}/);
   consentClick(live, 'granted');
   assert.equal(live.stored['af-clarity-consent'], 'granted');
   assert.deepEqual(clarityCalls(live.window).at(-1), ['consentv2', { ad_Storage: 'denied', analytics_Storage: 'granted' }], 'analytics only, never ads');
@@ -361,25 +364,27 @@ test('expired or redirected handoffs are rejected', () => {
 });
 
 // Runs the landing page's own inline script against a stub form.
-function landingForm(fields, { blocked = false, before } = {}) {
+function landingForm(fields, { blocked = false, before, hash = '' } = {}) {
   const html = read('project/static/raporsekolah/index.html');
   const code = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
     .map((match) => match[1]).find((script) => script.includes("getElementById('leadForm')"));
   const out = { location: {}, links: [] };
   const element = { addEventListener() {}, classList: { add() {}, remove() {} }, hidden: true };
   const input = () => ({ style: {}, focus() { out.focused = true; } });
-  const form = { addEventListener: (type, fn) => { out[type] = fn; }, elements: { sekolah: input(), jumlah: input(), kota: input() } };
-  out.steps = [];
+  // hidden: true, as the markup starts it.
+  const form = { hidden: true, addEventListener: (type, fn) => { out[type] = fn; }, elements: { sekolah: input(), jumlah: input(), kota: input() } };
+  const toggle = { attrs: {}, addEventListener: (type, fn) => { if (type === 'click') out.toggleClick = fn; }, setAttribute(k, v) { this.attrs[k] = v; } };
+  Object.assign(out, { form, toggle, steps: [] });
   const link = (wa, msg) => ({ href: '', addEventListener() {}, getAttribute: (k) => ({ 'data-wa': wa, 'data-msg': msg }[k] ?? null) });
-  out.links = [link('header', 'tanya'), link('hero', null)];
-  const location = { set href(v) { out.steps.push('navigate'); out.location.href = v; }, get href() { return out.location.href; } };
+  out.links = [link('header', 'tanya'), link('hero', null), link('hero-bantu', 'bantu'), link('kontak-footer', 'tanya')];
+  const location = { hash, set href(v) { out.steps.push('navigate'); out.location.href = v; }, get href() { return out.location.href; } };
   const AFTracking = {
     noteStep: (name, params) => { const v = params && (params.quote_mode || params.error_type || params.model); out.steps.push(v ? name + ':' + v : name); },
     noteWhatsApp: (label) => out.steps.push('wa:' + label),
   };
   vm.runInNewContext(code, { window: { open: (url) => { out.opened = url; }, AFTracking }, AFTracking, location,
-    document: { addEventListener() {}, querySelectorAll: (sel) => sel === '[data-wa]' ? out.links : [],
-      getElementById: (id) => id === 'leadForm' ? form : id === 'leadErr' ? (out.err = element) : element },
+    document: { addEventListener: (type, fn) => { if (type === 'click') out.docClick = fn; }, querySelectorAll: (sel) => sel === '[data-wa]' ? out.links : [],
+      getElementById: (id) => id === 'leadForm' ? form : id === 'leadErr' ? (out.err = element) : id === 'formToggle' ? toggle : element },
     addEventListener() {}, setTimeout() {},
     sessionStorage: { setItem: (_, value) => { if (blocked) throw Error('storage blocked'); out.saved = JSON.parse(value); } },
     FormData: class { get(key) { return fields[key]; } },
@@ -445,8 +450,16 @@ test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip
 test('client logos are square 240 px tiles, light, and all present', async () => {
   const sharp = (await import('sharp')).default;
   const html = read('dist/raporsekolah/index.html');
-  const logos = [...html.matchAll(/<li><img src="(img\/klien\/[\w-]+\.webp)" width="240" height="240" loading="lazy" decoding="async" alt="([^"]+)"/g)];
+  const logos = [...html.matchAll(/<li( class="lg-extra")?><img src="(img\/klien\/[\w-]+\.webp)" width="240" height="240" loading="lazy" decoding="async" alt="([^"]+)"/g)]
+    .map(([, extra, src, alt]) => [extra, src, alt]);
   assert.ok(logos.length >= 10, 'the client row shows the logos');
+  // Phones show the first ten, schools and education first (owner, 2026-10-17).
+  assert.equal(logos.filter(([extra]) => !extra).length, 10);
+  assert.ok(logos.some(([extra, src]) => extra && src.includes('badan-pertanahan-nasional')), 'the one non-education client is the first to go');
+  assert.match(html, /\.logos li\.lg-extra\{display:none\}/);
+  // The proof numbers moved from their own band into the logo label.
+  assert.match(html, /<p class="clients-label">Dipercaya <b>500\+ sekolah &amp; institusi<\/b> · <b>20 Juta\+ unit<\/b> diproduksi<\/p>/);
+  assert.ok(!html.includes('class="trust"'));
   for (const [, src, alt] of logos) {
     const file = path.join('dist/raporsekolah', src);
     const { width, height } = await sharp(file).metadata();
@@ -454,13 +467,39 @@ test('client logos are square 240 px tiles, light, and all present', async () =>
     assert.ok(fs.statSync(file).size < 20e3, alt + ' logo is too heavy');
   }
 });
-test('the landing photos follow the CTA on a phone, and the form follows the client list', () => {
+test('the landing photos follow the CTA on a phone; logos, then Jahit vs Press, then the optional form', () => {
   const html = read('dist/raporsekolah/index.html');
   const at = (marker) => html.indexOf(marker);
   assert.ok(at('class="hero-main"') < at('class="hero-photo"') && at('class="hero-photo"') < at('class="hero-more"'));
   assert.match(html, /grid-template-areas:"main" "photo" "more"/, 'phones show the photos right after the CTA');
-  assert.ok(at('<div class="clients">') > 0 && at('<div class="clients">') < at('id="leadForm"'), 'the form sits below the client list');
   assert.ok(at('id="leadForm"') > at('</section>'), 'the form left the hero');
+  assert.ok(at('<div class="clients">') > 0 && at('<div class="clients">') < at('id="model"'), 'the logos come right after the hero');
+  assert.ok(at('id="model"') < at('data-model="jahit"') && at('data-model="press"') < at('id="formToggle"') && at('id="formToggle"') < at('id="leadForm"'),
+    'the two models come before the form, which opens from a button under them');
+  // Two small cards side by side, also on phones; no second model block further down.
+  assert.match(html, /\.models\{display:grid;grid-template-columns:1fr 1fr;/);
+  assert.ok(!/@media[^{]*\{[^}]*\.models,/.test(html), 'phones keep both models in one row');
+  assert.equal((html.match(/data-model="/g) || []).length, 2);
+});
+test('the optional form starts closed; its button, a #leadForm link or the address open it', () => {
+  const html = read('project/static/raporsekolah/index.html');
+  assert.match(html, /<button class="btn btn-ghost btn-form" type="button" id="formToggle" aria-expanded="false" aria-controls="leadForm">Isi detail pesanan \(opsional\)<\/button>/);
+  assert.match(html, /<form class="lead card" id="leadForm" novalidate hidden>/);
+  const click = (href) => ({ target: { closest: () => ({ getAttribute: (k) => (k === 'href' ? href : null) }) } });
+  landingForm(leadFields, { before: (o) => {
+    o.toggleClick();
+    assert.deepEqual([o.form.hidden, o.toggle.attrs['aria-expanded']], [false, 'true']);
+    o.toggleClick();
+    assert.deepEqual([o.form.hidden, o.toggle.attrs['aria-expanded']], [true, 'false'], 'the button closes it again');
+    o.docClick(click('#model'));
+    assert.equal(o.form.hidden, true, 'another link leaves it closed');
+    o.docClick(click('#leadForm'));
+    assert.equal(o.form.hidden, false);
+  } });
+  assert.equal(landingForm(leadFields, { hash: '#leadForm' }).form.hidden, false, 'an address ending in #leadForm opens it');
+  assert.equal(landingForm(leadFields).form.hidden, true);
+  // Typing in the form hides the phone's sticky bar, so it never covers a field.
+  assert.match(html, /body:has\(form\.lead :focus\) \.stickybar\{display:none\}/);
 });
 test('a testimonial clip plays on the page, not on Instagram, and counts once', () => {
   const card = { href: 'https://www.instagram.com/p/DdDqBuSStgs/', target: '_blank', clicks: [], dataset: { video: 'img/testi-cikeas.mp4' },
@@ -523,23 +562,26 @@ test('the form asks for the order size, not a phone number, and holds back order
   }
   assert.match(landingForm({ ...leadFields, jumlah: '30' }).err.innerHTML, /50 pcs[\s\S]*\/produk-standar\//);
 });
-test('landing CTAs carry the sample checklist; the header asks a plain question', () => {
+test('landing CTAs open a short sample message; "belum punya contoh" asks for help; contact links ask a plain question', () => {
   const { links } = landingForm(leadFields);
-  const [header, hero] = links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
+  const [header, hero, bantu, footer] = links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
   assert.ok(links.every((l) => l.href.startsWith('https://wa.me/6282219472613?text=')));
-  assert.match(hero, /Jumlah: \.\.\. pcs \(minimal 50\)[\s\S]*Dibutuhkan tanggal[\s\S]*Kota pengiriman/);
-  // A sample photo is optional: the message must not say one was sent.
-  assert.match(hero, /Kalau ada, saya kirim foto contoh map[\s\S]*Kalau belum ada, mohon dibantu pilih modelnya/);
-  assert.ok(!/^Saya kirim foto/m.test(hero));
-  assert.ok(!header.includes('foto contoh'));
+  // One line to start the chat; quantity, date and city follow there (owner, 2026-10-17).
+  assert.equal(hero, 'Halo Agatha Felix, saya mau minta harga map rapor / ijazah custom. Saya kirim foto contohnya ya.');
+  assert.ok(!/\.\.\.|Jumlah|Kota|\n/.test(hero), 'no questionnaire to fill in before the chat starts');
+  // A visitor without a sample has their own link, which never says a photo follows.
+  assert.equal(bantu, 'Halo Agatha Felix, saya mau buat map rapor / ijazah custom, tapi belum punya contoh. Mohon dibantu pilih modelnya ya.');
+  for (const plain of [header, footer]) assert.ok(!/foto|Model/.test(plain), plain);
 });
-test('the landing page opens with the sample CTA and minimum order, and never pops up on its own', () => {
+test('the landing page opens with the sample CTA, the minimum order and help without a sample, and never pops up on its own', () => {
   const html = read('project/static/raporsekolah/index.html');
-  const hero = html.slice(html.indexOf('<section id="hero"'), html.indexOf('<form class="lead'));
+  const hero = html.slice(html.indexOf('<section id="hero"'), html.indexOf('</section>', html.indexOf('<section id="hero"')));
   const cta = hero.indexOf('data-wa="hero"');
   assert.ok(cta > 0 && cta < hero.indexOf('class="pricebar"'), 'the WhatsApp CTA comes before the price bar and photos');
-  assert.match(hero.slice(cta, cta + 2800), /Minta Harga &amp; Mockup Gratis<\/a>\s*<p class="cta-note"><strong>Minimal 50 pcs<\/strong>[^]*?<p class="cta-help">Belum punya contoh\? Kami bantu pilih model\.<\/p>/);
-  assert.ok(!html.includes('Kirim Contoh &amp; Minta Harga'), 'no CTA requires a sample photo');
+  // The CTA speaks to schools that already have a sample (owner, 2026-10-17); right under it,
+  // a visitor without one gets a WhatsApp link of their own.
+  assert.match(hero.slice(cta, cta + 2800), /Kirim Contoh Map &amp; Minta Harga<\/a>\s*<p class="cta-note"><strong>Minimal 50 pcs<\/strong>[^]*?<p class="cta-help"><a href="https:\/\/wa\.me\/6282219472613" [^>]*data-wa="hero-bantu" data-msg="bantu">Belum punya contoh\? Kami bantu pilih model\.<\/a><\/p>/);
+  assert.match(hero, /<p class="kirim"><b>Cukup kirim foto map contoh<\/b>[^<]*Jumlah, tanggal, dan kota bisa menyusul di chat\.<\/p>/);
   assert.ok(!/id="offer"|offer_tampil|setTimeout\(show|mouseout/.test(html), 'the automatic pop-up is gone');
   // No Google tag call may run when the page opens: every gtag() sits inside a click handler.
   for (const [line] of html.matchAll(/^.*gtag\(.*$/gm)) assert.match(line, /addEventListener\('click'/, line);
@@ -599,6 +641,18 @@ test('every WhatsApp link on the site uses the business number', () => {
   const heroText = decodeURIComponent(heroLink.match(/href="([^"]+)"/)[1].split('?text=')[1]);
   assert.match(heroText, /Kalau ada, saya kirim foto contohnya[\s\S]*Kalau belum ada, mohon dibantu pilih modelnya/);
   assert.ok(!/^Saya kirim foto/m.test(heroText));
+});
+
+test('the footer number is a WhatsApp link, and iPhone Safari leaves the page text alone', () => {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    // Safari wraps a plain phone number in a tel: link before React hydrates; the HTML then
+    // no longer matches and React re-renders the page (errors #418, #425, #423).
+    assert.match(html, /<meta name="format-detection" content="telephone=no"\/?>/, file);
+    const footer = html.slice(html.lastIndexOf('<footer'));
+    assert.match(footer, /<a href="https:\/\/wa\.me\/6282219472613[^"]*"[^>]*data-wa="kontak-footer"[^>]*>WhatsApp:? (\+62 822-1947-2613|0822-1947-2613)<\/a>/, file);
+  }
+  assert.match(read('project/static/js/af-site.js'), /'kontak-footer': 'footer'/, 'GA4 reports these clicks as cta_source footer');
 });
 
 test('built routes expose content, metadata, styles, and valid local assets in raw HTML', () => {
@@ -888,14 +942,16 @@ test('largest portfolio photos are served as compact WebP assets', () => {
 // The React pages list their hydration scripts in one inline loader that starts
 // them after the first paint.
 const afterPaint = (html) => JSON.parse(html.match(/<script>\(function\(\)\{var s=(\[[^\]]*\]);/)[1]);
+// Scripts started at the same moment that need no React and run as soon as they arrive.
+const afterPaintAlone = (html) => JSON.parse(html.match(/<script>\(function\(\)\{var s=\[[^\]]*\];var a=(\[[^\]]*\]);/)[1]);
 test('React pages load their hydration scripts after the first paint, in order, and every one exists', () => {
   for (const [file, page] of [['index.html', 'index'], ['produk-standar/index.html', 'produk-standar'], ['produk-custom/index.html', 'produk-custom']]) {
     const html = read('dist/' + file);
     assert.ok(!/<script defer src=/.test(html), file + ' still requests a script at parse time');
     const list = afterPaint(html);
     assert.deepEqual(list.slice(0, 3), ['/vendor/react.production.min.js', '/vendor/react-dom.production.min.js', '/_ds_bundle.js']);
-    assert.equal(list.at(-2), '/js/page-' + page + '.js', 'the page glue runs after every module it uses');
-    for (const src of list) assert.ok(fs.existsSync(path.join('dist', src)), file + ': missing ' + src);
+    assert.equal(list.at(-1), '/js/page-' + page + '.js', 'the page glue runs after every module it uses');
+    for (const src of [...list, ...afterPaintAlone(html)]) assert.ok(fs.existsSync(path.join('dist', src)), file + ': missing ' + src);
     assert.match(html, /e\.async=false/, 'dynamic scripts keep their order');
     assert.match(html, /requestAnimationFrame\(function\(\)\{setTimeout\(go,0\);\}\)/);
   }
@@ -1047,23 +1103,29 @@ test('a rapor model picked on the landing page goes into the form and every quot
   const out = landingForm({ ...leadFields, model: 'jahit' }, { before: (o) => o.change({ target: { name: 'model', value: 'jahit' } }) });
   assert.match(decodeURIComponent(out.opened), /Sekolah\/lembaga: Test School\nModel: Rapor Jahit\nJumlah: 120 pcs/);
   assert.deepEqual(out.steps, ['model_select:jahit', 'quote_form_submit:jahit', 'wa:form', 'navigate']);
-  const [header, hero] = out.links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
-  assert.match(hero, /\n- Model: Rapor Jahit\n- Jumlah: \.\.\. pcs/, 'the shared quote buttons name the model');
-  assert.ok(!hero.includes('mohon dibantu pilih modelnya'), 'no request to pick a model once one is picked');
-  assert.ok(!header.includes('Model'), 'the header question stays plain');
-  // Back to "Belum tahu": the model line goes again.
+  const [header, hero, bantu] = out.links.map((l) => decodeURIComponent(l.href.split('?text=')[1]));
+  assert.equal(hero, 'Halo Agatha Felix, saya mau minta harga map rapor / ijazah custom model Rapor Jahit. Saya kirim foto contohnya ya.', 'the shared quote buttons name the model');
+  assert.match(bantu, /custom model Rapor Jahit, tapi belum punya contoh\. Mohon dibantu ya\.$/, 'no request to pick a model once one is picked');
+  assert.ok(!header.includes('model'), 'the header question stays plain');
+  // Back to "Belum tahu": the model goes again.
   const reset = landingForm(leadFields, { before: (o) => { o.change({ target: { name: 'model', value: 'press' } }); o.change({ target: { name: 'model', value: 'belum' } }); } });
-  assert.ok(!decodeURIComponent(reset.links[1].href).includes('- Model:'));
+  assert.ok(!decodeURIComponent(reset.links[1].href).includes(' model '));
   assert.match(decodeURIComponent(reset.opened), /Model: belum tahu, mohon disarankan/);
   assert.deepEqual(reset.steps.slice(0, 2), ['model_select:press', 'quote_form_submit:belum'], '"Belum tahu" is no model choice');
 });
 
 test('product and portfolio photos open large; every zoom target exists and is reachable by keyboard', () => {
-  assert.ok(afterPaint(read('dist/index.html')).includes('/js/af-zoom.js'));
+  // The zoom script works on the prerendered HTML, so it runs on its own: queued
+  // behind React, a photo tapped before hydration did nothing (a Clarity dead click).
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html']) {
+    const html = read('dist/' + file);
+    assert.deepEqual(afterPaintAlone(html), ['/js/af-zoom.js'], file);
+    assert.ok(!afterPaint(html).includes('/js/af-zoom.js'), file + ' still waits for React');
+  }
   assert.match(read('project/ui_kits/website_v2/Sheet.jsx'), /data-zoom=\{src\} role="button" tabIndex=\{i === slide \? 0 : -1\}/, 'sheet photos zoom; only the one in view takes focus');
   for (const [file, min] of [['raporsekolah/index.html', 15], ['produk-custom/index.html', 8]]) {
     const html = read('dist/' + file);
-    assert.ok(file.startsWith('raporsekolah') ? /<script defer src="\/js\/af-zoom\.js"><\/script>/.test(html) : afterPaint(html).includes('/js/af-zoom.js'), file);
+    assert.ok(file.startsWith('raporsekolah') ? /<script defer src="\/js\/af-zoom\.js"><\/script>/.test(html) : afterPaintAlone(html).includes('/js/af-zoom.js'), file);
     const triggers = [...html.matchAll(/<img [^>]*data-zoom="([^"]+)"[^>]*>/g)];
     assert.ok(triggers.length >= min, `${file}: ${triggers.length} zoomable photos`);
     for (const [tag, src] of triggers) {
