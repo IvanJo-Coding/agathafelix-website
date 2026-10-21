@@ -1145,6 +1145,8 @@ test('product and portfolio photos open large; every zoom target exists and is r
   assert.match(zoom, /showModal\(\)/);
   assert.match(zoom, /e\.stopPropagation\(\)/, 'keys stay out of the product sheet underneath');
   assert.match(zoom, /opener\.focus/, 'focus goes back to the photo');
+  // The figure covers the dialog: checking e.target === dialog never closed it.
+  assert.match(zoom, /closest\('\.afz-img, \.afz-btn'\)\) dialog\.close\(\)/, 'a tap beside the photo closes it');
 });
 
 test('every WhatsApp button carries a fixed data-wa label', () => {
