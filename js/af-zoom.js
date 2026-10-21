@@ -62,7 +62,12 @@
     dialog.querySelector('.afz-close').addEventListener('click', function () { dialog.close(); });
     prev.addEventListener('click', function () { show(index - 1); });
     next.addEventListener('click', function () { show(index + 1); });
-    dialog.addEventListener('click', function (e) { if (e.target === dialog) dialog.close(); });
+    // The figure fills the whole dialog, so a tap beside the photo lands on the
+    // figure or the caption, never on the dialog itself (a Clarity dead click).
+    // Anything but the photo and the buttons closes it.
+    dialog.addEventListener('click', function (e) {
+      if (!e.target.closest || !e.target.closest('.afz-img, .afz-btn')) dialog.close();
+    });
     // Keys stay in here: the product sheet underneath closes on Escape and
     // loops Tab through listeners on document.
     dialog.addEventListener('keydown', function (e) {
