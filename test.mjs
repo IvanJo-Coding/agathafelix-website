@@ -67,6 +67,35 @@ test('the Google tag waits for the page, but the first tap or a WhatsApp click l
   const thanks = tracking('agatha-felix.com', '/raporsekolah/terima-kasih.html');
   assert.equal(thanks.scripts.length, 1, 'the thank-you page loads it at once');
 });
+
+test('a failed Google download retries from a later interaction, retaining the original event queue', () => {
+  const live = tracking('agatha-felix.com');
+  live.click('https://wa.me/6282219472613');
+  const first = live.scripts[0];
+  const queue = live.window.dataLayer;
+  first.onerror();
+  for (const fn of live.windowListeners.keydown) fn();
+  assert.equal(live.scripts.length, 2);
+  assert.notEqual(live.scripts[1], first, 'a failed script element is not reused');
+  assert.equal(live.window.dataLayer, queue);
+  assert.equal(queue.filter((e) => e[1] === 'conversion').length, 1, 'retrying the loader adds no conversion');
+  live.scripts[1].onload();
+  live.loads[0]();
+  assert.equal(live.scripts.length, 2, 'a successful loader is not fetched again');
+});
+
+test('Google download retries are bounded and WhatsApp still opens when every attempt fails', () => {
+  const live = tracking('agatha-felix.com');
+  for (let i = 0; i < 5; i++) {
+    live.click('https://wa.me/6282219472613');
+    live.scripts.at(-1).onerror();
+  }
+  assert.equal(live.scripts.length, 3);
+  const sameTab = live.click('https://wa.me/6282219472613', '');
+  assert.equal(sameTab.defaultPrevented, true);
+  live.timers.at(-1)();
+  assert.equal(live.navigations.length, 1, 'tracking does not block the WhatsApp handoff');
+});
 test('WhatsApp clicks are measured once; ordinary and lookalike links are ignored', () => {
   const result = tracking();
   vm.runInContext(tag, result.context);
@@ -285,6 +314,7 @@ test('GA4 counts a fresh form handoff once, with no form values or URL parameter
     ['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_form' }],
   ]);
   live.scripts[0].onload();
+  live.window.dataLayer.find((e) => e[1] === 'conversion')[2].event_callback();
   for (const pending of [first.saved, null]) {
     const visit = prepare(thanks, pending);
     const quiet = tracking('agatha-felix.com', thanksPath, visit.window, withAnalytics);
@@ -292,7 +322,7 @@ test('GA4 counts a fresh form handoff once, with no form values or URL parameter
     assert.equal(googleCalls(quiet.window).find((e) => e[1] === withAnalytics.googleAnalyticsId)[2].send_page_view, false);
   }
 });
-test('a fresh handoff counts once the tag loads, and a failed load is retried', () => {
+test('a fresh handoff shares the primary WhatsApp goal, deduplicates retries, and records processing separately from loading', () => {
   const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
   assert.equal(first.window.AF_LEAD_URL, wa);
   assert.equal(first.window.AF_LEAD_PREPARED, true);
@@ -301,21 +331,39 @@ test('a fresh handoff counts once the tag loads, and a failed load is retried', 
   assert.equal(failed.scripts.length, 1);
   assert.equal(failed.window.dataLayer[1][2].page_location, thanks);
   assert.ok(!('send_page_view' in failed.window.dataLayer[1][2]));
+  const firstConversion = failed.window.dataLayer.find((e) => e[1] === 'conversion');
+  assert.equal(firstConversion[2].send_to, config.waConversionLabel);
+  assert.equal(firstConversion[2].transaction_id, first.saved.id);
+  assert.match(first.saved.id, /^afw-[a-z0-9-]{12,60}$/i);
   // The tag never loaded (blocked or offline), so a reload sends the page view again.
   const retry = prepare(thanks, first.saved);
   assert.equal(retry.window.AF_LEAD_MEASURED, false);
   const loaded = tracking('agatha-felix.com', thanksPath, retry.window);
   assert.ok(!('send_page_view' in loaded.window.dataLayer[1][2]));
   loaded.scripts[0].onload();
+  assert.equal(retry.saved.measured, false, 'loading a script is not conversion processing');
+  const retriedConversion = loaded.window.dataLayer.find((e) => e[1] === 'conversion');
+  assert.equal(retriedConversion[2].transaction_id, firstConversion[2].transaction_id, 'retry preserves the deduplication ID');
+  retriedConversion[2].event_callback();
   assert.equal(retry.saved.measured, true);
   // Once measured, a reload keeps the message but sends no second form conversion.
   const reload = prepare(thanks, retry.saved);
   assert.equal(reload.window.AF_LEAD_URL, wa);
   const quiet = tracking('agatha-felix.com', thanksPath, reload.window);
   assert.equal(quiet.window.dataLayer[1][2].send_page_view, false);
-  assert.equal(quiet.scripts[0].onload, undefined);
+  assert.equal(quiet.window.dataLayer.filter((e) => e[1] === 'conversion').length, 0);
   quiet.click(wa);
   assert.equal(quiet.window.dataLayer.length, 2, 'WhatsApp retry must not double-count the prepared form');
+});
+
+test('separate prepared handoffs have different IDs and expose no contact fields to Ads', () => {
+  const one = prepare(thanks, { url: wa, created: Date.now(), measured: false });
+  const two = prepare(thanks, { url: wa, created: Date.now(), measured: false });
+  assert.notEqual(one.window.AF_LEAD_ID, two.window.AF_LEAD_ID);
+  const live = tracking('agatha-felix.com', thanksPath, one.window, withAnalytics);
+  const conversion = googleCalls(live.window).find((e) => e[1] === 'conversion')[2];
+  assert.deepEqual(Object.keys(conversion).sort(), ['send_to', 'transaction_id']);
+  assert.ok(!JSON.stringify(googleCalls(live.window)).includes('Local%20test'));
 });
 test('direct and expired thank-you visits deliver WhatsApp clicks without a form conversion', () => {
   for (const pending of [null, { url: wa, created: Date.now() - 31 * 60 * 1000, measured: false }]) {

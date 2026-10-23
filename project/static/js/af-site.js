@@ -9,12 +9,14 @@
   var later = [];
   var loadTag = function () {};
 
-  function trackWhatsApp(callback) {
+  function trackWhatsApp(callback, transactionId) {
     loadTag();
-    window.gtag('event', 'conversion', {
+    var params = {
       send_to: config.waConversionLabel,
       event_callback: callback,
-    });
+    };
+    if (/^afw-[a-z0-9-]{12,60}$/i.test(transactionId || '')) params.transaction_id = transactionId;
+    window.gtag('event', 'conversion', params);
   }
   // For a message the page keeps out of its HTML (waPribadi in Shell.jsx). The
   // page has already cancelled the click, so the listener below skips it: count
@@ -75,7 +77,7 @@
     return true;
   }
   // A WhatsApp chat opened without a link click: the rapor form's handoff,
-  // which Google Ads counts through the thank-you page instead. GA4 and
+  // which Google Ads counts once on a prepared thank-you page. GA4 and
   // Clarity get it as klik_whatsapp from the form.
   function noteWhatsApp(label) {
     if (label === 'form') noteButton(label, true);
@@ -83,8 +85,8 @@
   window.AFTracking = { trackWhatsApp: trackWhatsApp, openWhatsApp: openWhatsApp, noteVideo: noteVideo, noteStep: noteStep,
     noteWhatsApp: noteWhatsApp, setClarityConsent: setConsent };
 
-  // A thank-you page view is the form conversion (a URL rule in Google Ads), so
-  // only a fresh handoff that has not been measured yet may send one. Direct
+  // Only a fresh handoff may send the form's primary WhatsApp conversion.
+  // The existing thank-you URL action remains secondary, for observation. Direct
   // visits and reloads still load the tag, without a page view, so a WhatsApp
   // click there is delivered instead of waiting in dataLayer.
   var formConversion = thankYou && window.AF_LEAD_PREPARED && !window.AF_LEAD_MEASURED;
@@ -105,22 +107,36 @@
         method: 'whatsapp_form',
       });
     }
-    var script = document.createElement('script');
-    script.async = true;
-    // Loading the tag sends the queued page view; until then a reload retries.
-    if (formConversion) script.onload = function () { window.AF_LEAD_MARK_MEASURED(); };
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.googleAdsId);
-    var tagLoaded = false;
+    var tagState = 'idle', tagAttempts = 0, activeTag = null;
     loadTag = function () {
-      if (tagLoaded) return;
-      tagLoaded = true;
+      if (tagState === 'loading' || tagState === 'loaded' || tagAttempts >= 3) return;
+      tagState = 'loading';
+      tagAttempts++;
+      var script = document.createElement('script');
+      activeTag = script;
+      script.async = true;
+      script.onload = function () {
+        if (activeTag === script) tagState = 'loaded';
+      };
+      script.onerror = function () {
+        if (activeTag !== script) return;
+        tagState = 'failed';
+        if (script.parentNode) script.parentNode.removeChild(script);
+      };
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(config.googleAdsId);
       document.head.appendChild(script);
     };
-    // The thank-you page loads it at once: its page view is the form
-    // conversion. Elsewhere it waits for the page to finish loading, or for
+    // The same handoff keeps its non-personal ID on reload, so a retry does
+    // not create another primary conversion. A tag load alone is not event
+    // processing: keep the handoff retryable until the conversion callback.
+    if (formConversion && window.AF_LEAD_ID) trackWhatsApp(function () {
+      window.AF_LEAD_MARK_MEASURED();
+    }, window.AF_LEAD_ID);
+    // The thank-you page loads the tag at once. Elsewhere it waits for load or
     // the first tap or key press: fetched early (about 346 KB for both
     // destinations) it held the hero text back some 6 s in mobile lab runs.
-    // Anything sent before then waits in dataLayer and goes out on load.
+    // Anything sent before then stays in dataLayer, including after a failed
+    // download. A later interaction may retry, at most three attempts per page.
     if (thankYou) loadTag();
     else {
       later.push(loadTag);

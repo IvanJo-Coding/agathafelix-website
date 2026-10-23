@@ -632,7 +632,8 @@ var next='terima-kasih.html';
 try{sessionStorage.setItem('af-rapor-lead',JSON.stringify({url:url,created:Date.now(),measured:false}))}
 catch(_){next+='#wa='+encodeURIComponent(url)}
 try{window.open(url,'_blank','noopener')}catch(_){}
-// The form's WhatsApp handoff. Google Ads counts it on the thank-you page, so it is no WhatsApp click conversion.
+// GA4 and Clarity count the handoff here. The prepared thank-you page sends
+// the primary WhatsApp conversion with its stable, non-personal handoff ID.
 step('quote_form_submit',{model:m});
 if(window.AFTracking&&AFTracking.noteWhatsApp)AFTracking.noteWhatsApp('form');
 location.href=next})

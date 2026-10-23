@@ -90,6 +90,19 @@ WhatsApp enquiry, not proof that the visitor sent the message. These events
 are routed explicitly to GA4; the existing Ads WhatsApp and thank-you URL
 goals stay in place without adding new Ads conversions. Do not import the
 GA4 events as additional primary Ads goals for those same actions.
+
+From 2026-10-23, a fresh prepared rapor form handoff also sends the existing
+primary **Klik WhatsApp** conversion on the thank-you page. It carries a
+random, non-personal `transaction_id`, stored with the prepared handoff in
+sessionStorage, so a reload can retry the same conversion without creating a
+new ID. The measured flag is set by the conversion's processing callback,
+not by the script's load event. This callback does not prove server-side
+receipt or ad attribution. The existing thank-you URL action stays secondary
+for observation; do not promote it or import GA4 as another primary action.
+Compare pre/post form conversion counts with this definition change in mind.
+The Google loader retries a failed download on a later interaction, with a
+maximum of three requests per page; queued events are retained. WhatsApp
+navigation still works if all requests fail.
 `generate_lead` is registered as a GA4 key event (once per event, with no
 default monetary value); its code deduplicates refreshes of the same handoff.
 
