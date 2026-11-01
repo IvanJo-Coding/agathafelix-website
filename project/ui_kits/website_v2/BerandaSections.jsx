@@ -115,13 +115,17 @@ function SekolahV2() {
             Rapor Kerennya, <span style={{ color: 'var(--af-yellow)' }}>Biar Kami yang Bikin!</span>
           </h2>
           <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.92)', maxWidth: 440 }}>
-            Sampul rapor dengan logo dan warna khas sekolahmu — bahan tebal, jilid rapi, awet sampai lulus.
+            Sampul raport dan map ijazah dengan logo dan warna khas sekolahmu, dari TK sampai SMA/SMK — bahan tebal, jilid rapi, awet sampai lulus.
             Custom mulai <strong style={{ color: 'var(--af-yellow)' }}>50 pcs</strong>. Kami sarankan 100 pcs agar lebih ekonomis, dengan perkiraan sekitar Rp50.000/pcs sesuai model, bahan, dan cetak.
           </p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Button color="wa" data-wa="sekolah" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau konsultasi rapor / map custom untuk sekolah / les.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Konsultasi Gratis</Button>
             <Button color="orange" size="lg" href="produk-custom.html#simulator">🎨 Desain Sendiri di Simulator</Button>
           </div>
+          {/* A plain content link: the school page is where rapor and ijazah searches should land. */}
+          <a href="/raporsekolah/" style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', textDecorationColor: 'var(--af-yellow)', textDecorationThickness: 2, textUnderlineOffset: 4 }}>
+            Lihat contoh sampul raport &amp; map ijazah sekolah →
+          </a>
         </div>
       </div>
       <window.Wave fill="var(--af-paper)" />
