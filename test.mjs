@@ -485,7 +485,8 @@ function landingPage({ cards = [] } = {}) {
 }
 test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip is no empty box', () => {
   const html = read('dist/raporsekolah/index.html');
-  assert.match(html, /<title>Sampul Rapor &amp; Ijazah [^<]*<\/title>/);
+  // The title uses the spelling schools search with ("raport"); the H1 keeps "Rapor".
+  assert.match(html, /<title>Sampul Raport &amp; Map Ijazah [^<]*<\/title>/);
   assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Berlogo Sekolah, /);
   assert.match(html, /<summary>Bisa untuk map ijazah juga\?<\/summary>/);
   // The build drops data-video for a clip that is not in the repo; CSS then shows a compact card.
