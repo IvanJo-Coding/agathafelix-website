@@ -143,7 +143,7 @@ function HeroV2() {
             Dokumen <span style={{ color: 'var(--af-purple)' }}>Penting</span>, Masuk Map Plastik yang <span style={{ color: 'var(--af-orange)' }}>Keren!</span>
           </h1>
           <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 500 }}>
-            Dari rapor TK sampai akta notaris — Agatha Felix membuat map plastik &amp; rapor custom langsung dari pabrik.
+            Dari rapor TK sampai akta notaris — Agatha Felix membuat map plastik &amp; rapor custom langsung dari pabrik kami di Bekasi Timur.
             <strong style={{ color: 'var(--text-heading)' }}> Warna-warni boleh, harga tetap ramah.</strong>
           </p>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>

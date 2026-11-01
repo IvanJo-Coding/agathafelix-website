@@ -51,7 +51,7 @@ function PortfolioCard({ p, rot }) {
       onMouseLeave={(e) => { e.currentTarget.style.transform = `rotate(${rot}deg)`; }}
     >
       <div style={{ background: '#f4ede1', borderBottom: '2px solid var(--af-ink)', position: 'relative' }}>
-        <img className="af-pf-img" src={p.img} srcSet={window.afSrcSet(p.img)} sizes="(max-width: 680px) 50vw, 300px" alt={p.teknik + ' custom untuk ' + p.client} loading="lazy" decoding="async"
+        <img className="af-pf-img" src={p.img} srcSet={window.afSrcSet(p.img)} sizes="(max-width: 680px) 50vw, 300px" alt={p.teknik + (/custom/i.test(p.teknik) ? ' untuk ' : ' custom untuk ') + p.client} loading="lazy" decoding="async"
           data-zoom={p.img} role="button" tabIndex={0} aria-label={'Perbesar foto: ' + p.teknik + ' untuk ' + p.client} style={{ width: '100%', height: 230, objectFit: 'cover', display: 'block' }} />
         <span
           className="af-pf-seg"
@@ -130,7 +130,7 @@ function FactoryBand() {
             Semua Dibuat di <span style={{ color: 'var(--af-yellow)' }}>Pabrik Kami Sendiri</span>
           </h2>
           <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.82)', maxWidth: 420 }}>
-            Press, jahit, sablon, sampai packing — semua satu atap. Itu kenapa harga kami harga pabrik,
+            Press, jahit, sablon, sampai packing — semua satu atap di pabrik kami di Bekasi Timur. Itu kenapa harga kami harga pabrik,
             dan kualitasnya kami pegang dari awal sampai akhir.
           </p>
           <Button color="wa" data-wa="kapasitas" size="lg" href={window.waLink('Halo Agatha Felix! Saya mau bertanya tentang kapasitas produksi map / rapor custom.')} target="_blank" rel="noopener noreferrer"><window.WaGlyph2 /> Tanya Kapasitas Produksi</Button>

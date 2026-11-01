@@ -40,6 +40,10 @@ const SITE = {
   city: 'Kota Bekasi',
   region: 'Jawa Barat',
   country: 'ID',
+  // Same street line as the /raporsekolah/ page and its schema, so search engines see one address.
+  street: 'Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya, Kec. Bekasi Timur',
+  postalCode: '17112',
+  mapsUrl: 'https://maps.app.goo.gl/GA1jHXYczEmmMN136',
   sameAs: ['https://www.instagram.com/agathafelix_indonesia/'],
   openingHours: { days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], opens: '08:00', closes: '17:00' },
   minify: true,
@@ -78,10 +82,13 @@ const PAGES = [
   {
     out: 'index.html',
     canonical: '/',
-    title: 'Pabrik Map Plastik & Custom Rapor Sekolah | Agatha Felix',
+    // Each page owns one search intent: the factory and catalogue here, rapor and
+    // ijazah on /raporsekolah/, logo maps for offices on /produk-custom/.
+    // Descriptions stay at 155 characters or fewer so Google shows them whole.
+    title: 'Pabrik Map Plastik di Bekasi — Grosir & Custom | Agatha Felix',
     description:
-      'Agatha Felix — pabrik map plastik & custom rapor sekolah langsung dari produksi, ' +
-      'bukan reseller. Clear holder, map kancing, business file, rapor custom logo. Chat WhatsApp untuk harga grosir.',
+      'Pabrik map plastik di Bekasi Timur: clear holder, map kancing, business file grosir, ' +
+      'plus map custom logo & sampul raport sekolah. Bukan reseller.',
     sections: ['Shell', 'HeroMap', 'Portfolio', 'BerandaSections'],
     glue: `
       function BerandaPage() {
@@ -112,19 +119,18 @@ const PAGES = [
     canonical: '/produk-standar/',
     title: 'Jual Map Plastik Grosir — Katalog Siap Kirim | Agatha Felix',
     description:
-      'Jual map plastik grosir langsung dari pabrik: clear holder, map kancing, business file, ' +
-      'map L, map executive, carry file, expanding file, zipper bag. Beli per lusin atau grosir, siap kirim.',
+      'Map plastik grosir dari pabrik: clear holder, map kancing, business file, map L, ' +
+      'map executive, zipper bag. Beli satuan, lusin, atau grosir, siap kirim.',
     sections: ['Shell', 'Sheet', 'HargaStandar', 'ProdukStandarSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukStandarPage/>);`,
   },
   {
     out: 'produk-custom/index.html',
     canonical: '/produk-custom/',
-    title: 'Custom Rapor Sekolah & Map Cetak Logo | Agatha Felix',
-    // Kept under ~155 characters so Google shows it whole.
+    title: 'Cetak Map Custom Logo untuk Kantor & Sekolah | Agatha Felix',
     description:
-      'Custom rapor sekolah & map cetak logo untuk sekolah, les, kantor & instansi. ' +
-      'Minimal 50 pcs, sekitar Rp50.000/pcs untuk 100 pcs. Coba simulator rapor gratis.',
+      'Cetak map custom logo untuk kantor, instansi, sekolah & les: map sertifikat, map seminar, ' +
+      'clear holder, zipper bag. Mulai 50 pcs, mockup gratis.',
     sections: ['Shell', 'Sheet', 'Simulator', 'Portfolio', 'CustomHarga', 'CustomProduk', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
@@ -267,14 +273,15 @@ function organizationSchema() {
     url: SITE.domain + '/',
     logo: SITE.domain + SITE.logo,
     image: SITE.domain + SITE.ogImage,
-    description: 'Pabrik map plastik & custom rapor sekolah langsung dari produksi — clear holder, map kancing, business file, hingga rapor custom logo sekolah.',
+    description: 'Pabrik map plastik di Bekasi Timur — clear holder, map kancing, business file, map custom logo, hingga sampul rapor dan map ijazah sekolah.',
     telephone: '+' + SITE.whatsapp,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya',
-      postalCode: '17112',
+      streetAddress: SITE.street,
+      postalCode: SITE.postalCode,
       addressLocality: SITE.city, addressRegion: SITE.region, addressCountry: SITE.country,
     },
+    hasMap: SITE.mapsUrl,
     areaServed: { '@type': 'Country', name: 'Indonesia' },
     sameAs: SITE.sameAs,
     openingHoursSpecification: [{
@@ -299,7 +306,7 @@ function jsonLdFor(page) {
     });
     blocks.push(faqSchema(FAQ_ITEMS));
   } else {
-    const crumb = { '/produk-standar/': 'Produk Standar', '/produk-custom/': 'Custom Rapor Sekolah' }[page.canonical] || page.title;
+    const crumb = { '/produk-standar/': 'Produk Standar', '/produk-custom/': 'Map Custom Logo' }[page.canonical] || page.title;
     blocks.push({
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
       itemListElement: [
