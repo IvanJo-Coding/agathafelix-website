@@ -485,7 +485,8 @@ function landingPage({ cards = [] } = {}) {
 }
 test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip is no empty box', () => {
   const html = read('dist/raporsekolah/index.html');
-  assert.match(html, /<title>Sampul Rapor &amp; Ijazah [^<]*<\/title>/);
+  // The title uses the spelling schools search with ("raport"); the H1 keeps "Rapor".
+  assert.match(html, /<title>Sampul Raport &amp; Map Ijazah [^<]*<\/title>/);
   assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Berlogo Sekolah, /);
   assert.match(html, /<summary>Bisa untuk map ijazah juga\?<\/summary>/);
   // The build drops data-video for a clip that is not in the repo; CSS then shows a compact card.
@@ -727,6 +728,56 @@ test('built routes expose content, metadata, styles, and valid local assets in r
   assert.match(home, /<a[^>]+href="https:\/\/wa.me\/6282219472613[^>]+>[\s\S]*?Tanya Kapasitas Produksi/);
   assert.ok(!read('dist/sitemap.xml').includes('lastmod'));
   assert.match(read('dist/raporsekolah/terima-kasih.html'), /noindex/);
+});
+test('each page owns one search intent: unique short titles and descriptions, rapor only on the rapor page', () => {
+  const unescape = (s) => s.replace(/&amp;/g, '&');
+  const meta = (file) => {
+    const html = read('dist/' + file);
+    return { html, title: unescape(html.match(/<title>([^<]*)<\/title>/)[1]), desc: unescape(html.match(/<meta name="description" content="([^"]*)"/)[1]) };
+  };
+  const seen = new Set();
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'kebijakan-privasi/index.html']) {
+    const { title, desc } = meta(file);
+    assert.ok(!seen.has(title), file + ' repeats another page title'); seen.add(title);
+    assert.ok(title.length <= 65, `${file}: title is ${title.length} characters`);
+    // Google cuts descriptions at about 155 characters.
+    assert.ok(desc.length <= 155, `${file}: description is ${desc.length} characters`);
+  }
+  // Rapor and ijazah searches have one page; the homepage and the custom page do not compete for them.
+  for (const file of ['index.html', 'produk-custom/index.html']) assert.ok(!/rapor/i.test(meta(file).title), file);
+  const rapor = meta('raporsekolah/index.html');
+  assert.match(rapor.desc, /raport/);
+  assert.match(rapor.html, /<h2[^>]*>Ukuran, Bahan, dan Harga Sampul Raport<\/h2>/);
+});
+test('the rapor page is linked from page content, not only the footer, and the custom page sends schools there', () => {
+  const home = read('dist/index.html');
+  const sekolah = home.slice(home.indexOf('id="sekolah"'), home.indexOf('id="pabrik"'));
+  assert.match(sekolah, /<a href="\/raporsekolah\/"[^>]*>Lihat contoh sampul raport &amp; map ijazah sekolah →<\/a>/);
+  const custom = read('dist/produk-custom/index.html');
+  assert.match(custom.slice(0, custom.indexOf('id="produk-custom"')), /<a href="\/raporsekolah\/"[^>]*>Untuk sekolah: lihat sampul raport &amp; map ijazah →<\/a>/);
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html']) {
+    assert.match(read('dist/' + file), /<a href="\/raporsekolah\/"[^>]*>Sampul Raport &amp; Ijazah<\/a>/, file + ' footer');
+  }
+  const rapor = read('dist/raporsekolah/index.html');
+  assert.ok(rapor.includes('<a href="/produk-custom/">'), 'the rapor page links on to the custom page');
+});
+test('one business address everywhere: schema on every page and the visible footers agree', () => {
+  const addresses = new Set();
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+    const html = read('dist/' + file);
+    for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      const o = JSON.parse(json);
+      for (const b of o['@graph'] || [o]) {
+        if (!b.address) continue;
+        const { streetAddress, addressLocality, postalCode } = b.address;
+        addresses.add([streetAddress, addressLocality, postalCode].join(' | '));
+        assert.equal(b.hasMap, 'https://maps.app.goo.gl/GA1jHXYczEmmMN136', file);
+      }
+    }
+    assert.ok(html.includes('Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya, Kec. Bekasi Timur, Kota Bekasi, Jawa Barat 17112'), file + ' shows the full address');
+    assert.ok(!/alt="[^"]*\b[Cc]ustom custom\b/.test(html), file + ' repeats "custom" in an alt text');
+  }
+  assert.deepEqual([...addresses], ['Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya, Kec. Bekasi Timur | Kota Bekasi | 17112']);
 });
 test('FAQ structured data matches the answers visible on each page', () => {
   for (const file of ['index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {

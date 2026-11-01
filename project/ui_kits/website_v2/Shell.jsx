@@ -321,13 +321,13 @@ function FooterV2() {
           <a href="produk-standar.html#map-kancing" style={link}>Map Kancing</a>
           <a href="produk-standar.html#clear-sleeves" style={link}>Map L (Clear Sleeves)</a>
           <a href="produk-standar.html#dokumen-keeper" style={link}>Map Executive</a>
-          <a href="produk-custom.html" style={link}>Rapor &amp; Map Custom</a>
+          <a href="/raporsekolah/" style={link}>Sampul Raport &amp; Ijazah</a>
+          <a href="produk-custom.html" style={link}>Map Custom Logo</a>
         </div>
         <div>
           <div style={head}>Jelajahi</div>
           <a href="index.html" style={link}>Beranda</a>
           <a href="produk-custom.html#simulator" style={link}>Simulator Rapor</a>
-          <a href="/raporsekolah/" style={link}>Rapor Sekolah</a>
           <a href="index.html#cara-pesan" style={link}>Cara Pesan</a>
           <a href="index.html#faq" style={link}>FAQ</a>
         </div>
@@ -337,9 +337,13 @@ function FooterV2() {
             <a href={waLink('Halo Agatha Felix! Saya mau bertanya soal map / rapor custom.')} data-wa="kontak-footer" target="_blank" rel="noopener noreferrer"
               style={{ color: '#fff', fontWeight: 700, textUnderlineOffset: 3 }}>WhatsApp: +62 822-1947-2613</a><br />
             Senin–Sabtu, 08.00–17.00 WIB<br />
-            Pabrik di Kota Bekasi, Jawa Barat<br />
             Pengiriman ke seluruh Indonesia
           </p>
+          {/* The same address as /raporsekolah/ and the LocalBusiness schema. */}
+          <address style={{ fontStyle: 'normal', fontSize: '0.84rem', lineHeight: 1.7, marginTop: 10 }}>
+            Jl. Mahoni Raya No.75, RT.001/RW.008, Bekasi Jaya, Kec. Bekasi Timur, Kota Bekasi, Jawa Barat 17112 ·{' '}
+            <a href="https://maps.app.goo.gl/GA1jHXYczEmmMN136" target="_blank" rel="noopener noreferrer" style={{ color: '#fff' }}>Google Maps</a>
+          </address>
         </div>
       </div>
       <div

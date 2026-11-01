@@ -75,11 +75,13 @@ function ProdukCustomPage() {
           <window.ConfettiV2 />
           <div style={wrapPC({ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, paddingBottom: 40 })}>
             <Badge color="orange" dot>✏️ Custom Order</Badge>
+            {/* This page owns "map custom / cetak map logo" for every kind of buyer;
+                rapor and ijazah searches belong to /raporsekolah/, linked below. */}
             <h1 style={{ fontSize: 'var(--text-2xl)', maxWidth: 820, textWrap: 'balance' }}>
-              Custom Rapor &amp; Map, <span style={{ color: 'var(--af-orange)' }}>Logo &amp; Warna Kamu!</span>
+              Cetak Map Custom, <span style={{ color: 'var(--af-orange)' }}>Logo &amp; Warna Kamu!</span>
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 540 }}>
-              Rapor sekolah, map les, sampai file kantor notaris — kami cetak sesuai identitasmu.
+              Map sertifikat, map seminar, file kantor notaris, sampai rapor sekolah — kami cetak sesuai identitas kantor, instansi, atau sekolahmu.
               Punya contoh? Kirim fotonya lewat WhatsApp, kami hitungkan harganya. Tidak perlu tahu istilah bahan.
             </p>
             {/* The minimum order sits right above the button, so nobody reaches WhatsApp without seeing it. */}
@@ -93,6 +95,9 @@ function ProdukCustomPage() {
             <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-body)' }}>
               Belum punya contoh? Kami bantu pilih model.
             </p>
+            <a href="/raporsekolah/" style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--af-ink)', textDecorationColor: 'var(--af-orange)', textDecorationThickness: 2, textUnderlineOffset: 4 }}>
+              Untuk sekolah: lihat sampul raport &amp; map ijazah →
+            </a>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
               <Chip color="purple">Sekolah &amp; TK</Chip>
               <Chip color="green">Bimbel &amp; Les</Chip>
@@ -131,12 +136,18 @@ function ProdukCustomPage() {
               <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" width="1080" height="1080" loading="lazy" decoding="async" style={{ width: '100%', height: 'auto', display: 'block' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
-              <Badge color="yellow" dot>Untuk yang Serius-Serius</Badge>
+              <Badge color="yellow" dot>Untuk Kantor &amp; Instansi</Badge>
               <h2 style={{ fontSize: 'var(--text-xl)', color: '#fff' }}>
-                Notaris, Lawyer, Kantor — <span style={{ color: 'var(--af-yellow)' }}>Kami Juga Bisa Kalem</span>
+                Map Sertifikat, Seminar &amp; Kantor — <span style={{ color: 'var(--af-yellow)' }}>Kami Juga Bisa Kalem</span>
               </h2>
               <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.85)', maxWidth: 440 }}>
-                Di balik warna-warni kami, ada lini executive: document keeper kulit sintetis dengan
+                Map sertifikat dan piagam untuk pelatihan atau penghargaan: <a href="#custom-map-press" style={{ color: '#fff' }}>Map Press</a> atau{' '}
+                <a href="#custom-map-jahit" style={{ color: '#fff' }}>Map Jahit</a> ukuran A4 atau F4, logo poly emas, silver, atau biru tua.
+                Untuk seminar dan pelatihan, <a href="#custom-clear-holder-print" style={{ color: '#fff' }}>clear holder</a> dan{' '}
+                <a href="#custom-zipper-bag-print" style={{ color: '#fff' }}>zipper bag</a> berlogo.
+              </p>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,.85)', maxWidth: 440 }}>
+                Untuk notaris dan lawyer, lini executive: document keeper kulit sintetis dengan
                 <strong style={{ color: '#fff' }}> emboss foil emas nama firma Anda</strong>. Akta, kontrak, dan
                 sertifikat klien tersimpan rapi — dan terlihat semahal isinya.
               </p>
