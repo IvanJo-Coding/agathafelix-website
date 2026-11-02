@@ -665,7 +665,9 @@ var d=new FormData(f),v=function(k){return (d.get(k)||'').toString().trim()};
 need.forEach(function(k){f.elements[k].style.borderColor=''});
 var missing=need.filter(function(k){return !v(k)});
 if(missing.length)return invalid(missing,'Lengkapi nama sekolah/lembaga, jumlah, dan kota dulu.','data_kurang');
-var jumlah=parseInt(v('jumlah'),10);
+// Number, not parseInt: the form is novalidate, and parseInt read "150.5" as 150 pcs and "1e3" as 1.
+var jumlah=Number(v('jumlah'));
+if(!Number.isInteger(jumlah))return invalid(['jumlah'],'Isi jumlah dengan angka bulat, mis. 120.','data_kurang');
 // The minimum is shown before anyone reaches WhatsApp, so a small order is pointed at stock items instead.
 if(!(jumlah>=50))return invalid(['jumlah'],'Minimal pesan custom 50 pcs per desain. Untuk jumlah lebih kecil, lihat <a href="/produk-standar/">produk standar siap kirim</a>.','di_bawah_minimum');
 err.hidden=true;

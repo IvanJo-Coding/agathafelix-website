@@ -614,7 +614,7 @@ test('the form asks for the order size, not a phone number, and holds back order
   const form = html.slice(html.indexOf('<form class="lead'), html.indexOf('</form>'));
   assert.ok(!/name="hp"|type="tel"/.test(form), 'the visitor already writes from their own WhatsApp');
   assert.match(form, /name="jumlah"[^>]*min="50"/);
-  for (const jumlah of ['49', '', 'abc']) {
+  for (const jumlah of ['49', '', 'abc', '150.5', '49.9']) {
     const result = landingForm({ ...leadFields, jumlah });
     assert.equal(result.opened, undefined, `jumlah "${jumlah}" must not open WhatsApp`);
     assert.equal(result.location.href, undefined);
@@ -622,6 +622,12 @@ test('the form asks for the order size, not a phone number, and holds back order
     assert.ok(result.focused);
   }
   assert.match(landingForm({ ...leadFields, jumlah: '30' }).err.innerHTML, /50 pcs[\s\S]*\/produk-standar\//);
+  // The form is novalidate: a decimal is refused, never rounded down into the message.
+  assert.match(landingForm({ ...leadFields, jumlah: '150.5' }).err.innerHTML, /angka bulat/);
+  // What the number field accepts is what the message says ("1e3" was read as 1 pcs).
+  for (const [jumlah, pcs] of [['150', 150], ['1e3', 1000]]) {
+    assert.ok(decodeURIComponent(landingForm({ ...leadFields, jumlah }).saved.url).includes(`Jumlah: ${pcs} pcs`), jumlah);
+  }
 });
 test('landing CTAs open a short sample message; "belum punya contoh" asks for help; contact links ask a plain question', () => {
   const { links } = landingForm(leadFields);
