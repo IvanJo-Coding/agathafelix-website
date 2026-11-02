@@ -22,6 +22,14 @@
       pending.measured = window.AF_LEAD_MEASURED = true;
       try { sessionStorage.setItem(key, JSON.stringify(pending)); } catch (_) {}
     };
+    // GA4's generate_lead has its own flag and callback. GA4 does not
+    // deduplicate it, so a reload while only the Ads callback was pending
+    // would otherwise send the same lead to GA4 twice.
+    window.AF_LEAD_GA4_SENT = !!pending.ga4;
+    window.AF_LEAD_MARK_GA4 = function () {
+      pending.ga4 = window.AF_LEAD_GA4_SENT = true;
+      try { sessionStorage.setItem(key, JSON.stringify(pending)); } catch (_) {}
+    };
   } else if (legacy) {
     // Preserve old bookmarked links without counting them as new submissions.
     window.AF_LEAD_URL = legacy;

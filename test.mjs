@@ -306,13 +306,25 @@ test('GA4 shares the Google loader and contact events never carry the WhatsApp m
 });
 
 test('GA4 counts a fresh form handoff once, with no form values or URL parameters', () => {
+  const leads = (result) => googleCalls(result.window).filter((e) => e[1] === 'generate_lead');
   const first = prepare(thanks, { url: wa, created: Date.now(), measured: false });
   const live = tracking('agatha-felix.com', thanksPath, first.window, withAnalytics);
   const calls = googleCalls(live.window);
   assert.deepEqual(calls.find((e) => e[0] === 'config' && e[1] === withAnalytics.googleAnalyticsId)[2], { page_location: thanks });
-  assert.deepEqual(calls.filter((e) => e[1] === 'generate_lead'), [
-    ['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_form' }],
-  ]);
+  // googleCalls copies through JSON, which drops the callback: read that from dataLayer itself.
+  assert.deepEqual(leads(live), [['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_form' }]]);
+  const ga4Done = live.window.dataLayer.find((e) => e[1] === 'generate_lead')[2].event_callback;
+  assert.equal(typeof ga4Done, 'function');
+  // GA4 has sent the lead but the Ads callback has not run yet: a reload now
+  // retries the Ads conversion (deduplicated by its ID), never the GA4 lead.
+  ga4Done();
+  assert.deepEqual([first.saved.ga4, first.saved.measured], [true, false]);
+  const reload = tracking('agatha-felix.com', thanksPath, prepare(thanks, first.saved).window, withAnalytics);
+  assert.equal(leads(reload).length, 0, 'a reload before the Ads callback sent generate_lead twice');
+  assert.equal(googleCalls(reload.window).filter((e) => e[1] === 'conversion').length, 1);
+  // The other way round: Ads done, GA4 never confirmed (blocked), so GA4 may still retry.
+  const other = prepare(thanks, { url: wa, created: Date.now(), measured: true });
+  assert.equal(leads(tracking('agatha-felix.com', thanksPath, other.window, withAnalytics)).length, 1);
   live.scripts[0].onload();
   live.window.dataLayer.find((e) => e[1] === 'conversion')[2].event_callback();
   for (const pending of [first.saved, null]) {

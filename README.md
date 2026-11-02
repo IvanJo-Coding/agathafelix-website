@@ -104,7 +104,10 @@ The Google loader retries a failed download on a later interaction, with a
 maximum of three requests per page; queued events are retained. WhatsApp
 navigation still works if all requests fail.
 `generate_lead` is registered as a GA4 key event (once per event, with no
-default monetary value); its code deduplicates refreshes of the same handoff.
+default monetary value). GA4 does not deduplicate it, so the handoff keeps a
+separate GA4 flag, set by `generate_lead`'s own callback: a refresh while
+only the Ads callback is pending does not send the lead to GA4 again
+(until 2026-11-02 both waited on the Ads flag).
 
 In GA4, keep enhanced measurement's **outbound clicks, form interactions,
 and site search OFF**. Automatic outbound events could read the thank-you
