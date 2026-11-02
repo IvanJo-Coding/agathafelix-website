@@ -90,6 +90,9 @@
   // visits and reloads still load the tag, without a page view, so a WhatsApp
   // click there is delivered instead of waiting in dataLayer.
   var formConversion = thankYou && window.AF_LEAD_PREPARED && !window.AF_LEAD_MEASURED;
+  // GA4 keeps its own state: its lead is sent until its own callback runs,
+  // whatever the Ads conversion is doing.
+  var formLead = thankYou && window.AF_LEAD_PREPARED && !window.AF_LEAD_GA4_SENT;
 
   // Local previews never send page views or test conversions to Google Ads.
   if (production) {
@@ -102,9 +105,10 @@
     // contact events separate from the existing Ads conversion goals.
     if (config.googleAnalyticsId) {
       window.gtag('config', config.googleAnalyticsId, params);
-      if (formConversion) window.gtag('event', 'generate_lead', {
+      if (formLead) window.gtag('event', 'generate_lead', {
         send_to: config.googleAnalyticsId,
         method: 'whatsapp_form',
+        event_callback: function () { if (window.AF_LEAD_MARK_GA4) window.AF_LEAD_MARK_GA4(); },
       });
     }
     var tagState = 'idle', tagAttempts = 0, activeTag = null;
