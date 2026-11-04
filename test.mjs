@@ -497,9 +497,13 @@ function landingPage({ cards = [] } = {}) {
 }
 test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip is no empty box', () => {
   const html = read('dist/raporsekolah/index.html');
-  // The title uses the spelling schools search with ("raport"); the H1 keeps "Rapor".
-  assert.match(html, /<title>Sampul Raport &amp; Map Ijazah [^<]*<\/title>/);
-  assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Berlogo Sekolah, /);
+  // The title covers both spellings schools search with and the custom school-logo offer.
+  assert.match(html, /<title>Map Rapor, Sampul Raport &amp; Ijazah Custom [^<]*<\/title>/);
+  assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Custom <em>Logo Sekolah Anda<\/em><\/h1>/);
+  for (const target of ['model', 'spesifikasi', 'hasil']) {
+    assert.match(html, new RegExp('href="#' + target + '"'));
+    assert.equal([...html.matchAll(new RegExp('id="' + target + '"', 'g'))].length, 1);
+  }
   assert.match(html, /<summary>Bisa untuk map ijazah juga\?<\/summary>/);
   // The build drops data-video for a clip that is not in the repo; CSS then shows a compact card.
   for (const [card] of html.matchAll(/<a class="igvid"[^>]*>/g)) {
