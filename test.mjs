@@ -181,7 +181,7 @@ test('the privacy page offers the Clarity choice and the bar explains it', () =>
   assert.ok(!html.includes('Tanpa cookie</span>'), 'Clarity is no longer described as always cookieless');
   assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Clarity hanya memakai cookie bila Anda mengizinkannya/);
   // Browsers expose an element's id as a window property, and Clarity's own loader reads window.clarity.
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'kebijakan-privasi/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html', 'kebijakan-privasi/index.html']) {
     assert.ok(!/\b(id|name)="clarity"/.test(read('dist/' + file)), file + ' has an element named "clarity"');
   }
 });
@@ -715,7 +715,7 @@ test('every WhatsApp link on the site uses the business number', () => {
 });
 
 test('the footer number is a WhatsApp link, and iPhone Safari leaves the page text alone', () => {
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html']) {
     const html = read('dist/' + file);
     // Safari wraps a plain phone number in a tel: link before React hydrates; the HTML then
     // no longer matches and React re-renders the page (errors #418, #425, #423).
@@ -727,7 +727,7 @@ test('the footer number is a WhatsApp link, and iPhone Safari leaves the page te
 });
 
 test('built routes expose content, metadata, styles, and valid local assets in raw HTML', () => {
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html']) {
     const html = read('dist/' + file);
     assert.equal((html.match(/<h1\b/g) || []).length, 1, file);
     assert.equal((html.match(/rel="canonical"/g) || []).length, 1, file);
@@ -758,7 +758,7 @@ test('each page owns one search intent: unique short titles and descriptions, ra
     return { html, title: unescape(html.match(/<title>([^<]*)<\/title>/)[1]), desc: unescape(html.match(/<meta name="description" content="([^"]*)"/)[1]) };
   };
   const seen = new Set();
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'kebijakan-privasi/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html', 'kebijakan-privasi/index.html']) {
     const { title, desc } = meta(file);
     assert.ok(!seen.has(title), file + ' repeats another page title'); seen.add(title);
     assert.ok(title.length <= 65, `${file}: title is ${title.length} characters`);
@@ -785,7 +785,7 @@ test('the rapor page is linked from page content, not only the footer, and the c
 });
 test('one business address everywhere: schema on every page and the visible footers agree', () => {
   const addresses = new Set();
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html']) {
     const html = read('dist/' + file);
     for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
       const o = JSON.parse(json);
@@ -1020,7 +1020,7 @@ test('admin page stays private: noindex, untracked, unlinked, not in the sitemap
   assert.ok(!html.includes('clarity'), 'no Clarity on the admin page: recordings would show cost prices');
   for (const [, raw] of html.matchAll(/(?:href|src)="([^"]+)"/g)) assert.ok(fs.existsSync(path.join('dist', raw)), 'admin references missing ' + raw);
   assert.ok(!read('dist/sitemap.xml').includes('/admin/'));
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html']) {
     assert.ok(!read('dist/' + file).includes('/admin/'), file + ' links to the admin page');
   }
 });
@@ -1271,7 +1271,7 @@ test('product and portfolio photos open large; every zoom target exists and is r
 });
 
 test('every WhatsApp button carries a fixed data-wa label', () => {
-  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html']) {
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'clear-holder/index.html']) {
     const html = read('dist/' + file);
     for (const [tag] of html.matchAll(/<a [^>]*href="https:\/\/wa\.me\/[^"]*"[^>]*>/g)) {
       assert.match(tag, /data-wa="[a-z-]+"/, file + ': ' + tag.slice(0, 120));

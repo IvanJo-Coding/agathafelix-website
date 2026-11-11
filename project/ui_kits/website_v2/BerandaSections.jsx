@@ -26,7 +26,7 @@ function TeaserCard({ t }) {
   const deep = `var(--af-${t.color}-deep)`;
   return (
     <a
-      href={t.featured ? 'produk-custom.html' : 'produk-standar.html#' + t.slug}
+      href={t.featured ? 'produk-custom.html' : t.slug === 'clear-holder' ? '/clear-holder/' : 'produk-standar.html#' + t.slug}
       style={{
         display: 'flex', flexDirection: 'column', gap: 0, textDecoration: 'none',
         background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-lg)',
