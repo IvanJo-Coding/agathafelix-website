@@ -508,7 +508,6 @@ function DaftarHarga() {
       <div className="af-ps-dh-grid">
         <div className="af-ps-box" style={{ gridColumn: '1 / -1' }}>
           <h3>Clear Holder <span>Rupiah per pcs, menurut isi kantong (lembar)</span></h3>
-          <p className="af-ps-note"><a href="/clear-holder/">Panduan ukuran, harga, dan pemesanan Clear Holder →</a></p>
           <div style={{ overflowX: 'auto' }}>
             <table className="af-ps-tabel">
               <thead>

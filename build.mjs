@@ -134,14 +134,6 @@ const PAGES = [
     sections: ['Shell', 'Sheet', 'Simulator', 'Portfolio', 'CustomHarga', 'CustomProduk', 'ProdukCustomSections'],
     glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ProdukCustomPage/>);`,
   },
-  {
-    out: 'clear-holder/index.html',
-    canonical: '/clear-holder/',
-    title: 'Clear Holder A4, F4/Folio & A3 Grosir | Agatha Felix',
-    description: 'Clear holder A4, F4/Folio, A3 dan tipe A5 dari pabrik di Bekasi. Lihat harga per pcs, pilihan isi kantong, lalu pesan satuan, grosir atau custom logo.',
-    sections: ['Shell', 'HargaStandar', 'ClearHolderPage'],
-    glue: `ReactDOM.hydrateRoot(document.getElementById('root'), <window.ClearHolderPage/>);`,
-  },
 ];
 
 // All section modules referenced by any page (deduped, transpiled once each).
@@ -314,7 +306,7 @@ function jsonLdFor(page) {
     });
     blocks.push(faqSchema(FAQ_ITEMS));
   } else {
-    const crumb = { '/produk-standar/': 'Produk Standar', '/produk-custom/': 'Map Custom Logo', '/clear-holder/': 'Clear Holder' }[page.canonical] || page.title;
+    const crumb = { '/produk-standar/': 'Produk Standar', '/produk-custom/': 'Map Custom Logo' }[page.canonical] || page.title;
     blocks.push({
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
       itemListElement: [
