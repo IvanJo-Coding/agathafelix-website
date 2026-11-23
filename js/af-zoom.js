@@ -5,9 +5,14 @@
 // group's photos. The close button, Escape, or a tap beside the photo close
 // it, and focus returns to the photo that opened it. Triggers carry
 // role="button" and tabindex="0" in the markup, so Enter and Space open them.
+// Under each photo, "Tanya harga model ini" opens WhatsApp with a message that
+// names that photo; af-site.js counts the click as klik_whatsapp (data-wa="zoom")
+// with the photo as item_name (data-item). The name is the photo's alt text
+// from our own markup, never anything a visitor typed.
 (function () {
   if (window.AFZoom || typeof HTMLDialogElement === 'undefined') return;
-  var dialog, img, caption, count, prev, next;
+  var WA = '6282219472613';
+  var dialog, img, caption, count, prev, next, ask;
   var items = [], index = 0, opener = null, startX = null;
 
   var style = document.createElement('style');
@@ -28,6 +33,11 @@
     '.afz-prev{left:12px;top:50%;transform:translateY(-50%)}' +
     '.afz-next{right:12px;top:50%;transform:translateY(-50%)}' +
     '.afz-count{position:absolute;top:26px;left:18px;color:#fff;font:700 14px system-ui,sans-serif}' +
+    '.afz-ask{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 20px;border-radius:999px;' +
+      'border:2px solid #2B2A28;background:#25D366;color:#2B2A28;box-shadow:0 3px 0 #1AAB50;text-decoration:none;' +
+      'font:800 15px/1.2 "Baloo 2","Baloo 2 Fallback",system-ui,sans-serif}' +
+    '.afz-ask svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}' +
+    '.afz-ask:focus-visible{outline:3px solid #F5D920;outline-offset:2px}' +
     '@media (max-width:640px){.afz-prev,.afz-next{top:auto;bottom:16px;transform:none}' +
       '.afz-prev{left:calc(50% - 64px)}.afz-next{right:calc(50% - 64px)}}';
   document.head.appendChild(style);
@@ -48,7 +58,10 @@
     dialog.className = 'afz';
     dialog.setAttribute('aria-label', 'Foto diperbesar');
     dialog.innerHTML =
-      '<figure class="afz-fig"><img class="afz-img" alt="" decoding="async"><figcaption class="afz-cap"></figcaption></figure>' +
+      '<figure class="afz-fig"><img class="afz-img" alt="" decoding="async"><figcaption class="afz-cap"></figcaption>' +
+      '<a class="afz-ask" href="https://wa.me/' + WA + '" target="_blank" rel="noopener noreferrer" data-wa="zoom">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>' +
+      'Tanya harga model ini</a></figure>' +
       '<span class="afz-count" aria-live="polite"></span>' +
       '<button type="button" class="afz-btn afz-prev" aria-label="Foto sebelumnya">' + icon('M15.5 5 8.5 12l7 7') + '</button>' +
       '<button type="button" class="afz-btn afz-next" aria-label="Foto berikutnya">' + icon('M8.5 5l7 7-7 7') + '</button>' +
@@ -59,14 +72,16 @@
     count = dialog.querySelector('.afz-count');
     prev = dialog.querySelector('.afz-prev');
     next = dialog.querySelector('.afz-next');
+    ask = dialog.querySelector('.afz-ask');
     dialog.querySelector('.afz-close').addEventListener('click', function () { dialog.close(); });
     prev.addEventListener('click', function () { show(index - 1); });
     next.addEventListener('click', function () { show(index + 1); });
     // The figure fills the whole dialog, so a tap beside the photo lands on the
     // figure or the caption, never on the dialog itself (a Clarity dead click).
-    // Anything but the photo and the buttons closes it.
+    // Anything but the photo and the buttons closes it. The WhatsApp link leaves
+    // it open, so the photo is still there when the visitor comes back.
     dialog.addEventListener('click', function (e) {
-      if (!e.target.closest || !e.target.closest('.afz-img, .afz-btn')) dialog.close();
+      if (!e.target.closest || !e.target.closest('.afz-img, .afz-btn, .afz-ask')) dialog.close();
     });
     // Keys stay in here: the product sheet underneath closes on Escape and
     // loops Tab through listeners on document.
@@ -95,6 +110,11 @@
     img.src = el.getAttribute('data-zoom');
     img.alt = altOf(el);
     caption.textContent = img.alt;
+    var item = img.alt.replace(/\s+/g, ' ').trim().slice(0, 100);
+    ask.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent('Halo Agatha Felix, saya mau tanya harga model ini: ' +
+      (item || 'foto di website') + '. Saya lihat fotonya di website agatha-felix.com.');
+    if (item) ask.setAttribute('data-item', item);
+    else ask.removeAttribute('data-item');
     var many = items.length > 1;
     prev.hidden = !many;
     next.hidden = !many;

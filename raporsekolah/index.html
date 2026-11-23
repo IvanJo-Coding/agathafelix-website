@@ -62,8 +62,17 @@ header .logo{display:flex;flex-shrink:0}
 .hdr-r{margin-left:auto;display:flex;align-items:center;gap:12px}
 .hdr-tel{font-family:var(--fd);font-weight:800;font-size:16px;color:var(--ink);text-decoration:none;white-space:nowrap}
 #hero{background:linear-gradient(180deg,var(--orange-tint),var(--paper));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;grid-template-areas:"main photo" "more photo";gap:0 46px;align-items:start;padding:52px 0 66px}
-.hero-main{grid-area:main}.hero-more{grid-area:more}
+/* The first phone screen carries the whole offer (brief 2026-11-21): heading,
+   one photo, the three points, client logos and the WhatsApp button. The page
+   reads in that order everywhere; the longer copy follows under the button. */
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;grid-template-areas:"head photo" "proof photo" "act photo" "more photo";grid-template-rows:auto auto auto 1fr;gap:0 46px;align-items:start;padding:52px 0 66px}
+.hero-head{grid-area:head}.hero-proof{grid-area:proof}.hero-act{grid-area:act}.hero-more{grid-area:more}
+.hero-more .hero-sub{margin-top:18px}
+.hero-trust{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;font-weight:700;color:var(--ink2)}
+.hero-trust ul{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+.hero-trust li{width:38px;height:38px;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.hero-trust img{width:100%;height:100%;object-fit:contain}
+.hero-trust b{font-family:var(--fd);font-weight:800;color:var(--ink)}
 .hero-h1 em{font-style:normal;color:var(--orange)}
 .hero-sub{font-size:18px;margin-top:16px;max-width:36em}
 .hero-jump{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:12px;max-width:520px}
@@ -86,7 +95,7 @@ header .logo{display:flex;flex-shrink:0}
 /* One line on what to send, no checklist: quantity, date and city come later in the chat. */
 .kirim{position:relative;margin:18px 0 0;padding:12px 16px 12px 42px;max-width:520px;background:#fff;border:1px dashed var(--ink3);border-radius:16px;font-size:14px;color:var(--ink);line-height:1.5}
 .kirim:before{content:"";position:absolute;left:17px;top:18px;width:13px;height:8px;border-left:2.5px solid var(--green-deep);border-bottom:2.5px solid var(--green-deep);transform:rotate(-45deg)}
-.hero-photo{grid-area:photo;display:grid;grid-template-columns:1fr;gap:14px}
+.hero-photo{grid-area:photo;display:grid;grid-template-columns:1fr;gap:14px;position:sticky;top:90px}
 .hero-photo figure{margin:0;background:#fff;border:2px solid var(--ink);border-radius:18px;box-shadow:0 3px 0 rgba(43,42,40,.16);overflow:hidden}
 .hero-photo img{aspect-ratio:4/3;object-fit:cover;object-position:center 40%;width:100%}
 .hero-photo figcaption{font-size:12.5px;font-weight:700;color:var(--ink);padding:8px 12px;border-top:1px solid var(--line);background:var(--paper)}
@@ -191,13 +200,34 @@ fieldset.f .f-row label{margin-top:0;padding:10px;font-size:14px}
 .port img{aspect-ratio:4/3;object-fit:cover;object-position:center 38%;width:100%;border-bottom:2px solid var(--ink)}
 .port figcaption{padding:12px 16px;font-size:14px;font-weight:700;color:var(--ink)}
 .macro{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:30px}
-/* Phones keep the two hero photos side by side: stacked, they pushed the form a screen further down. */
-@media (max-width:560px){.hero-photo{gap:10px}.hero-photo figcaption{font-size:11.5px;line-height:1.35;padding:6px 9px}}
 @media (max-width:520px){.macro{grid-template-columns:1fr 1fr}.macro figcaption{font-size:12px;padding:9px 10px}}
 .macro figure{margin:0;background:#fff;border:2px solid var(--ink);border-radius:18px;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.35)}
 .macro img{aspect-ratio:16/9;object-fit:cover;width:100%;border-bottom:2px solid var(--ink)}
 .macro figcaption{padding:11px 14px;font-size:13.5px;font-weight:700;color:var(--ink)}
 .port figcaption b{display:block;font-weight:400;font-size:13px;color:var(--ink3)}
+/* --- Map ijazah: its own section, the target of the ijazah ads (#ijazah). */
+#ijazah{scroll-margin-top:90px}
+.ijz{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.ijz-list{margin:16px 0 22px;padding:0;list-style:none;display:grid;gap:8px}
+.ijz-list li{position:relative;padding-left:22px;font-size:15px;line-height:1.5}
+.ijz-list li:before{content:"";position:absolute;left:0;top:7px;width:10px;height:10px;border-radius:3px;background:var(--yellow-deep)}
+.ijz-list b{color:var(--ink)}
+.ijz-photos{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ijz-photos figure{margin:0;background:#fff;border:2px solid var(--ink);border-radius:18px;overflow:hidden;box-shadow:0 3px 0 rgba(43,42,40,.16)}
+.ijz-photos img{aspect-ratio:1;object-fit:cover;width:100%;border-bottom:2px solid var(--ink)}
+.ijz-photos figcaption{padding:9px 12px;font-size:13px;font-weight:700;color:var(--ink);line-height:1.35}
+.ijz-photos figcaption b{display:block;font-weight:400;font-size:12.5px;color:var(--ink3)}
+@media (max-width:960px){.ijz{grid-template-columns:1fr;gap:24px}}
+/* --- "Lihat juga": picture links to the other pages, so a school that also needs
+   stock folders or office maps finds them (1.02 pages per session, 2026-11). */
+.lj{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+.lj a{display:flex;align-items:center;gap:16px;padding:12px 16px 12px 12px;text-decoration:none;color:var(--ink2);transition:transform .16s var(--pop)}
+.lj a:hover{transform:translateY(-3px);color:var(--ink2)}
+.lj img{width:96px;height:96px;flex:none;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#f8f4ee}
+.lj b{display:block;font-family:var(--fd);font-weight:800;font-size:17px;color:var(--ink);line-height:1.25}
+.lj span{display:block;font-size:14px;line-height:1.45}
+.lj em{display:block;margin-top:6px;font-style:normal;font-size:13.5px;font-weight:700;color:var(--blue-deep)}
+@media (max-width:700px){.lj{grid-template-columns:1fr;gap:12px}.lj img{width:80px;height:80px}.lj b{font-size:16px}}
 /* --- Specs and price factors: the options the owner confirmed for the custom
    configurator (2026-09-24), no prices beyond the published 100-pcs average. */
 .spec{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;margin-top:28px;align-items:start}
@@ -249,9 +279,15 @@ footer details p{color:rgba(255,255,255,.72)}
 @media (max-width:360px){.stickybar .btn{font-size:15px;padding:12px 10px}}
 .wabubble{position:fixed;right:20px;bottom:24px;z-index:65;width:60px;height:60px;border-radius:var(--pill);background:var(--wa);border:2px solid var(--ink);box-shadow:0 4px 0 var(--wa-deep);display:grid;place-items:center;color:#fff}
 .wabubble svg{width:30px;height:30px}
-@media (max-width:960px){.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;grid-template-areas:"main" "photo" "more";gap:0;padding:38px 0 48px}.hero-photo{grid-template-columns:1fr 1fr;margin-top:24px}.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}}
+@media (max-width:960px){.visit-photo{max-width:420px;justify-self:center}.hero-grid{grid-template-columns:1fr;grid-template-areas:"head" "photo" "proof" "act" "more";grid-template-rows:none;gap:0;padding:38px 0 48px}.hero-photo{position:static;margin-top:20px;max-width:560px}.promo,.testi,.visit{grid-template-columns:1fr}.macro{gap:14px}.why,.steps{grid-template-columns:1fr 1fr}.port{grid-template-columns:1fr 1fr}}
 /* Phones: two rows of five logos; a narrower side margin keeps each tile about 60px. Typing in the form hides the sticky bar so it never covers a field. */
 @media (max-width:700px){.sec{padding:42px 0}.igvid-grid{grid-template-columns:1fr;max-width:340px;margin-left:auto;margin-right:auto}.clients .wrap{padding:0 16px}.logos{gap:8px}.logos li{width:calc((100% - 32px)/5);border-radius:12px}.logos li.lg-extra{display:none}body:has(form.lead :focus) .stickybar{display:none}.pricebar{grid-template-columns:repeat(3,1fr);gap:4px;padding:14px 4px}.pricebar>div+div{padding-left:8px}.pricebar strong{font-size:19px}.pricebar span{white-space:normal;font-size:11.5px;line-height:1.3}.chip{white-space:normal}.hdr-tel{display:none}header img{height:34px}.hdr-r .btn{font-size:15px;padding:10px 16px;white-space:nowrap}.why,.steps{grid-template-columns:1fr}.stickybar{display:flex}.wabubble{display:none}footer{padding-bottom:110px}}
+/* Phones: a wide crop of the one hero photo and a tighter hero, so heading,
+   photo, the three points, logos and the button fit above the sticky bar on a 375 x 812 screen. */
+@media (max-width:700px){.hero-grid{padding:18px 0 40px}.hero-head .eyebrow{font-size:11px;line-height:1.5;letter-spacing:.08em}.hero-h1{margin-top:6px!important;font-size:28px}
+.hero-photo{margin-top:14px}.hero-photo img{aspect-ratio:16/9;object-position:center 45%}.hero-photo figcaption{font-size:11.5px;line-height:1.35;padding:5px 10px}
+.hero-proof .pricebar{margin-top:12px}.hero-trust{margin-top:10px;gap:8px;font-size:12.5px}.hero-trust li{width:34px;height:34px;border-radius:9px}
+.hero-cta{margin-top:12px}.hero-cta .btn-lg{font-size:17px;padding:13px 18px}}
 /* 320px phones: the logo + WhatsApp button together still outrun the header. */
 @media (max-width:400px){header img{height:28px}.hdr-r .btn{font-size:13.5px;padding:9px 12px}header .wrap{gap:10px}}
 </style>
@@ -269,36 +305,50 @@ footer details p{color:rgba(255,255,255,.72)}
 
 <main id="isi">
 <section id="hero"><div class="wrap"><div class="hero-grid">
-<div class="hero-main">
+<div class="hero-head">
 <span class="eyebrow">Mulai 50 pcs · Pabrik di Bekasi · TK, SD, SMP, SMA/SMK &amp; Lembaga Kursus</span>
 <h1 class="hero-h1" style="margin-top:12px">Map Rapor &amp; Ijazah Custom <em>Logo Sekolah Anda</em></h1>
-<p class="hero-sub">Sampul raport jahit atau press untuk sekolah Anda. Sudah punya contoh? Kirim foto map yang sekarang dipakai lewat WhatsApp; kami bantu cocokkan bahan, logo, dan harga per pcs.</p>
+</div>
+<div class="hero-photo" data-zoom-group>
+<figure><img src="img/collection-480.webp" srcset="img/collection-480.webp 480w, img/collection-800.webp 800w, img/collection.webp 1091w" sizes="(max-width:960px) min(560px, calc(100vw - 48px)), 500px" fetchpriority="high" alt="Sampul raport dan map ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta" data-zoom="img/collection.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul raport dan map ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta"><figcaption>SMAK Penabur · SPH Lippo Cikarang</figcaption></figure>
+</div>
+<div class="hero-proof">
+<div class="pricebar">
+<div><strong>50 pcs</strong><span>mulai pesan</span></div>
+<div><strong>±Rp 50rb</strong><span>harga pabrik / pcs (100 pcs)</span></div>
+<div><strong>Gratis</strong><span>desain &amp; mockup</span></div>
+</div>
+<div class="hero-trust">
+<span>Dipercaya</span>
+<ul>
+<li><img src="img/klien/bpk-penabur.webp" alt="BPK Penabur" width="240" height="240" decoding="async"></li>
+<li><img src="img/klien/al-azhar.webp" alt="Al-Azhar Kelapa Gading" width="240" height="240" decoding="async"></li>
+<li><img src="img/klien/sekolah-alam-cikeas.webp" alt="Sekolah Alam Cikeas" width="240" height="240" decoding="async"></li>
+<li><img src="img/klien/sekolah-kak-seto.webp" alt="Sekolah Kak Seto" width="240" height="240" decoding="async"></li>
+</ul>
+<span><b>500+</b> sekolah</span>
+</div>
+</div>
+<div class="hero-act">
 <div class="hero-cta">
 <a class="btn btn-wa btn-lg" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="hero"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Kirim Contoh Map &amp; Minta Harga</a>
 <p class="cta-note"><strong>Minimal 50 pcs</strong> per desain/warna · <u>rata-rata Rp50rb/pcs</u> untuk 100 pcs · harga akhir sesuai spesifikasi</p>
 <p class="cta-help"><a href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="hero-bantu" data-msg="bantu">Belum punya contoh? Kami bantu pilih model.</a></p>
 </div>
-<nav class="hero-jump" aria-label="Panduan pesanan rapor">
-<a href="#model">Model jahit &amp; press</a>
-<a href="#spesifikasi">Harga &amp; bahan</a>
-<a href="#hasil">Contoh hasil</a>
-</nav>
-</div>
-<div class="hero-photo" data-zoom-group>
-<figure><img src="img/collection-480.webp" srcset="img/collection-480.webp 480w, img/collection-800.webp 800w, img/collection.webp 1091w" sizes="(max-width:960px) calc(50vw - 30px), 500px" decoding="async" alt="Sampul rapor dan ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta" data-zoom="img/collection.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul rapor dan ijazah custom SMAK Penabur, SPH Lippo Cikarang, SMAK 1 Penabur Jakarta"><figcaption>SMAK Penabur · SPH Lippo Cikarang</figcaption></figure>
-<figure><img src="img/stack-alazhar-480.webp" srcset="img/stack-alazhar-480.webp 480w, img/stack-alazhar-800.webp 800w, img/stack-alazhar.webp 1090w" sizes="(max-width:960px) calc(50vw - 30px), 500px" decoding="async" alt="Sampul ijazah custom Al-Azhar Kelapa Gading lima pilihan warna" data-zoom="img/stack-alazhar.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul ijazah custom Al-Azhar Kelapa Gading lima pilihan warna"><figcaption>Al-Azhar Kelapa Gading · 5 warna</figcaption></figure>
 </div>
 <div class="hero-more">
+<p class="hero-sub">Sampul raport jahit atau press untuk sekolah Anda. Sudah punya contoh? Kirim foto map yang sekarang dipakai lewat WhatsApp; kami bantu cocokkan bahan, logo, dan harga per pcs.</p>
 <p class="kirim"><b>Cukup kirim foto map contoh</b>, tampak luar &amp; dalam. Jumlah, tanggal, dan kota bisa menyusul di chat.</p>
-<div class="pricebar">
-<div><strong>±Rp 50rb</strong><span>rata-rata / pcs untuk 100 pcs</span></div>
-<div><strong>50 pcs</strong><span>minimal pesan</span></div>
-<div><strong>Gratis</strong><span>desain &amp; mockup</span></div>
-</div>
 <div class="hero-chips">
 <span class="chip"><svg viewBox="0 0 24 24" style="color:var(--blue-deep)"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>Gratis ongkir Jabodetabek min. 50 pcs</span>
 <span class="chip"><svg viewBox="0 0 24 24" style="color:var(--purple)"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5–14 hari kerja</span>
 </div>
+<nav class="hero-jump" aria-label="Panduan pesanan rapor">
+<a href="#model">Model jahit &amp; press</a>
+<a href="#spesifikasi">Harga &amp; bahan</a>
+<a href="#ijazah">Map ijazah</a>
+<a href="#hasil">Contoh hasil</a>
+</nav>
 </div>
 </div></div></section>
 
@@ -447,6 +497,26 @@ Lanjut ke WhatsApp</button>
 </div>
 </div></section>
 
+<section class="sec" id="ijazah" style="background:var(--yellow-tint);border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap"><div class="ijz">
+<div>
+<span class="eyebrow">Map Ijazah</span>
+<h2 style="margin-top:10px">Map &amp; Sampul Ijazah Custom Logo Sekolah</h2>
+<p style="margin-top:12px;max-width:34em">Map ijazah kami buat dengan pilihan yang sama seperti sampul raport, jadi rapor dan ijazah sekolah Anda bisa seragam.</p>
+<ul class="ijz-list">
+<li><b>Jahit atau press.</b> Press tanpa jahitan, memberi kesan resmi.</li>
+<li><b>Bahan TPK atau linen</b> tekstur pasir (linen khusus model press).</li>
+<li><b>Logo poly / hot print</b> emas atau silver.</li>
+<li><b>Satu desain, beberapa warna.</b> Minimal 50 pcs per warna.</li>
+<li><b>Rata-rata ±Rp50.000/pcs</b> untuk 100 pcs, sama seperti sampul raport.</li>
+</ul>
+<a class="btn btn-wa" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="ijazah" data-msg="ijazah">Minta Harga Map Ijazah</a>
+</div>
+<div class="ijz-photos" data-zoom-group>
+<figure><img loading="lazy" decoding="async" src="img/stack-alazhar-480.webp" srcset="img/stack-alazhar-480.webp 480w, img/stack-alazhar-800.webp 800w, img/stack-alazhar.webp 1090w" sizes="(max-width:960px) calc(50vw - 31px), 260px" alt="Map ijazah custom Al-Azhar Kelapa Gading lima pilihan warna" data-zoom="img/stack-alazhar.webp" role="button" tabindex="0" aria-label="Perbesar foto: Map ijazah custom Al-Azhar Kelapa Gading lima pilihan warna"><figcaption>Al-Azhar Kelapa Gading<b>Map ijazah, 5 pilihan warna</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="img/stack-cikeas-480.webp" srcset="img/stack-cikeas-480.webp 480w, img/stack-cikeas-800.webp 800w, img/stack-cikeas.webp 1091w" sizes="(max-width:960px) calc(50vw - 31px), 260px" alt="Sampul ijazah Sekolah Alam Cikeas lima warna dengan emboss logo" data-zoom="img/stack-cikeas.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul ijazah Sekolah Alam Cikeas lima warna dengan emboss logo"><figcaption>Sekolah Alam Cikeas<b>Map ijazah press emboss, 5 warna</b></figcaption></figure>
+</div>
+</div></div></section>
+
 <section class="sec"><div class="wrap">
 <span class="eyebrow">Kenapa Lebih Murah</span>
 <h2 style="margin-top:10px">Karena Anda Beli Langsung dari <span style="color:var(--orange)">Pabriknya</span></h2>
@@ -471,14 +541,14 @@ Lanjut ke WhatsApp</button>
 
 <section class="sec" id="hasil"><div class="wrap">
 <span class="eyebrow">Hasil Nyata</span>
-<h2 style="margin-top:10px">Contoh Sampul Raport &amp; Map Ijazah yang Sudah Kami Buat</h2>
-<p style="margin-top:12px;max-width:42em">Semua foto ini pesanan asli — dari SD, SMP, dan SMA swasta maupun negeri sampai lembaga kursus. Bukan gambar katalog.</p>
+<h2 style="margin-top:10px">Contoh Sampul Raport SD, SMP &amp; SMA yang Sudah Kami Buat</h2>
+<p style="margin-top:12px;max-width:42em">Semua foto ini pesanan asli — dari SD, SMP, dan SMA swasta maupun negeri sampai lembaga kursus. Bukan gambar katalog. Ketuk foto untuk melihat lebih dekat dan tanya harga model yang sama.</p>
 <div class="port" data-zoom-group>
-<figure><img loading="lazy" decoding="async" src="img/stack-cikeas-800.webp" srcset="img/stack-cikeas-480.webp 480w, img/stack-cikeas-800.webp 800w, img/stack-cikeas.webp 1091w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul ijazah Sekolah Alam Cikeas lima warna dengan emboss logo" data-zoom="img/stack-cikeas.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul ijazah Sekolah Alam Cikeas lima warna dengan emboss logo"><figcaption>Sekolah Alam Cikeas<b>Map ijazah press emboss, 5 pilihan warna</b></figcaption></figure>
-<figure><img loading="lazy" decoding="async" src="img/almasnuniyah-800.webp" srcset="img/almasnuniyah-480.webp 480w, img/almasnuniyah-800.webp 800w, img/almasnuniyah.webp 816w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul rapor SDI Al Masnuniyah hijau tua hot print emas" data-zoom="img/almasnuniyah.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul rapor SDI Al Masnuniyah hijau tua hot print emas"><figcaption>SDI Al Masnuniyah<b>Sampul raport SD · press kancing, hot print emas</b></figcaption></figure>
-<figure><img loading="lazy" decoding="async" src="img/jahit-red-800.webp" srcset="img/jahit-red-480.webp 480w, img/jahit-red-800.webp 800w, img/jahit-red.webp 887w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul rapor jahit maroon SMAK 1 Penabur Jakarta" data-zoom="img/jahit-red.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul rapor jahit maroon SMAK 1 Penabur Jakarta"><figcaption>SMAK 1 Penabur Jakarta<b>Sampul raport SMA · jahit, logo emas + sudut logam</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="img/almasnuniyah-800.webp" srcset="img/almasnuniyah-480.webp 480w, img/almasnuniyah-800.webp 800w, img/almasnuniyah.webp 816w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul raport SD hijau tua hot print emas SDI Al Masnuniyah" data-zoom="img/almasnuniyah.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul raport SD hijau tua hot print emas SDI Al Masnuniyah"><figcaption>SDI Al Masnuniyah<b>Sampul raport SD · press kancing, hot print emas</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="/assets/portfolio/rapor-press-evergreen-480.webp" srcset="/assets/portfolio/rapor-press-evergreen-480.webp 480w, /assets/portfolio/rapor-press-evergreen.webp 600w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul raport SMP press dengan foil emas SMP Evergreen Education" data-zoom="/assets/portfolio/rapor-press-evergreen.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul raport SMP press dengan foil emas SMP Evergreen Education"><figcaption>SMP Evergreen Education<b>Sampul raport SMP · press, foil emas</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="img/jahit-red-800.webp" srcset="img/jahit-red-480.webp 480w, img/jahit-red-800.webp 800w, img/jahit-red.webp 887w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta" data-zoom="img/jahit-red.webp" role="button" tabindex="0" aria-label="Perbesar foto: Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta"><figcaption>SMAK 1 Penabur Jakarta<b>Sampul raport SMA · jahit, logo emas + sudut logam</b></figcaption></figure>
+<figure><img loading="lazy" decoding="async" src="/assets/portfolio/rapor-press-bekasi-480.webp" srcset="/assets/portfolio/rapor-press-bekasi-480.webp 480w, /assets/portfolio/rapor-press-bekasi.webp 600w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Map raport SMP press hitam Dokumen Hasil Evaluasi Belajar Siswa SMP Negeri 5 Kota Bekasi" data-zoom="/assets/portfolio/rapor-press-bekasi.webp" role="button" tabindex="0" aria-label="Perbesar foto: Map raport SMP press hitam Dokumen Hasil Evaluasi Belajar Siswa SMP Negeri 5 Kota Bekasi"><figcaption>SMP Negeri 5 Kota Bekasi<b>Map raport SMP press · sekolah negeri</b></figcaption></figure>
 <figure><img loading="lazy" decoding="async" src="img/clearholder-480.webp" srcset="img/clearholder-480.webp 480w, img/clearholder.webp 778w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Clear holder custom kuning SMPK 3 Penabur Jakarta" data-zoom="img/clearholder.webp" role="button" tabindex="0" aria-label="Perbesar foto: Clear holder custom kuning SMPK 3 Penabur Jakarta"><figcaption>SMPK 3 Penabur Jakarta<b>Clear holder custom sekolah</b></figcaption></figure>
-<figure><img loading="lazy" decoding="async" src="/assets/portfolio/rapor-press-bekasi-480.webp" srcset="/assets/portfolio/rapor-press-bekasi-480.webp 480w, /assets/portfolio/rapor-press-bekasi.webp 600w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Map rapor press hitam Dokumen Hasil Evaluasi Belajar Siswa SMP Negeri 5 Kota Bekasi" data-zoom="/assets/portfolio/rapor-press-bekasi.webp" role="button" tabindex="0" aria-label="Perbesar foto: Map rapor press hitam Dokumen Hasil Evaluasi Belajar Siswa SMP Negeri 5 Kota Bekasi"><figcaption>SMP Negeri 5 Kota Bekasi<b>Map raport SMP press · sekolah negeri</b></figcaption></figure>
 <figure><img loading="lazy" decoding="async" src="/assets/portfolio/zipperbag-robotics-480.webp" srcset="/assets/portfolio/zipperbag-robotics-480.webp 480w, /assets/portfolio/zipperbag-robotics-800.webp 800w, /assets/portfolio/zipperbag-robotics.webp 1000w" sizes="(max-width:960px) calc(50vw - 34px), 364px" alt="Zipper bag jaring bertali dengan logo Robotics Education Centre" data-zoom="/assets/portfolio/zipperbag-robotics.webp" role="button" tabindex="0" aria-label="Perbesar foto: Zipper bag jaring bertali dengan logo Robotics Education Centre"><figcaption>Robotics Education Centre<b>Zipper bag + tali · lembaga kursus</b></figcaption></figure>
 </div>
 </div></section>
@@ -522,6 +592,14 @@ Lanjut ke WhatsApp</button>
 <details><summary>Desain dan mockup benar-benar gratis?</summary><p>Ya. Kirim logo sekolah, kami buatkan tata letak sampulnya dan revisi sampai Anda setuju — tanpa biaya dan tanpa kewajiban lanjut order. Untuk sekolah di Jabodetabek kami juga bisa kirim sampel fisik agar Anda cek langsung kualitas jahitan dan hasil cetaknya.</p></details>
 <details><summary>Berapa lama produksinya?</summary><p>5–14 hari kerja dihitung setelah desain di-ACC dan DP masuk. Kalau tanggal pembagian rapor Anda mepet, sebutkan di awal supaya kami atur prioritas slot produksi.</p></details>
 <details><summary>Bisa untuk sekolah negeri dengan PO dan invoice?</summary><p>Bisa. Kami melayani pesanan dengan surat pesanan (PO) resmi, invoice, dan kwitansi bermaterai sesuai kebutuhan administrasi sekolah. Sampaikan kebutuhan dokumennya saat konsultasi.</p></details>
+</div>
+</div></section>
+
+<section class="sec" style="padding-top:0" aria-labelledby="lihatJuga"><div class="wrap">
+<h2 id="lihatJuga" style="font-size:22px">Lihat Juga</h2>
+<div class="lj">
+<a class="card" href="/produk-standar/#clear-holder"><img loading="lazy" decoding="async" src="/assets/products/clear-holder-480.webp" width="480" height="480" alt="Clear holder Agatha Felix"><span><b>Clear holder &amp; map plastik grosir</b>Katalog siap kirim, satuan sampai grosir, langsung dari pabrik.<em>Lihat katalog &rarr;</em></span></a>
+<a class="card" href="/produk-custom/"><img loading="lazy" decoding="async" src="/assets/portfolio/clearholder-symphonia-480.webp" width="480" height="480" alt="Clear holder custom cetak penuh warna"><span><b>Map custom logo kantor &amp; instansi</b>Map seminar, sertifikat, dan clear holder berlogo. Mulai 50 pcs.<em>Lihat map custom &rarr;</em></span></a>
 </div>
 </div></section>
 
@@ -590,8 +668,10 @@ var TANYA='Halo Agatha Felix, saya mau tanya sampul rapor custom untuk sekolah/l
 function pilihan(){return model?' model '+MODEL[model]:''}
 function contoh(){return 'Halo Agatha Felix, saya mau minta harga map rapor / ijazah custom'+pilihan()+'. Saya kirim foto contohnya ya.'}
 function bantu(){return 'Halo Agatha Felix, saya mau buat map rapor / ijazah custom'+pilihan()+', tapi belum punya contoh. Mohon dibantu '+(model?'ya.':'pilih modelnya ya.')}
-var PESAN={tanya:function(){return TANYA},bantu:bantu};
-function setLinks(){document.querySelectorAll('[data-wa]').forEach(function(a){
+function ijazah(){return 'Halo Agatha Felix, saya mau minta harga map ijazah custom. Saya kirim foto contohnya ya.'}
+var PESAN={tanya:function(){return TANYA},bantu:bantu,ijazah:ijazah};
+/* The zoom's "Tanya harga model ini" link (data-item) carries its own message about that photo. */
+function setLinks(){document.querySelectorAll('[data-wa]:not([data-item])').forEach(function(a){
 a.href=waLink((PESAN[a.getAttribute('data-msg')]||contoh)());a.target='_blank';a.rel='noopener noreferrer'})}
 setLinks();
 document.querySelectorAll('[data-maps]').forEach(function(a){a.addEventListener('click',function(){if(typeof gtag==='function')gtag('event','klik_maps')})});
@@ -638,12 +718,15 @@ var f=document.getElementById('leadForm'),err=document.getElementById('leadErr')
 /* The form is optional and starts closed. Its button, any #leadForm link and
    an address ending in #leadForm open it; a link opens it before the jump. */
 var toggle=document.getElementById('formToggle');
-function bukaForm(buka){f.hidden=!buka;toggle.setAttribute('aria-expanded',String(buka))}
+/* quote_start, once per page: opening the form or its first field, whichever comes first. */
+var mulai=false;
+function mulaiPenawaran(){if(mulai)return;mulai=true;step('quote_start',{product_id:'sampul-rapor',quote_mode:'form'})}
+function bukaForm(buka){f.hidden=!buka;toggle.setAttribute('aria-expanded',String(buka));if(buka)mulaiPenawaran()}
 toggle.addEventListener('click',function(){bukaForm(f.hidden)});
 document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a');if(a&&a.getAttribute('href')==='#leadForm')bukaForm(true)});
 if(location.hash==='#leadForm')bukaForm(true);
 function step(name,params){if(window.AFTracking&&AFTracking.noteStep)AFTracking.noteStep(name,params||{})}
-f.addEventListener('focusin',function(){step('quote_start',{product_id:'sampul-rapor',quote_mode:'form'})},{once:true});
+f.addEventListener('focusin',mulaiPenawaran);
 /* One model choice for the cards, the form and the messages. Only fixed
    labels reach the page, never anything typed. */
 function pilihModel(m,catat){
