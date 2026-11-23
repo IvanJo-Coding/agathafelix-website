@@ -1,12 +1,15 @@
 import React from 'react';
 
 const BTN_COLORS = {
-  orange: ['var(--af-orange)', 'var(--af-orange-deep)'],
+  // White text needs 4.5:1 (WCAG AA): orange-strong gives 4.76:1, the brand
+  // orange only 3.66:1. Green and blue stay bright and take ink text instead
+  // (white on them is 3.09:1 and 2.50:1; ink is 4.64:1 and 5.70:1).
+  orange: ['var(--af-orange-strong)', 'var(--af-orange-deep)'],
   // Dark text on WhatsApp green: white on it is 1.98:1, under WCAG AA.
   wa:     ['var(--af-wa)',     'var(--af-wa-deep)', 'var(--af-wa-ink)'],
-  green:  ['var(--af-green)',  'var(--af-green-deep)'],
+  green:  ['var(--af-green)',  'var(--af-green-deep)', 'var(--af-ink)'],
   purple: ['var(--af-purple)', 'var(--af-purple-deep)'],
-  blue:   ['var(--af-blue)',   'var(--af-blue-deep)'],
+  blue:   ['var(--af-blue)',   'var(--af-blue-deep)', 'var(--af-ink)'],
 };
 
 const BTN_SIZES = {

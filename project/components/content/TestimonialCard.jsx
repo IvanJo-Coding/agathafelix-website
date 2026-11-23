@@ -1,6 +1,7 @@
 import React from 'react';
 
-const AVATAR_COLORS = ['var(--af-orange)', 'var(--af-green)', 'var(--af-purple)', 'var(--af-blue)'];
+// Fills that keep the white initials at WCAG AA (4.5:1 or more).
+const AVATAR_COLORS = ['var(--af-orange-strong)', 'var(--af-green-deep)', 'var(--af-purple)', 'var(--af-blue-deep)'];
 
 /**
  * Customer quote card: ★ stars, italic quote, initials avatar + name/role.

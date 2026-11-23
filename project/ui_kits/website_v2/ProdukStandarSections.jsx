@@ -313,7 +313,7 @@ const PS_CSS_ID = 'af-produk-standar';
   document.head.appendChild(tag);
 })();
 
-function KatalogCard({ fam, eager, onOpen }) {
+function KatalogCard({ fam, eager, priority, onOpen }) {
   const first = fam.variants[0];
   const types = fam.variants.map((v) => v.label).filter(Boolean);
   const mulai = mulaiDari(fam);
@@ -331,9 +331,10 @@ function KatalogCard({ fam, eager, onOpen }) {
       <div className="af-ps-img">
         <img
           src={first.thumb}
-          srcSet={first.card ? `${first.thumb} 540w, ${first.card} 1080w` : undefined}
+          srcSet={first.card ? `${first.thumb} 540w, ${first.card} 1080w` : window.afSrcSet(first.thumb)}
           sizes="(max-width: 680px) 50vw, (max-width: 900px) 33vw, 280px"
           alt={fam.name} loading={eager ? 'eager' : 'lazy'} decoding="async"
+          fetchpriority={priority ? 'high' : undefined}
         />
         {fam.badge ? (
           <span className="af-ps-badge" style={{ position: 'absolute', top: 8, right: 8, background: 'var(--af-yellow)', border: '2px solid var(--af-ink)', borderRadius: 999, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 10, padding: '2px 9px', color: 'var(--af-ink)' }}>{fam.badge}</span>
@@ -596,7 +597,7 @@ function ProdukStandarPage() {
           <div className="af-ps-wrap af-ps-hero" style={wrapPS({ paddingBottom: 20, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 })}>
             <Badge color="green" dot>Siap Kirim Hari Ini</Badge>
             <h1 style={{ fontSize: 'var(--text-2xl)', maxWidth: 640 }}>
-              Katalog Map Plastik <span style={{ color: 'var(--af-green)' }}>Siap Pakai</span>
+              Katalog Map Plastik <span style={{ color: 'var(--af-green-deep)' }}>Siap Pakai</span>
             </h1>
             <p style={{ margin: 0, fontSize: 'var(--text-md)', maxWidth: 520 }}>
               Tanpa minimum desain, tanpa nunggu produksi — pilih, pesan, kirim. Beli satuan, per lusin, atau grosir.
@@ -607,6 +608,10 @@ function ProdukStandarPage() {
 
         <section style={{ background: 'var(--af-paper)' }}>
           <div className="af-ps-wrap af-ps-list" style={wrapPS({ paddingTop: 8 })}>
+            {/* Visually hidden: keeps the outline h1 → h2 → h3 for the product cards. */}
+            <h2 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 }}>
+              Daftar Produk Map Plastik
+            </h2>
             <div className="af-ps-filters" role="group" aria-label="Filter produk">
               {FILTERS.map(([key, label]) => {
                 const isOn = filter === key;
@@ -618,7 +623,7 @@ function ProdukStandarPage() {
                     onClick={() => setFilter(key)}
                     style={{
                       fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.88rem', cursor: 'pointer',
-                      background: isOn ? 'var(--af-green)' : '#fff', color: isOn ? '#fff' : 'var(--af-ink)',
+                      background: isOn ? 'var(--af-green-deep)' : '#fff', color: isOn ? '#fff' : 'var(--af-ink)',
                       border: '2px solid var(--af-ink)', borderRadius: 999, padding: '9px 18px',
                       boxShadow: isOn ? '0 3px 0 var(--af-ink)' : 'none',
                       transition: 'all 160ms var(--ease-pop)',
@@ -633,7 +638,7 @@ function ProdukStandarPage() {
               {shown.length} produk, {typeCount} tipe · ketuk untuk lihat detail
             </p>
             <div className="af-ps-grid">
-              {shown.map((f, i) => <KatalogCard key={f.slug} fam={f} eager={i < 4} onOpen={() => openProduct(f.slug)} />)}
+              {shown.map((f, i) => <KatalogCard key={f.slug} fam={f} eager={i < 4} priority={i < 2} onOpen={() => openProduct(f.slug)} />)}
             </div>
             <DaftarHarga />
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 28 }}>

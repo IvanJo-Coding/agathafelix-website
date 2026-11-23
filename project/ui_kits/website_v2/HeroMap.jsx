@@ -99,10 +99,11 @@ function GiantMap() {
           ></span>
         </div>
         <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 64, width: 'auto' }} />
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#fff', fontSize: 18, letterSpacing: '0.04em' }}>MAP KANCING · A4</span>
+        {/* 20px bold is "large text", where white on the brand orange (3.66:1) meets WCAG AA. */}
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#fff', fontSize: 20, letterSpacing: '0.04em' }}>MAP KANCING · A4</span>
         <span
           style={{
-            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, color: 'var(--af-orange)',
+            fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 11, color: 'var(--af-orange-deep)',
             background: '#fff', border: '2px solid var(--af-ink)', borderRadius: 999, padding: '4px 12px',
             opacity: stage === 'in' ? 1 : 0, transform: stage === 'in' ? 'translateY(0)' : 'translateY(8px)',
             transition: 'all 350ms var(--ease-pop) 1800ms',

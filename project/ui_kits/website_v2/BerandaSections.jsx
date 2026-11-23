@@ -45,7 +45,7 @@ function TeaserCard({ t }) {
         }}
       >
         {t.img ? (
-          <img src={t.img} alt={t.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={t.img} srcSet={window.afSrcSet(t.img)} sizes="(max-width: 680px) 90vw, 300px" alt={t.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 52, height: 52 }}>
             {(TEASER_ICONS[t.title] || []).map((d, i) => <path key={i} d={d} />)}
@@ -291,12 +291,12 @@ function FAQV2() {
 function CTAV2() {
   const { Button } = DS2b;
   return (
-    <section style={{ background: 'var(--af-orange)', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ background: 'var(--af-orange-strong)', position: 'relative', overflow: 'hidden' }}>
       <window.ConfettiV2 density={1} />
       <div style={wrapV2({ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 })}>
         <img src="../../assets/logo-mark-white.png" alt="" width="192" height="192" style={{ height: 60, width: 'auto' }} />
         <h2 style={{ fontSize: 'var(--text-xl)', color: '#fff', maxWidth: 560 }}>Yuk, Bikin Map Versi Kamu!</h2>
-        <p style={{ margin: 0, color: 'rgba(255,255,255,.92)', fontSize: '0.95rem', maxWidth: 440 }}>
+        <p style={{ margin: 0, color: '#fff', fontSize: '0.95rem', maxWidth: 440 }}>
           Cerita kebutuhanmu, kami buatkan penawaran terbaik — gratis, tanpa komitmen, langsung dari pabriknya.
         </p>
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>

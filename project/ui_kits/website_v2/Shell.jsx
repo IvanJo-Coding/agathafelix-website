@@ -266,6 +266,9 @@ function ConfettiV2({ density = 1, style }) {
 function MarqueeV2() {
   const items = ['MAP KANCING', 'CLEAR HOLDER', 'RAPOR CUSTOM', 'MAP L', 'BUSINESS FILE', 'MAP EXECUTIVE'];
   const colors = ['var(--af-orange)', 'var(--af-green)', 'var(--af-yellow)', 'var(--af-purple)', 'var(--af-blue)', '#fff'];
+  // Text on the ink strip needs 4.5:1: the brand orange (3.9:1) and purple
+  // (1.7:1) are lightened for the words; the dots keep the logo colours.
+  const textColors = ['#F7845C', 'var(--af-green)', 'var(--af-yellow)', '#B9A2E8', 'var(--af-blue)', '#fff'];
   const run = [...items, ...items, ...items];
   return (
     <div style={{ background: 'var(--af-ink)', overflow: 'hidden', padding: '13px 0', borderTop: '2px solid var(--af-ink)', borderBottom: '2px solid var(--af-ink)' }}>
@@ -273,7 +276,7 @@ function MarqueeV2() {
       @media (prefers-reduced-motion: reduce) { .af-marquee-track { animation: none !important; } }`}</style>
       <div className="af-marquee-track" style={{ display: 'flex', gap: 38, width: 'max-content', animation: 'af-marquee 24s linear infinite' }}>
         {run.map((t, i) => (
-          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 38, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.06em', color: colors[i % colors.length], whiteSpace: 'nowrap' }}>
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 38, fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.06em', color: textColors[i % textColors.length], whiteSpace: 'nowrap' }}>
             {t} <span style={{ width: 8, height: 8, borderRadius: '50%', background: colors[(i + 1) % colors.length] }}></span>
           </span>
         ))}

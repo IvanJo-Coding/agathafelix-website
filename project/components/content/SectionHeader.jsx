@@ -15,8 +15,9 @@ export function SectionHeader({
   align = 'center',
   style,
 }) {
+  // Heading text is large, so 3:1 is enough; bright green on paper is 2.93:1.
   const colors = {
-    orange: 'var(--af-orange)', green: 'var(--af-green)',
+    orange: 'var(--af-orange)', green: 'var(--af-green-deep)',
     yellow: 'var(--af-yellow-deep)', purple: 'var(--af-purple)', blue: 'var(--af-blue-deep)',
   };
   const parts = highlight && title.includes(highlight) ? title.split(highlight) : null;
