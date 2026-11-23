@@ -133,7 +133,9 @@ function ProdukCustomPage() {
                 overflow: 'hidden', transform: 'rotate(-1.2deg)', boxShadow: '0 8px 0 rgba(0,0,0,.35)',
               }}
             >
-              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" width="1080" height="1080" loading="lazy" decoding="async" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              <img src="../../assets/document-keeper-green.png" alt="Document Keeper Executive Agatha Felix dengan foil emas" width="1080" height="1080" loading="lazy" decoding="async"
+                data-zoom="../../assets/document-keeper-green.png" role="button" tabIndex={0} aria-label="Perbesar foto: Document Keeper Executive Agatha Felix dengan foil emas"
+                style={{ width: '100%', height: 'auto', display: 'block' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 18 }}>
               <Badge color="yellow" dot>Untuk Kantor &amp; Instansi</Badge>

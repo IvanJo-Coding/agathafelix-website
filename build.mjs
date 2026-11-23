@@ -13,6 +13,7 @@
 
 import esbuild from 'esbuild';
 import { promises as fs } from 'fs';
+import { execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { buildComponents, optimizePhotos, prerender, responsiveVariants } from './build-tools.mjs';
@@ -117,7 +118,9 @@ const PAGES = [
   {
     out: 'produk-standar/index.html',
     canonical: '/produk-standar/',
-    title: 'Jual Map Plastik Grosir — Katalog Siap Kirim | Agatha Felix',
+    // 1,168 impressions at 0.5% CTR under the old "Katalog Siap Kirim" title
+    // (Search Console, 2026-11): price and size now show in the result.
+    title: 'Map Plastik Grosir Harga Pabrik — A4 & Folio | Agatha Felix',
     description:
       'Map plastik grosir dari pabrik: clear holder, map kancing, business file, map L, ' +
       'map executive, zipper bag. Beli satuan, lusin, atau grosir, siap kirim.',
@@ -531,12 +534,15 @@ async function build() {
   await fs.writeFile(path.join(DIST, 'robots.txt'),
     `User-agent: *\nAllow: /\n\nSitemap: ${SITE.domain}/sitemap.xml\n`);
 
-  const sitemapPaths = [
-    ...PAGES.map((p) => p.canonical),
-    ...STATIC_PAGES.filter((p) => p.inSitemap).map((p) => p.canonical),
+  // Each URL with the files its content comes from, for <lastmod>.
+  const sitemapPages = [
+    ...PAGES.map((p) => [p.canonical, p.sections.map((name) => path.join(KIT, `${name}.jsx`))]),
+    ...STATIC_PAGES.filter((p) => p.inSitemap).map((p) => [p.canonical, [path.join(SRC, 'static', p.canonical.replace(/^\/|\/$/g, ''))]]),
   ];
-  const urls = sitemapPaths.map((canonical) =>
-    `  <url>\n    <loc>${SITE.domain}${canonical}</loc>\n  </url>`).join('\n');
+  const urls = sitemapPages.map(([canonical, sources]) => {
+    const lastmod = lastModified(sources);
+    return `  <url>\n    <loc>${SITE.domain}${canonical}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}  </url>`;
+  }).join('\n');
   await fs.writeFile(path.join(DIST, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`);
 
@@ -559,6 +565,22 @@ async function build() {
   console.log(`✓ Built ${PAGES.length} pages (+${STATIC_PAGES.length} static) + ${ALL_SECTIONS.length} modules to dist/ in ${Date.now() - t0}ms`);
   console.log(`  domain: ${SITE.domain}`);
   console.log(`  media slots: ${mediaManifest.length} clip(s) live, ${pruned} empty slot(s) left as placeholders`);
+}
+
+// The day a page's own source files last changed, for the sitemap's <lastmod>:
+// the last commit touching them, or today while they hold uncommitted edits.
+// A build date on every URL would teach Google to ignore lastmod, so a page
+// keeps its date until its content changes. Without git, no lastmod at all.
+function lastModified(sources) {
+  const rel = sources.map((file) => path.relative(ROOT, file));
+  const git = (args) => execFileSync('git', [...args, '--', ...rel], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try {
+    if (git(['status', '--porcelain'])) return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' });
+    const date = git(['log', '-1', '--format=%cs']);
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+  } catch {
+    return null;
+  }
 }
 
 function html404() {

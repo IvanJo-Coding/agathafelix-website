@@ -205,7 +205,9 @@
     '#af-consent button{min-height:36px;padding:6px 12px;border-radius:999px;border:2px solid #2B2A28;background:#fff;color:#2B2A28;cursor:pointer;' +
     'font:800 13.5px/1 "Baloo 2","Baloo 2 Fallback",sans-serif}#af-consent button[data-af-consent="granted"]{background:#2B2A28;color:#fff}' +
     'body:has(input:focus,select:focus,textarea:focus) #af-consent{display:none}' +
-    '@media (max-width:680px){#af-consent{left:12px;right:12px;bottom:94px;max-width:none;font-size:12.5px}}' +
+    // Phones: a shorter line and smaller buttons keep it about 50px tall (74px before, 2026-11).
+    '@media (max-width:680px){#af-consent{left:12px;right:12px;bottom:94px;max-width:none;gap:8px;padding:6px 7px 6px 12px;font-size:12px;line-height:1.35;border-radius:12px}' +
+      '#af-consent button{min-height:34px;padding:5px 11px;font-size:13px}}' +
     '@media (max-width:700px){body:has(.stickybar) #af-consent{left:12px;right:12px;bottom:84px;max-width:none}}';
   function showBar() {
     if (bar || readConsent()) return;
@@ -213,7 +215,7 @@
     bar.id = 'af-consent';
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', 'Izin cookie Microsoft Clarity');
-    bar.innerHTML = '<style>' + BAR_CSS + '</style><p>Boleh pakai cookie Microsoft Clarity untuk analisis kunjungan? ' +
+    bar.innerHTML = '<style>' + BAR_CSS + '</style><p>Izinkan cookie analisis Microsoft Clarity? ' +
       '<a href="/kebijakan-privasi/#izin-clarity">Detail</a></p>' +
       '<div><button type="button" data-af-consent="granted">Izinkan</button><button type="button" data-af-consent="denied">Tidak</button></div>';
     document.body.appendChild(bar);
@@ -260,15 +262,44 @@
   // sticky bar, the header, the footer's contact line, or anywhere else on the page.
   var SOURCES = { form: 'formulir', simulator: 'simulator', 'sheet-detail': 'konfigurator', 'sheet-bantu': 'konfigurator',
     'sheet-standar': 'konfigurator', bubble: 'mengambang', sticky: 'mengambang', header: 'header', menu: 'header',
-    'kontak-footer': 'footer' };
+    'kontak-footer': 'footer', zoom: 'foto_zoom' };
+  // The kind of page a contact button sits on, for GA4 reports per page.
+  function pageType() {
+    var p = location.pathname || '/';
+    if (p === '/' || p === '/index.html') return 'beranda';
+    if (p.indexOf('/produk-standar') === 0) return 'produk_standar';
+    if (p.indexOf('/produk-custom') === 0) return 'produk_custom';
+    if (p.indexOf('/raporsekolah/terima-kasih') === 0) return 'terima_kasih';
+    if (p.indexOf('/raporsekolah') === 0) return 'rapor_sekolah';
+    if (p.indexOf('/kebijakan-privasi') === 0) return 'kebijakan_privasi';
+    return 'lainnya';
+  }
+  // The photo a zoom's "Tanya harga model ini" link asks about: the photo's
+  // alt text from our own markup (data-item), never anything typed.
+  function itemName(link) {
+    var item = link.getAttribute && link.getAttribute('data-item');
+    return typeof item === 'string' ? item.replace(/\s+/g, ' ').trim().slice(0, 100) : '';
+  }
   // Clarity ranks contact buttons across the whole site, beyond one page's heatmap.
   function noteContact(link, whatsapp) {
-    noteButton(buttonName(link), whatsapp);
+    noteButton(buttonName(link), whatsapp, itemName(link));
   }
-  function noteButton(name, whatsapp) {
-    var params = { send_to: config.googleAnalyticsId, button_label: name };
-    if (whatsapp) params.cta_source = SOURCES[name] || 'halaman';
-    if (production && config.googleAnalyticsId) window.gtag('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon', params);
+  function noteButton(name, whatsapp, item) {
+    var params = { send_to: config.googleAnalyticsId, button_label: name, page_type: pageType() };
+    // cta_source stays for the reports built on it; button_location is the same value.
+    if (whatsapp) params.cta_source = params.button_location = SOURCES[name] || 'halaman';
+    if (item) params.item_name = item;
+    if (production && config.googleAnalyticsId) {
+      window.gtag('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon', params);
+      // A chat opened from a WhatsApp button is a GA4 lead too. The rapor form's
+      // handoff ('form') is not: its thank-you page sends that generate_lead
+      // (method whatsapp_form), so one form lead is never counted twice.
+      if (whatsapp && name !== 'form') {
+        var lead = { send_to: config.googleAnalyticsId, method: 'whatsapp_klik', page_type: params.page_type, button_location: params.button_location };
+        if (item) lead.item_name = item;
+        window.gtag('event', 'generate_lead', lead);
+      }
+    }
     if (!useClarity) return;
     window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
     window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', name);

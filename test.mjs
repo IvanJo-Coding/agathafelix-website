@@ -204,7 +204,7 @@ test('every WhatsApp click says where its button sits: form, simulator, product 
   const live = tracking('agatha-felix.com', '/produk-custom/', {}, withAnalytics);
   const source = (label) => {
     live.click('https://wa.me/6282219472613', '_blank', { 'data-wa': label });
-    return [live.window.dataLayer.at(-2)[2].cta_source, clarityCalls(live.window).at(-1)];
+    return [live.window.dataLayer.findLast((e) => e[1] === 'klik_whatsapp')[2].cta_source, clarityCalls(live.window).at(-1)];
   };
   assert.deepEqual(source('simulator'), ['simulator', ['set', 'sumber_whatsapp', 'simulator']]);
   assert.deepEqual(source('sheet-bantu')[0], 'konfigurator');
@@ -217,7 +217,8 @@ test('every WhatsApp click says where its button sits: form, simulator, product 
   const ads = live.window.dataLayer.filter((e) => e[1] === 'conversion').length;
   live.window.AFTracking.noteWhatsApp('form');
   assert.deepEqual(googleCalls(live.window).at(-1), ['event', 'klik_whatsapp',
-    { send_to: withAnalytics.googleAnalyticsId, button_label: 'form', cta_source: 'formulir' }]);
+    { send_to: withAnalytics.googleAnalyticsId, button_label: 'form', page_type: 'produk_custom', cta_source: 'formulir', button_location: 'formulir' }],
+    'no generate_lead here: the thank-you page sends the form lead');
   assert.deepEqual(clarityCalls(live.window).slice(-3), [['event', 'klik_whatsapp'], ['set', 'tombol_whatsapp', 'form'], ['set', 'sumber_whatsapp', 'formulir']]);
   assert.equal(live.window.dataLayer.filter((e) => e[1] === 'conversion').length, ads);
   const before = live.window.dataLayer.length;
@@ -291,8 +292,9 @@ test('GA4 shares the Google loader and contact events never carry the WhatsApp m
   live.click('tel:+6282219472613', '', { text: 'Telepon' });
   const events = googleCalls(live.window).filter((e) => e[0] === 'event');
   assert.deepEqual(events.filter((e) => e[1] !== 'conversion'), [
-    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero', cta_source: 'halaman' }],
-    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: 'Telepon' }],
+    ['event', 'klik_whatsapp', { send_to: withAnalytics.googleAnalyticsId, button_label: 'hero', page_type: 'produk_custom', cta_source: 'halaman', button_location: 'halaman' }],
+    ['event', 'generate_lead', { send_to: withAnalytics.googleAnalyticsId, method: 'whatsapp_klik', page_type: 'produk_custom', button_location: 'halaman' }],
+    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: 'Telepon', page_type: 'produk_custom' }],
   ]);
   assert.equal(events.filter((e) => e[1] === 'conversion').length, 1);
   assert.ok(!JSON.stringify(events).includes('Local%20test'));
@@ -303,6 +305,28 @@ test('GA4 shares the Google loader and contact events never carry the WhatsApp m
   preview.click(wa);
   assert.equal(preview.scripts.length, 0);
   assert.ok(!googleCalls(preview.window).some((e) => e[2]?.send_to === withAnalytics.googleAnalyticsId));
+});
+test('a WhatsApp click is a GA4 lead with its page type and button location; a zoomed photo names itself', () => {
+  const ga4 = withAnalytics.googleAnalyticsId;
+  const events = (live, name) => googleCalls(live.window).filter((e) => e[0] === 'event' && e[1] === name).map((e) => e[2]);
+  for (const [pathname, type] of [['/', 'beranda'], ['/produk-standar/', 'produk_standar'], ['/raporsekolah/', 'rapor_sekolah'], ['/kebijakan-privasi/', 'kebijakan_privasi']]) {
+    const live = tracking('agatha-felix.com', pathname, {}, withAnalytics);
+    live.click(wa, '_blank', { 'data-wa': 'bubble' });
+    assert.deepEqual(events(live, 'generate_lead'), [{ send_to: ga4, method: 'whatsapp_klik', page_type: type, button_location: 'mengambang' }], pathname);
+  }
+  // "Tanya harga model ini" under a zoomed photo: the photo's alt text rides along as item_name.
+  const live = tracking('agatha-felix.com', '/raporsekolah/', {}, withAnalytics);
+  live.click(wa, '_blank', { 'data-wa': 'zoom', 'data-item': '  Sampul raport SMA jahit maroon\n SMAK 1 Penabur Jakarta ' });
+  const item = 'Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta';
+  assert.deepEqual(events(live, 'klik_whatsapp'), [{ send_to: ga4, button_label: 'zoom', page_type: 'rapor_sekolah', cta_source: 'foto_zoom', button_location: 'foto_zoom', item_name: item }]);
+  assert.deepEqual(events(live, 'generate_lead'), [{ send_to: ga4, method: 'whatsapp_klik', page_type: 'rapor_sekolah', button_location: 'foto_zoom', item_name: item }]);
+  assert.equal(events(live, 'conversion').length, 1, 'still one Ads conversion per click');
+  // A phone call is no lead, and nothing is sent from a preview.
+  live.click('tel:+6282219472613', '', { text: 'Telepon' });
+  assert.equal(events(live, 'generate_lead').length, 1);
+  const preview = tracking('localhost', '/raporsekolah/', {}, withAnalytics);
+  preview.click(wa, '_blank', { 'data-wa': 'zoom', 'data-item': item });
+  assert.equal(events(preview, 'generate_lead').length, 0);
 });
 
 test('GA4 counts a fresh form handoff once, with no form values or URL parameters', () => {
@@ -399,7 +423,7 @@ test('on a prepared thank-you page a phone call still counts; the WhatsApp retry
   assert.equal(googleCalls(live.window).length, before, 'no Ads conversion and no klik_whatsapp for the lead the form already counted');
   live.click('tel:+6282219472613', '', { text: '0822-1947-2613' });
   assert.deepEqual(googleCalls(live.window).slice(before), [
-    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: '0822-1947-2613' }],
+    ['event', 'klik_telepon', { send_to: withAnalytics.googleAnalyticsId, button_label: '0822-1947-2613', page_type: 'terima_kasih' }],
   ]);
 });
 test('storage fallback and old links remove contact details before tracking', () => {
@@ -443,7 +467,7 @@ function landingForm(fields, { blocked = false, before, hash = '' } = {}) {
     noteWhatsApp: (label) => out.steps.push('wa:' + label),
   };
   vm.runInNewContext(code, { window: { open: (url) => { out.opened = url; }, AFTracking }, AFTracking, location,
-    document: { addEventListener: (type, fn) => { if (type === 'click') out.docClick = fn; }, querySelectorAll: (sel) => sel === '[data-wa]' ? out.links : [],
+    document: { addEventListener: (type, fn) => { if (type === 'click') out.docClick = fn; }, querySelectorAll: (sel) => sel.startsWith('[data-wa]') ? out.links : [],
       getElementById: (id) => id === 'leadForm' ? form : id === 'leadErr' ? (out.err = element) : id === 'formToggle' ? toggle : element },
     addEventListener() {}, setTimeout() {},
     sessionStorage: { setItem: (_, value) => { if (blocked) throw Error('storage blocked'); out.saved = JSON.parse(value); } },
@@ -500,7 +524,7 @@ test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip
   // The title covers both spellings schools search with and the custom school-logo offer.
   assert.match(html, /<title>Map Rapor, Sampul Raport &amp; Ijazah Custom [^<]*<\/title>/);
   assert.match(html, /<span class="eyebrow">Mulai 50 pcs · [^<]*<\/span>\s*<h1 [^>]*>Map Rapor &amp; Ijazah Custom <em>Logo Sekolah Anda<\/em><\/h1>/);
-  for (const target of ['model', 'spesifikasi', 'hasil']) {
+  for (const target of ['model', 'spesifikasi', 'ijazah', 'hasil']) {
     assert.match(html, new RegExp('href="#' + target + '"'));
     assert.equal([...html.matchAll(new RegExp('id="' + target + '"', 'g'))].length, 1);
   }
@@ -511,6 +535,32 @@ test('the landing page matches the "Rapor & Ijazah" campaign, and a missing clip
     if (clip) assert.ok(fs.existsSync(path.join('dist/raporsekolah', clip[1])), card);
   }
   assert.match(html, /\.igvid:not\(\[data-video\]\)\{display:flex\}/);
+});
+test('map ijazah has its own #ijazah section with real ijazah photos and its own WhatsApp message', () => {
+  const html = read('dist/raporsekolah/index.html');
+  const section = html.slice(html.indexOf('<section class="sec" id="ijazah"'), html.indexOf('</section>', html.indexOf('id="ijazah"')));
+  assert.match(section, /<h2[^>]*>Map &amp; Sampul Ijazah Custom Logo Sekolah<\/h2>/);
+  assert.equal((section.match(/data-zoom="img\/stack-(alazhar|cikeas)\.webp"/g) || []).length, 2);
+  assert.match(section, /data-wa="ijazah" data-msg="ijazah">Minta Harga Map Ijazah<\/a>/);
+  assert.ok(html.indexOf('id="spesifikasi"') < html.indexOf('id="ijazah"') && html.indexOf('id="ijazah"') < html.indexOf('id="hasil"'));
+  // Gallery heading for "contoh sampul raport SD/SMP/SMA" searches.
+  assert.match(html, /<h2[^>]*>Contoh Sampul Raport SD, SMP &amp; SMA yang Sudah Kami Buat<\/h2>/);
+  // "Lihat juga": picture links to the catalogue and the custom page.
+  const more = html.slice(html.indexOf('id="lihatJuga"'), html.indexOf('</section>', html.indexOf('id="lihatJuga"')));
+  assert.match(more, /href="\/produk-standar\/#clear-holder"><img [^>]*src="\/assets\/products\/clear-holder-480\.webp"/);
+  assert.match(more, /href="\/produk-custom\/"><img /);
+  for (const [, src] of more.matchAll(/src="([^"]+)"/g)) assert.ok(fs.existsSync(path.join('dist', src)), src);
+});
+test('/clear-holder/ forwards to the clear holder in the catalogue; the sitemap dates each page by its own source', () => {
+  const stub = read('dist/clear-holder/index.html');
+  assert.match(stub, /<link rel="canonical" href="https:\/\/agatha-felix\.com\/produk-standar\/">/);
+  assert.match(stub, /window\.location\.replace\('\/produk-standar\/' \+ window\.location\.search \+ '#clear-holder'\)/);
+  assert.match(stub, /<meta http-equiv="refresh" content="0; url=https:\/\/agatha-felix\.com\/produk-standar\/#clear-holder">/);
+  const sitemap = read('dist/sitemap.xml');
+  assert.ok(!sitemap.includes('clear-holder'), 'a forwarding page stays out of the sitemap');
+  const entries = [...sitemap.matchAll(/<url>\s*<loc>([^<]+)<\/loc>\s*(?:<lastmod>([^<]+)<\/lastmod>\s*)?<\/url>/g)];
+  assert.equal(entries.length, 5);
+  for (const [, loc, lastmod] of entries) assert.match(lastmod || '', /^20\d\d-\d\d-\d\d$/, loc + ' has a lastmod');
 });
 test('client logos are square 240 px tiles, light, and all present', async () => {
   const sharp = (await import('sharp')).default;
@@ -532,11 +582,19 @@ test('client logos are square 240 px tiles, light, and all present', async () =>
     assert.ok(fs.statSync(file).size < 20e3, alt + ' logo is too heavy');
   }
 });
-test('the landing photos follow the CTA on a phone; logos, then Jahit vs Press, then the optional form', () => {
+test('the first phone screen holds heading, photo, three points, logos and the button; then Jahit vs Press and the optional form', () => {
   const html = read('dist/raporsekolah/index.html');
   const at = (marker) => html.indexOf(marker);
-  assert.ok(at('class="hero-main"') < at('class="hero-photo"') && at('class="hero-photo"') < at('class="hero-more"'));
-  assert.match(html, /grid-template-areas:"main" "photo" "more"/, 'phones show the photos right after the CTA');
+  // Brief 2026-11-21: 55% of phone visits left before a quarter of the page, and the first screen was text only.
+  const order = ['class="hero-head"', 'class="hero-photo"', 'class="pricebar"', 'class="hero-trust"', 'data-wa="hero"', 'class="hero-sub"'];
+  for (let i = 1; i < order.length; i++) assert.ok(at(order[i - 1]) < at(order[i]), order[i - 1] + ' before ' + order[i]);
+  assert.match(html, /grid-template-areas:"head" "photo" "proof" "act" "more"/, 'phones read the hero in source order');
+  const hero = html.slice(at('<section id="hero"'), html.indexOf('</section>', at('<section id="hero"')));
+  assert.equal((hero.match(/data-zoom="/g) || []).length, 1, 'one hero photo, eager and first in line');
+  assert.match(hero, /<img src="img\/collection-480\.webp"[^>]*fetchpriority="high"/);
+  assert.ok(!/<img [^>]*loading="lazy"/.test(hero), 'nothing in the first screen waits for lazy loading');
+  const points = [...hero.matchAll(/<div><strong>([^<]+)<\/strong><span>([^<]+)<\/span><\/div>/g)].map((m) => m[1]);
+  assert.deepEqual(points, ['50 pcs', '±Rp 50rb', 'Gratis']);
   assert.ok(at('id="leadForm"') > at('</section>'), 'the form left the hero');
   assert.ok(at('<div class="clients">') > 0 && at('<div class="clients">') < at('id="model"'), 'the logos come right after the hero');
   assert.ok(at('id="model"') < at('data-model="jahit"') && at('data-model="press"') < at('id="formToggle"') && at('id="formToggle"') < at('id="leadForm"'),
@@ -592,12 +650,15 @@ test('one phone click on the landing page sends one klik_telepon to GA4, with it
   const toGa4 = (e) => !e[2] || !e[2].send_to || e[2].send_to === ga4;
   const call = click(tel[0]);
   assert.equal(call.defaultPrevented, undefined, 'the tel: link still dials');
-  assert.deepEqual(events('klik_telepon').filter(toGa4), [['event', 'klik_telepon', { send_to: ga4, button_label: 'Telepon 0822-1947-2613' }]]);
+  assert.deepEqual(events('klik_telepon').filter(toGa4), [['event', 'klik_telepon', { send_to: ga4, button_label: 'Telepon 0822-1947-2613', page_type: 'rapor_sekolah' }]]);
   assert.deepEqual(clarityCalls(page).slice(1), [['event', 'klik_telepon'], ['set', 'tombol_telepon', 'Telepon 0822-1947-2613']]);
   // WhatsApp on the same page still counts one Ads conversion and one GA4 event.
   click(wa[0]);
   assert.equal(events('conversion').length, 1);
-  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp', { send_to: ga4, button_label: 'hero', cta_source: 'halaman' }]]);
+  assert.deepEqual(events('klik_whatsapp').filter(toGa4), [['event', 'klik_whatsapp',
+    { send_to: ga4, button_label: 'hero', page_type: 'rapor_sekolah', cta_source: 'halaman', button_location: 'halaman' }]]);
+  assert.deepEqual(events('generate_lead').filter(toGa4), [['event', 'generate_lead',
+    { send_to: ga4, method: 'whatsapp_klik', page_type: 'rapor_sekolah', button_location: 'halaman' }]]);
   assert.equal(events('klik_telepon').length, 1, 'a WhatsApp click adds no phone event');
 });
 test('the real form prepares the message and hands off even when storage is blocked', () => {
@@ -648,7 +709,8 @@ test('the landing page opens with the sample CTA, the minimum order and help wit
   const html = read('project/static/raporsekolah/index.html');
   const hero = html.slice(html.indexOf('<section id="hero"'), html.indexOf('</section>', html.indexOf('<section id="hero"')));
   const cta = hero.indexOf('data-wa="hero"');
-  assert.ok(cta > 0 && cta < hero.indexOf('class="pricebar"'), 'the WhatsApp CTA comes before the price bar and photos');
+  // The button follows the photo, the three points and the logos, all in the first phone screen, and comes before the longer copy.
+  assert.ok(cta > hero.indexOf('class="hero-trust"') && cta < hero.indexOf('class="hero-sub"'), 'the WhatsApp CTA closes the first screen');
   // The CTA speaks to schools that already have a sample (owner, 2026-10-17); right under it,
   // a visitor without one gets a WhatsApp link of their own.
   assert.match(hero.slice(cta, cta + 2800), /Kirim Contoh Map &amp; Minta Harga<\/a>\s*<p class="cta-note"><strong>Minimal 50 pcs<\/strong>[^]*?<p class="cta-help"><a href="https:\/\/wa\.me\/6282219472613" [^>]*data-wa="hero-bantu" data-msg="bantu">Belum punya contoh\? Kami bantu pilih model\.<\/a><\/p>/);
@@ -686,7 +748,7 @@ test('every srcset candidate exists, and photos are lighter than the originals',
         assert.match(w, /^\d+w$/);
       }
     }
-    assert.ok(!html.includes('rel="preload" as="image"'), 'the hero text is the LCP element; no image preload competes with the fonts');
+    assert.ok(!html.includes('rel="preload" as="image"'), 'no image preload competes with the fonts (on the rapor page the hero photo is fetchpriority=high instead; a preload measured no gain, 2026-11-23)');
   }
   assert.ok(fs.statSync('dist/raporsekolah/img/stack-alazhar-480.webp').size < fs.statSync('dist/raporsekolah/img/stack-alazhar.webp').size / 3);
   for (const [logo, max] of [['logo-agatha-felix', 40e3], ['logo-mark-white', 15e3]]) {
@@ -748,7 +810,9 @@ test('built routes expose content, metadata, styles, and valid local assets in r
   }
   const home = read('dist/index.html');
   assert.match(home, /<a[^>]+href="https:\/\/wa.me\/6282219472613[^>]+>[\s\S]*?Tanya Kapasitas Produksi/);
-  assert.ok(!read('dist/sitemap.xml').includes('lastmod'));
+  // The build date on every URL (removed 2026-09-14) is what teaches Google to ignore lastmod;
+  // each URL now carries the day its own source last changed (see the /clear-holder/ test).
+  assert.ok(!read('dist/sitemap.xml').includes('T00:00'), 'dates only, no build timestamp');
   assert.match(read('dist/raporsekolah/terima-kasih.html'), /noindex/);
 });
 test('each page owns one search intent: unique short titles and descriptions, rapor only on the rapor page', () => {
@@ -1244,7 +1308,7 @@ test('product and portfolio photos open large; every zoom target exists and is r
     assert.ok(!afterPaint(html).includes('/js/af-zoom.js'), file + ' still waits for React');
   }
   assert.match(read('project/ui_kits/website_v2/Sheet.jsx'), /data-zoom=\{src\} role="button" tabIndex=\{i === slide \? 0 : -1\}/, 'sheet photos zoom; only the one in view takes focus');
-  for (const [file, min] of [['raporsekolah/index.html', 15], ['produk-custom/index.html', 8]]) {
+  for (const [file, min] of [['raporsekolah/index.html', 15], ['produk-custom/index.html', 9]]) {
     const html = read('dist/' + file);
     assert.ok(file.startsWith('raporsekolah') ? /<script defer src="\/js\/af-zoom\.js"><\/script>/.test(html) : afterPaintAlone(html).includes('/js/af-zoom.js'), file);
     const triggers = [...html.matchAll(/<img [^>]*data-zoom="([^"]+)"[^>]*>/g)];
@@ -1267,7 +1331,42 @@ test('product and portfolio photos open large; every zoom target exists and is r
   assert.match(zoom, /e\.stopPropagation\(\)/, 'keys stay out of the product sheet underneath');
   assert.match(zoom, /opener\.focus/, 'focus goes back to the photo');
   // The figure covers the dialog: checking e.target === dialog never closed it.
-  assert.match(zoom, /closest\('\.afz-img, \.afz-btn'\)\) dialog\.close\(\)/, 'a tap beside the photo closes it');
+  assert.match(zoom, /closest\('\.afz-img, \.afz-btn, \.afz-ask'\)\) dialog\.close\(\)/, 'a tap beside the photo closes it');
+});
+test('a zoomed photo offers "Tanya harga model ini": a WhatsApp message naming that photo, counted with item_name', () => {
+  const zoom = read('dist/js/af-zoom.js');
+  assert.match(zoom, /<a class="afz-ask" href="https:\/\/wa\.me\/' \+ WA \+ '" target="_blank" rel="noopener noreferrer" data-wa="zoom">/);
+  assert.match(zoom, /var WA = '6282219472613';/);
+  // Run the zoom on a tiny DOM: open a photo, read the link it prepares.
+  const made = [];
+  const el = (tag) => {
+    const node = { tagName: tag.toUpperCase(), attrs: {}, listeners: {}, children: [], hidden: false, textContent: '', style: {},
+      setAttribute(k, v) { this.attrs[k] = String(v); }, getAttribute(k) { return this.attrs[k] ?? null; }, removeAttribute(k) { delete this.attrs[k]; },
+      addEventListener(type, fn) { (this.listeners[type] ||= []).push(fn); }, appendChild(c) { this.children.push(c); }, focus() {},
+      showModal() { this.open = true; }, close() { this.open = false; } };
+    made.push(node);
+    return node;
+  };
+  const parts = {};
+  const dialog = el('dialog');
+  Object.defineProperty(dialog, 'innerHTML', { set(html) { this.html = html; } });
+  dialog.querySelector = (sel) => (parts[sel] ||= el(sel === '.afz-ask' ? 'a' : 'span'));
+  const docListeners = {};
+  const photo = el('img');
+  photo.setAttribute('data-zoom', 'img/jahit-red.webp');
+  photo.setAttribute('alt', 'Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta');
+  photo.closest = (sel) => (sel === '[data-zoom]' ? photo : null);
+  const window = {};
+  vm.runInNewContext(zoom, { window, HTMLDialogElement: function () {}, Array,
+    document: { createElement: (tag) => (tag === 'dialog' ? dialog : el(tag)), head: { appendChild() {} }, body: { appendChild() {} },
+      addEventListener: (type, fn) => { docListeners[type] = fn; } } });
+  docListeners.click({ target: photo, preventDefault() {} });
+  assert.ok(dialog.open);
+  const ask = parts['.afz-ask'];
+  assert.equal(ask.attrs['data-item'], 'Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta');
+  assert.equal(decodeURIComponent(ask.href.split('?text=')[1]),
+    'Halo Agatha Felix, saya mau tanya harga model ini: Sampul raport SMA jahit maroon SMAK 1 Penabur Jakarta. Saya lihat fotonya di website agatha-felix.com.');
+  assert.ok(ask.href.startsWith('https://wa.me/6282219472613?text='));
 });
 
 test('every WhatsApp button carries a fixed data-wa label', () => {
