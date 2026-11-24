@@ -186,33 +186,20 @@ function gallery(fam, v, colour) {
   ];
 }
 
-// Prices from HargaStandar.jsx. A type's rows: a Clear Holder column ('ch:x')
-// or a list of item ids. Types without a mapping stay "tanya harga".
-// The page shows one starting price per product and per type, never the
-// full list (owner, 2026-11-24): enough for search results and the
-// "harga pabrik" title; the rest is quoted on WhatsApp.
+// Starting prices from HargaStandar.jsx, one per catalogue type; a type without
+// one stays "tanya harga". The page shows only these, never a full list (owner,
+// 2026-11-24): enough for search results and the "harga pabrik" title; the
+// rest is quoted on WhatsApp. HargaStandar.jsx holds nothing more, since it
+// ships to every visitor and the repository is public.
 const rupiah = (n) => 'Rp' + n.toLocaleString('id-ID');
-function hargaTipe(slug) {
-  const hs = window.HARGA_STANDAR;
-  const map = hs.tipe[slug];
-  if (!map) return [];
-  if (typeof map === 'string') {
-    const col = hs.clearHolder.ukuran.findIndex(([key]) => 'ch:' + key === map);
-    return hs.clearHolder.isi.filter(([, row]) => typeof row[col] === 'number')
-      .map(([n, row]) => ({ label: 'Isi ' + n + ' lembar', harga: row[col], satuan: 'pcs' }));
-  }
-  return map.map((id) => {
-    for (const grup of hs.daftar) {
-      const b = grup.barang.find((x) => x[0] === id);
-      if (b) return { label: b[1] + ' · ' + b[3], kode: b[2], harga: b[4], satuan: grup.satuan };
-    }
-    return null;
-  }).filter(Boolean);
+function hargaMulai(slug) {
+  const m = window.HARGA_STANDAR.mulai[slug];
+  return m ? { harga: m[0], satuan: m[1] } : null;
 }
 const termurah = (rows) => (rows.length ? rows.reduce((a, b) => (b.harga < a.harga ? b : a)) : null);
 // Lowest price across a product's types, for the card.
 function mulaiDari(fam) {
-  return termurah(fam.variants.flatMap((v) => hargaTipe(v.slug)));
+  return termurah(fam.variants.map((v) => hargaMulai(v.slug)).filter(Boolean));
 }
 
 const FILTERS = [
@@ -349,9 +336,8 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
   }
 
   const chosen = colourIdx === null ? null : v.colours[colourIdx];
-  const harga = hargaTipe(v.slug);
-  const mulaiTipe = termurah(harga);
-  const waText = `Halo Agatha Felix! Saya mau ${harga.length ? 'pesan' : 'tanya harga grosir'} *${fam.name}*${v.title ? ' (' + v.title + ')' : ''}.`
+  const mulaiTipe = hargaMulai(v.slug);
+  const waText = `Halo Agatha Felix! Saya mau ${mulaiTipe ? 'pesan' : 'tanya harga grosir'} *${fam.name}*${v.title ? ' (' + v.title + ')' : ''}.`
     + `\nWarna: ${chosen ? chosen.name : ''}\nJumlah: \nKota tujuan: `;
   const chip = (c) => ({ color: `var(--af-${c}-deep)`, background: `var(--af-${c}-tint)`, borderColor: `var(--af-${c}-soft)` });
 
@@ -360,7 +346,7 @@ function DetailSheet({ fam, vi, pos, total, onClose, onStep, onVariant }) {
       pos={pos} total={total} onClose={onClose} onStep={onStep} resetKey={fam.slug}
       footer={<>
         <Button color="wa" size="lg" data-wa="sheet-standar" href={window.waLink(waText)} target="_blank" rel="noopener noreferrer">
-          <window.WaGlyph2 /> <span>{harga.length ? 'Pesan' : 'Tanya Harga'}<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
+          <window.WaGlyph2 /> <span>{mulaiTipe ? 'Pesan' : 'Tanya Harga'}<span className="af-sheet-xs-hide"> via WhatsApp</span></span>
         </Button>
         <window.AfShareButton url={location.origin + location.pathname + '#' + v.slug} title={fam.name + ' — Agatha Felix'} />
       </>}

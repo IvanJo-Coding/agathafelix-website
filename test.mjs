@@ -881,29 +881,29 @@ test('FAQ structured data matches the answers visible on each page', () => {
     }
   }
 });
-test('standard prices point at real catalogue types and are shown on the page', () => {
+test('the catalogue ships starting prices only, each for a real catalogue type, and shows them as "Mulai"', () => {
   const window = {};
-  vm.runInNewContext(read('dist/js/HargaStandar.js'), { window });
+  const src = read('dist/js/HargaStandar.js');
+  vm.runInNewContext(src, { window });
   const hs = window.HARGA_STANDAR;
-  const ids = new Set(hs.daftar.flatMap((g) => g.barang.map((b) => b[0])));
-  const cols = hs.clearHolder.ukuran.map(([key]) => 'ch:' + key);
+  // One [price, unit] per type and nothing else: the file reaches every visitor and the repository is public (owner, 2026-11-24).
+  assert.deepEqual(Object.keys(hs).sort(), ['mulai', 'update']);
   const katalog = read('project/ui_kits/website_v2/ProdukStandarSections.jsx');
-  for (const [slug, map] of Object.entries(hs.tipe)) {
+  for (const [slug, [harga, satuan]] of Object.entries(hs.mulai)) {
     assert.ok(katalog.includes(`tipe('${slug}'`), slug + ' is not a catalogue type');
-    for (const ref of typeof map === 'string' ? [map] : map) assert.ok(cols.includes(ref) || ids.has(ref), slug + ' -> ' + ref);
+    assert.ok(Number.isInteger(harga) && harga > 0, slug);
+    assert.ok(['pcs', 'lusin'].includes(satuan), slug);
   }
-  for (const [, row] of hs.clearHolder.isi) assert.equal(row.length, hs.clearHolder.ukuran.length);
+  const source = read('project/ui_kits/website_v2/HargaStandar.jsx');
+  assert.doesNotMatch(source + src, /0,755|0\.755|offline \+|daftar:|clearHolder|barang:/, 'no full list, offline price or price formula');
   const html = read('dist/produk-standar/index.html');
-  // One starting price per product, never the full list (owner, 2026-11-24).
   assert.doesNotMatch(html, /id="daftar-harga"|Daftar Harga/);
   assert.doesNotMatch(html, /PPN/, 'prices are final, no PPN note');
   assert.ok(html.includes('Mulai Rp20.000/pcs'), 'Clear Holder card shows its lowest price');
   const visible = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
   const prices = [...visible.matchAll(/Rp[\d.]+/g)].map((m) => visible.slice(Math.max(0, m.index - 6), m.index));
   assert.ok(prices.length > 0 && prices.every((before) => /Mulai $/.test(before)), 'every price on the page is a "Mulai" price: ' + prices.join(' | '));
-  const katalog2 = read('project/ui_kits/website_v2/ProdukStandarSections.jsx');
-  assert.match(katalog2, /<p className="af-ps-mulai">Mulai <strong>\{rupiah\(mulaiTipe\.harga\)\}<\/strong>\/\{mulaiTipe\.satuan\}<\/p>/, 'the detail sheet shows one starting price');
-  assert.doesNotMatch(katalog2, /harga\.map\(/, 'no per-type price rows in the sheet');
+  assert.match(katalog, /<p className="af-ps-mulai">Mulai <strong>\{rupiah\(mulaiTipe\.harga\)\}<\/strong>\/\{mulaiTipe\.satuan\}<\/p>/, 'the detail sheet shows one starting price');
 });
 // Custom products: load the built price table and product logic without a DOM.
 function customKit() {
