@@ -9,10 +9,13 @@ const SIM_COLORS = [
   ['Hitam Elegan', '#2B2A28', '#141413'],
   ['Hijau Eksekutif', '#1E3B2F', '#10241B'],
 ];
-const SIM_ACCENTS = [
-  ['Kuning', 'var(--af-yellow)'],
-  ['Putih', '#FFFFFF'],
-  ['Emas', '#D4A93C'],
+// The cover's lettering is printed with the logo's poly (hot print), so its
+// colours are the poly colours the product sheets offer and we already produce
+// ([label, colour, the sheet's poly id]). One colour for both, never two.
+const SIM_POLY = [
+  ['Emas', '#D4A93C', 'emas'],
+  ['Silver', '#C3C7CC', 'silver'],
+  ['Biru tua', '#1F3A6E', 'biru-tua'],
 ];
 
 // Phones: the cover preview comes first and is scaled down, so every colour
@@ -41,7 +44,12 @@ const SIM_CSS_ID = 'af-simulator';
   .af-sim-konfig span { width: 100%; font-size: .78rem; font-weight: 600; color: var(--text-muted); }
   .af-sim-konfig strong { font-family: var(--font-display); font-weight: 800; }
   .af-sim-konfig a, .af-sim-hint a { font-weight: 700; color: var(--af-purple-deep); }
-  .af-sim-hint { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--text-body); }`;
+  .af-sim-hint { margin: 0; font-size: .82rem; line-height: 1.5; color: var(--text-body); }
+  /* The file input stays in the tab order (display:none took it out): hidden
+     from view, while its label shows the focus ring. */
+  .af-sim-upload { position: relative; }
+  .af-sim-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+  .af-sim-upload:focus-within { outline: 3px solid var(--af-blue-deep); outline-offset: 3px; }`;
   document.head.appendChild(tag);
 })();
 
@@ -49,19 +57,22 @@ const SIM_CSS_ID = 'af-simulator';
 // product sheet), it is that sheet's own message with the design added, so the
 // model, specification, colour count and quantity all carry over. The cover
 // colour is named once: the sheet's when it has one (a swatch picked here is
-// written into the sheet), otherwise the simulator's.
+// written into the sheet), otherwise the simulator's. The lettering colour is
+// the poly colour, also named once: the sheet's "Warna poly logo" line when it
+// has one (again, a swatch picked here is written into the sheet).
 function pesanSimulator(desain, p, d) {
   const sampulSheet = p && (d.raw['warna-sampul'] || '').trim();
+  const polySheet = p && d.raw.poly;
   const lines = sampulSheet ? [] : ['- Warna sampul: ' + desain.sampul];
-  lines.push('- Warna tulisan: ' + desain.tulisan);
+  if (!polySheet) lines.push('- Warna poly tulisan & logo: ' + desain.tulisan);
   if (desain.nama) lines.push('- Nama sekolah di sampul: ' + desain.nama);
   if (!p) {
     return ['Halo Agatha Felix! Saya mau pesan rapor custom sesuai simulator:', ...lines,
       'Jumlah: ... pcs (minimal 50 pcs per warna)', '', 'Logo sekolah saya kirim di chat ini.'].join('\n');
   }
   const pesan = window.AfCustom.pesanDraft(p, d).split('\n');
-  // Before the closing note about the logo or sample photo.
-  pesan.splice(pesan.length - 2, 0, '', 'Desain dari simulator rapor:', ...lines);
+  // Before the closing note about the logo or sample photo; nothing to add when the sheet says it all.
+  if (lines.length) pesan.splice(pesan.length - 2, 0, '', 'Desain dari simulator rapor:', ...lines);
   return pesan.join('\n');
 }
 
@@ -87,7 +98,14 @@ function SimulatorRapor({ order }) {
   const shown = iDraft >= 0 ? iDraft : color;
   const sampulLain = !!sampulDraft && iDraft < 0;
   const [, base, deep] = SIM_COLORS[shown];
-  const [, accentColor] = SIM_ACCENTS[accent];
+  // The same for the lettering: a poly picked in the sheet shows here; one we
+  // have no swatch for (merah, hologram...) is named, in its own colour.
+  const polyDraft = draft ? draft.raw.poly : undefined;
+  const iPoly = SIM_POLY.findIndex(([, , id]) => id === polyDraft);
+  const tulisanIdx = iPoly >= 0 ? iPoly : accent;
+  const polyLain = !!polyDraft && iPoly < 0 ? (C.POLY || []).find((op) => op.id === polyDraft) || { label: polyDraft } : null;
+  const accentColor = polyLain ? (/^#/.test(polyLain.hex || '') ? polyLain.hex : '#C3C7CC') : SIM_POLY[tulisanIdx][1];
+  const tulisan = polyLain ? polyLain.label : SIM_POLY[tulisanIdx][0];
 
   // simulator_start, once: the first change to the design.
   function mulai() {
@@ -100,6 +118,11 @@ function SimulatorRapor({ order }) {
     setColor(i);
     if (dari) order.ubah(dari, { raw: { ...draft.raw, 'warna-sampul': SIM_COLORS[i][0] } });
   }
+  function pilihTulisan(i) {
+    mulai();
+    setAccent(i);
+    if (dari) order.ubah(dari, { raw: { ...draft.raw, poly: SIM_POLY[i][2] } });
+  }
 
   const onLogo = (e) => {
     const f = e.target.files && e.target.files[0];
@@ -110,7 +133,7 @@ function SimulatorRapor({ order }) {
     reader.readAsDataURL(f);
   };
 
-  const pesanWA = pesanSimulator({ sampul: SIM_COLORS[shown][0], tulisan: SIM_ACCENTS[accent][0], nama: nama.trim() }, dari, draft);
+  const pesanWA = pesanSimulator({ sampul: SIM_COLORS[shown][0], tulisan, nama: nama.trim() }, dari, draft);
 
   const swatchStyle = (bg, isOn) => ({
     width: 44, height: 44, borderRadius: '50%', background: bg, cursor: 'pointer',
@@ -142,10 +165,10 @@ function SimulatorRapor({ order }) {
               </div>
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>2 · Warna tulisan <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {SIM_ACCENTS[accent][0]}</span></div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>2 · Warna poly tulisan &amp; logo <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}>· {polyLain ? tulisan + ', sesuai pilihan produk' : tulisan}</span></div>
               <div style={{ display: 'flex', gap: 10 }}>
-                {SIM_ACCENTS.map(([label, bg], i) => (
-                  <button key={label} type="button" title={label} aria-label={'Warna tulisan ' + label} aria-pressed={accent === i} onClick={() => { mulai(); setAccent(i); }} style={swatchStyle(bg, accent === i)}></button>
+                {SIM_POLY.map(([label, bg], i) => (
+                  <button key={label} type="button" title={label} aria-label={'Warna poly ' + label} aria-pressed={!polyLain && tulisanIdx === i} onClick={() => pilihTulisan(i)} style={swatchStyle(bg, !polyLain && tulisanIdx === i)}></button>
                 ))}
               </div>
             </div>
@@ -156,13 +179,14 @@ function SimulatorRapor({ order }) {
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-heading)', marginBottom: 10 }}>4 · Logo sekolah (opsional)</div>
               <label
+                className="af-sim-upload"
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer',
                   border: '2px dashed var(--af-ink-3)', borderRadius: 'var(--radius-sm)', padding: '14px 16px',
                   fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-body)', background: 'var(--af-paper)',
                 }}
               >
-                <input type="file" accept="image/*" onChange={onLogo} style={{ display: 'none' }} />
+                <input type="file" accept="image/*" onChange={onLogo} />
                 {logo ? '✓ Logo terpasang — klik untuk ganti' : '⬆ Unggah logo (PNG/JPG)'}
               </label>
             </div>

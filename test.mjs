@@ -594,7 +594,7 @@ test('the first phone screen holds heading, photo, three points, logos and the b
   assert.match(hero, /<img src="img\/collection-480\.webp"[^>]*fetchpriority="high"/);
   assert.ok(!/<img [^>]*loading="lazy"/.test(hero), 'nothing in the first screen waits for lazy loading');
   const points = [...hero.matchAll(/<div><strong>([^<]+)<\/strong><span>([^<]+)<\/span><\/div>/g)].map((m) => m[1]);
-  assert.deepEqual(points, ['50 pcs', '±Rp 50rb', 'Gratis']);
+  assert.deepEqual(points, ['50 pcs', 'Harga pabrik', 'Gratis'], 'no price figure in the first screen (owner, 2026-11-24)');
   assert.ok(at('id="leadForm"') > at('</section>'), 'the form left the hero');
   assert.ok(at('<div class="clients">') > 0 && at('<div class="clients">') < at('id="model"'), 'the logos come right after the hero');
   assert.ok(at('id="model"') < at('data-model="jahit"') && at('data-model="press"') < at('id="formToggle"') && at('id="formToggle"') < at('id="leadForm"'),
@@ -894,11 +894,16 @@ test('standard prices point at real catalogue types and are shown on the page', 
   }
   for (const [, row] of hs.clearHolder.isi) assert.equal(row.length, hs.clearHolder.ukuran.length);
   const html = read('dist/produk-standar/index.html');
-  assert.match(html, /id="daftar-harga"/);
-  assert.ok(html.includes('Update <!-- -->' + hs.update), 'price list shows its date');
+  // One starting price per product, never the full list (owner, 2026-11-24).
+  assert.doesNotMatch(html, /id="daftar-harga"|Daftar Harga/);
   assert.doesNotMatch(html, /PPN/, 'prices are final, no PPN note');
-  for (const [, nama, , , harga] of hs.daftar.flatMap((g) => g.barang)) assert.ok(html.includes('Rp' + harga.toLocaleString('id-ID')), nama);
   assert.ok(html.includes('Mulai Rp20.000/pcs'), 'Clear Holder card shows its lowest price');
+  const visible = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
+  const prices = [...visible.matchAll(/Rp[\d.]+/g)].map((m) => visible.slice(Math.max(0, m.index - 6), m.index));
+  assert.ok(prices.length > 0 && prices.every((before) => /Mulai $/.test(before)), 'every price on the page is a "Mulai" price: ' + prices.join(' | '));
+  const katalog2 = read('project/ui_kits/website_v2/ProdukStandarSections.jsx');
+  assert.match(katalog2, /<p className="af-ps-mulai">Mulai <strong>\{rupiah\(mulaiTipe\.harga\)\}<\/strong>\/\{mulaiTipe\.satuan\}<\/p>/, 'the detail sheet shows one starting price');
+  assert.doesNotMatch(katalog2, /harga\.map\(/, 'no per-type price rows in the sheet');
 });
 // Custom products: load the built price table and product logic without a DOM.
 function customKit() {
@@ -1064,6 +1069,19 @@ test('HPP: selling price, customer quote, and saved data that survives new optio
     assert.ok(t.includes(line), 'quote is missing: ' + line + '\n' + t);
   }
   assert.ok(!/HPP|markup/i.test(t), 'the quote never shows cost or markup');
+  // Review 2026-11-24: only the base cost (Rp20.000) and a 30% markup filled in still quoted Rp26.000/pcs.
+  const partial = admin.lengkapi({});
+  partial.hpp['map-press'].harga.dasar.f4[50] = 20000;
+  const raw = { ukuran: 'f4', bahan: 'tpk-urat', poly: 'emas', 'inner-tipe': 'mika', 'inner-jumlah': '40' };
+  const sebagian = admin.hitungHpp(press, raw, 100, partial.hpp['map-press']);
+  assert.ok(sebagian.kurang.length > 0, 'the other costs are still empty');
+  assert.equal(admin.hargaJual(sebagian.hppPcs, 30, 500), 26000, 'the bare markup sum the review saw');
+  assert.equal(admin.hargaPenawaran(sebagian, 30, 500), null, 'no price, so no quote, while any cost is missing');
+  assert.equal(admin.hargaPenawaran({ ...sebagian, kurang: [] }, 30, 500), 26000, 'a complete HPP is quoted');
+  const kalkulator = read('project/ui_kits/website_v2/AdminHpp.jsx');
+  assert.match(kalkulator, /const jual = hargaPenawaran\(hasil, markup, data\.bulat\);/);
+  assert.match(kalkulator, /jual: hargaPenawaran\(h, markup, data\.bulat\)/, 'the quantity table follows the same rule');
+  assert.match(kalkulator, /const teks = jual \? teksPenawaran\(/);
 
   const saved = admin.lengkapi({});
   saved.hpp['map-press'].harga.dasar.f4[100] = 18000;
@@ -1285,7 +1303,13 @@ test('Map Press, 3 colours, 150 pcs: the simulator message carries the whole she
   assert.equal(kit.pesanDraft(press, draft), kit.pesanCustom(press, draft.raw, 150, 3, draft.info), 'the same message as the sheet');
   const msg = sim.pesanSimulator({ sampul: 'Hijau', tulisan: 'Emas', nama: '' }, press, draft);
   assert.match(msg, /^Halo Agatha Felix! Saya mau minta penawaran \*Map Press\*/);
-  assert.match(msg, /- Ukuran: A4[\s\S]*\nJumlah: 150 pcs \(3 warna, minimal 50 pcs per warna\)\nSekolah \/ instansi: SD Uji\nKota pengiriman: Bekasi\n\nDesain dari simulator rapor:\n- Warna sampul: Hijau\n- Warna tulisan: Emas\n\n/);
+  assert.match(msg, /- Ukuran: A4[\s\S]*\nJumlah: 150 pcs \(3 warna, minimal 50 pcs per warna\)\nSekolah \/ instansi: SD Uji\nKota pengiriman: Bekasi\n\nDesain dari simulator rapor:\n- Warna sampul: Hijau\n- Warna poly tulisan & logo: Emas\n\n/);
+  // Review 2026-11-24: poly Silver in the sheet, then the simulator, sent "Warna poly logo: Silver"
+  // and "Warna tulisan: Kuning". The lettering is the poly: one colour, named once, by the sheet.
+  const silver = sim.pesanSimulator({ sampul: 'Hijau', tulisan: 'Silver', nama: '' }, press, { ...draft, raw: { ukuran: 'a4', poly: 'silver' } });
+  assert.deepEqual(silver.match(/Warna (poly|tulisan)[^\n]*/g), ['Warna poly logo: Silver']);
+  const lengkap = sim.pesanSimulator({ sampul: 'Hijau', tulisan: 'Silver', nama: '' }, press, { ...draft, raw: { 'warna-sampul': 'Hijau', poly: 'silver' } });
+  assert.ok(!lengkap.includes('Desain dari simulator rapor'), 'no empty design block when the sheet names both colours');
   assert.equal(msg.split('\n').at(-1), press.fileNote, 'the logo note still closes the message');
   assert.match(kit.pesanDraft(press, { ...kit.DRAFT_BARU, warnaCount: 3, jumlah: 100 }), /Jumlah: 150 pcs \(3 warna/, 'raised to the colour minimum, as the sheet does');
   const bantu = sim.pesanSimulator({ sampul: 'Biru', tulisan: 'Putih', nama: 'SD Uji' }, press, { ...draft, bantu: true });
@@ -1294,11 +1318,23 @@ test('Map Press, 3 colours, 150 pcs: the simulator message carries the whole she
   // preview, and a swatch picked in the simulator is written into the sheet.
   const navy = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Emas', nama: '' }, press, { ...draft, raw: { 'warna-sampul': 'Navy' } });
   assert.deepEqual(navy.match(/Warna sampul: .*/g), ['Warna sampul: Navy']);
-  assert.match(navy, /Desain dari simulator rapor:\n- Warna tulisan: Emas\n/);
+  assert.match(navy, /Desain dari simulator rapor:\n- Warna poly tulisan & logo: Emas\n/);
   assert.deepEqual(msg.match(/Warna sampul: .*/g), ['Warna sampul: Hijau'], 'without a sheet colour, the simulator names it');
   const simSrc = read('project/ui_kits/website_v2/Simulator.jsx');
   assert.match(simSrc, /if \(dari\) order\.ubah\(dari, \{ raw: \{ \.\.\.draft\.raw, 'warna-sampul': SIM_COLORS\[i\]\[0\] \} \}\);/);
   assert.match(simSrc, /onClick=\{\(\) => pilihSampul\(i\)\}/);
+  // A lettering swatch picked here is the sheet's poly, and its options are the sheet's own poly ids.
+  assert.match(simSrc, /if \(dari\) order\.ubah\(dari, \{ raw: \{ \.\.\.draft\.raw, poly: SIM_POLY\[i\]\[2\] \} \}\);/);
+  assert.match(simSrc, /onClick=\{\(\) => pilihTulisan\(i\)\}/);
+  for (const [, label, id] of simSrc.matchAll(/\['([^']+)', '#[0-9A-F]{6}', '([a-z-]+)'\]/g)) {
+    const op = kit.POLY.find((x) => x.id === id);
+    assert.ok(op && op.label === label && !op.uji, label + ' is a poly colour we produce');
+  }
+  assert.ok(!/Kuning|SIM_ACCENTS/.test(simSrc), 'no lettering colour outside the poly range');
+  // Review 2026-11-24: the logo upload was out of the tab order (display:none).
+  assert.match(simSrc, /<input type="file" accept="image\/\*" onChange=\{onLogo\} \/>/);
+  assert.match(simSrc, /\.af-sim-upload input \{ position: absolute; width: 1px; height: 1px; opacity: 0;/);
+  assert.match(simSrc, /\.af-sim-upload:focus-within \{ outline: 3px solid/);
   // Straight to the simulator, no product: the quantity is asked for, never left blank.
   const lepas = sim.pesanSimulator({ sampul: 'Oranye', tulisan: 'Kuning', nama: '' });
   assert.match(lepas, /\nJumlah: \.\.\. pcs \(minimal 50 pcs per warna\)\n/);
@@ -1439,6 +1475,14 @@ test('contrast: WhatsApp buttons use dark text, muted and deep text colours meet
   const rapor = read('project/static/raporsekolah/index.html');
   assert.match(rapor, /\.btn-wa\{background:var\(--wa\);color:var\(--ink\)/);
   assert.ok(ratio(rapor.match(/--ink3:(#\w{6})/)[1], '#FFFFFF') >= 4.5);
+  // a:hover is orange-deep, the background of .btn-or (Google Maps): the text vanished on hover (review 2026-11-24).
+  assert.match(rapor, /\.btn-wa:hover,\.btn-ghost:hover\{color:var\(--ink\)\}\.btn-or:hover\{color:#fff\}/);
+  assert.match(rapor, /#akhir \.btn-ghost,#akhir \.btn-ghost:hover\{color:#fff;/);
+  // The thank-you page's WhatsApp button: white on WhatsApp green was 1.98:1.
+  const thanks = read('project/static/raporsekolah/terima-kasih.html');
+  assert.match(thanks, /\.btn\{[^}]*background:var\(--wa\);color:var\(--ink\)/);
+  assert.match(thanks, /\.btn:hover\{[^}]*color:var\(--ink\)\}/);
+  assert.ok(ratio(thanks.match(/--ink:(#\w{6})/)[1], thanks.match(/--wa:(#\w{6})/)[1]) >= 4.5);
 });
 
 test('landing rapor has one main landmark; the custom page shows proof before the simulator', () => {

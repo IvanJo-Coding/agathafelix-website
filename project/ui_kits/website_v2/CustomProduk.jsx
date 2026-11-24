@@ -845,6 +845,6 @@ function CustomProdukSection({ order }) {
 
 Object.assign(window, {
   CustomProdukSection, useCustomDrafts,
-  AfCustom: { CUSTOM_PRODUK, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize,
+  AfCustom: { CUSTOM_PRODUK, POLY, customSel, visibleFields, optionsOf, describeField, pesanCustom, pesanBantu, perkiraanCustom, ringSize,
     jumlahSaran, pesanDraft, ringkasDraft, DRAFT_BARU, slugFromHash },
 });

@@ -146,6 +146,13 @@ function hargaJual(hppPcs, markup, bulat) {
   return bulat > 0 ? Math.ceil(raw / bulat - 1e-6) * bulat : Math.round(raw);
 }
 
+// The selling price an order may be quoted at: none while any cost is still
+// missing (an unpriced option, a one-time cost without an amount), so a quote
+// is never built on a partial HPP.
+function hargaPenawaran(hasil, markup, bulat) {
+  return hasil.kurang.length ? null : hargaJual(hasil.hppPcs, markup, bulat);
+}
+
 const rupiah = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
 
 // WhatsApp-ready quote for the customer. Never shows HPP or markup.
@@ -262,7 +269,8 @@ function Kalkulator({ data, kalk, setKalk, keTab }) {
   const markup = typeof kalk.markup === 'number' ? kalk.markup : segmen && typeof segmen.markup === 'number' ? segmen.markup : null;
   const ekstra = { perPcs: kalk.lainPcs, sekali: kalk.lainSekali };
   const hasil = hitungHpp(p, raw, qty, data.hpp[p.slug], ekstra);
-  const jual = hargaJual(hasil.hppPcs, markup, data.bulat);
+  const lengkap = hasil.kurang.length === 0;
+  const jual = hargaPenawaran(hasil, markup, data.bulat);
   const sel = hasil.sel;
   const [tersalin, setTersalin] = React.useState(false);
   const set = (patch) => setKalk((k) => ({ ...k, ...patch }));
@@ -272,7 +280,7 @@ function Kalkulator({ data, kalk, setKalk, keTab }) {
   const daftarQty = [...new Set([...TINGKAT, qty])].filter((n) => n > 0).sort((a, b) => a - b);
   const tingkat = daftarQty.map((n) => {
     const h = hitungHpp(p, raw, n, data.hpp[p.slug], ekstra);
-    return { n, hpp: h.hppPcs, jual: hargaJual(h.hppPcs, markup, data.bulat) };
+    return { n, hpp: h.kurang.length ? null : h.hppPcs, jual: hargaPenawaran(h, markup, data.bulat) };
   });
   const jual50 = tingkat[0] && tingkat[0].jual;
   const teks = jual ? teksPenawaran(p, sel, qty, jual, sekolah, hasil.sekaliNama) : '';
@@ -388,7 +396,7 @@ function Kalkulator({ data, kalk, setKalk, keTab }) {
               {hasil.sekali ? <li><span>Biaya sekali bayar {rupiah(hasil.sekali)} ÷ {qty} pcs</span><span>{rupiah(hasil.sekali / qty)}</span></li> : null}
             </ul>
             <div className="af-ad-big">
-              <div><small>HPP per pcs</small><strong>{rupiah(hasil.hppPcs)}</strong><span>Total {rupiah(hasil.total)}</span></div>
+              <div><small>{lengkap ? 'HPP per pcs' : 'HPP sementara (belum lengkap)'}</small><strong>{rupiah(hasil.hppPcs)}</strong><span>Total {rupiah(hasil.total)}</span></div>
               <div className="jual">
                 <small>Harga jual per pcs{markup !== null ? ' · markup ' + markup + '%' : ''}</small>
                 {jual ? (
@@ -396,7 +404,7 @@ function Kalkulator({ data, kalk, setKalk, keTab }) {
                     <strong>{rupiah(jual)}</strong>
                     <span>Total {rupiah(jual * qty)} · laba {rupiah((jual - hasil.hppPcs) * qty)} ({Math.round((1 - hasil.hppPcs / jual) * 100)}% dari harga jual)</span>
                   </>
-                ) : <span>{markup === null ? 'Pilih segmen atau isi markup.' : 'Isi harga perintilan dulu.'}</span>}
+                ) : <span>{!lengkap ? 'Belum bisa dihitung: lengkapi dulu harga yang masih kosong di atas.' : markup === null ? 'Pilih segmen atau isi markup.' : 'Isi harga perintilan dulu.'}</span>}
               </div>
             </div>
             <h3 style={{ margin: '14px 0 6px' }}>Potongan per jumlah</h3>
@@ -418,9 +426,8 @@ function Kalkulator({ data, kalk, setKalk, keTab }) {
                 <h3 style={{ margin: '16px 0 6px' }}>Teks penawaran untuk pelanggan</h3>
                 <textarea readOnly value={teks} aria-label="Teks penawaran" />
                 <button type="button" className="af-ad-btn utama" style={{ marginTop: 8 }} onClick={salin}>{tersalin ? 'Tersalin ✓' : 'Salin teks penawaran'}</button>
-                {hasil.kurang.length ? <p className="af-ad-hint">Periksa dulu: harga belum lengkap.</p> : null}
               </>
-            ) : null}
+            ) : !lengkap ? <p className="af-ad-hint">Teks penawaran muncul setelah semua harga terisi.</p> : null}
           </>
         ) : <p className="af-ad-hint">Isi jumlah pesanan.</p>}
       </section>
@@ -681,4 +688,4 @@ if (typeof document !== 'undefined' && document.getElementById('af-admin')) {
   ReactDOM.createRoot(document.getElementById('af-admin')).render(<AdminApp />);
 }
 
-Object.assign(window, { AfAdmin: { TINGKAT, grupHpp, lengkapi, nilai, hitungHpp, hargaJual, teksPenawaran } });
+Object.assign(window, { AfAdmin: { TINGKAT, grupHpp, lengkapi, nilai, hitungHpp, hargaJual, hargaPenawaran, teksPenawaran } });
