@@ -56,6 +56,8 @@ const SITE = {
   // Microsoft Clarity project ID (heatmaps, scroll depth, recordings). Empty
   // means Clarity stays off. The project must keep its Cookies setting OFF.
   clarityId: 'ytbsysdvb4',
+  // OpenAI Ads pixel (ads in ChatGPT). Empty means it stays off.
+  openaiPixelId: 'VaTmStM36AKmtEDsVX11jV',
 };
 
 // ---------------------------------------------------------------------------
@@ -183,7 +185,7 @@ async function transpileSource(code) {
 // Google tag as soon as it arrives. (Deferred, it ran after the first paint and
 // Lighthouse counted it as blocking time.) On the thank-you page the parser only
 // reaches it after the synchronous lead-handoff.js whose result it reads.
-const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel, googleAnalyticsId: SITE.googleAnalyticsId, clarityId: SITE.clarityId})};</script>
+const GTAG_HEAD = `<script>window.AF_TRACKING=${JSON.stringify({googleAdsId: SITE.googleAdsId, waConversionLabel: SITE.waConversionLabel, googleAnalyticsId: SITE.googleAnalyticsId, clarityId: SITE.clarityId, openaiPixelId: SITE.openaiPixelId})};</script>
 <script async src="/js/af-site.js"></script>`;
 
 // ---------------------------------------------------------------------------

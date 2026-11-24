@@ -1094,7 +1094,7 @@ test('the privacy page names every measuring tool and every public page links to
   assert.match(html, /<link rel="canonical" href="https:\/\/agatha-felix\.com\/kebijakan-privasi\/">/);
   assert.ok(!html.includes('<!-- AF_FONTS -->') && !html.includes('<!-- AF_GOOGLE_TAG -->'), 'the build fills both markers');
   assert.match(html, /<script async src="\/js\/af-site\.js"><\/script>/);
-  for (const tool of ['Google Ads', 'Google Analytics', 'Microsoft Clarity']) assert.ok(html.includes('<h3>' + tool + '</h3>'), tool);
+  for (const tool of ['Google Ads', 'Google Analytics', 'Microsoft Clarity', 'OpenAI Ads']) assert.ok(html.includes('<h3>' + tool + '</h3>'), tool);
   assert.ok(!html.includes('wa.me'), 'a data request must not count as a WhatsApp conversion');
   for (const [, raw] of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
     assert.ok(fs.existsSync(path.join('dist', raw.endsWith('/') ? raw + 'index.html' : raw)), 'missing ' + raw);
@@ -1103,7 +1103,44 @@ test('the privacy page names every measuring tool and every public page links to
   for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html']) {
     assert.ok(read('dist/' + file).includes('href="/kebijakan-privasi/"'), file + ' does not link the privacy page');
   }
-  assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Google Analytics[\s\S]*Microsoft Clarity/);
+  assert.match(read('dist/raporsekolah/index.html'), /id="privasi"[\s\S]*Google Analytics[\s\S]*Microsoft Clarity[\s\S]*OpenAI Ads/);
+});
+test('OpenAI Ads pixel: production only, after the first paint, a page view per page and a lead per WhatsApp chat', () => {
+  const withOpenAI = { ...withAnalytics, openaiPixelId: 'VaTmStM36AKmtEDsVX11jV' };
+  const queue = (window) => JSON.parse(JSON.stringify((window.oaiq?.q || []).map((call) => Array.from(call))));
+  const sdk = (live) => live.scripts.filter((el) => String(el.src) === 'https://bzrcdn.openai.com/sdk/oaiq.min.js');
+  const live = tracking('agatha-felix.com', '/raporsekolah/', {}, withOpenAI);
+  assert.deepEqual(queue(live.window), [['init', { pixelId: 'VaTmStM36AKmtEDsVX11jV', debug: false }], ['measure', 'page_viewed', { type: 'contents' }]]);
+  assert.equal(sdk(live).length, 0, 'the SDK waits for the page');
+  for (const fn of live.loads) fn();
+  assert.equal(sdk(live).length, 1);
+  assert.equal(sdk(live)[0].async, true);
+  live.click(wa, '_blank', { 'data-wa': 'hero' });
+  live.click('tel:+6282219472613', '', { text: 'Telepon' });
+  live.window.AFTracking.noteWhatsApp('form');
+  assert.deepEqual(queue(live.window).slice(2), [['measure', 'lead_created', { type: 'customer_action' }], ['measure', 'lead_created', { type: 'customer_action' }]],
+    'one lead per WhatsApp chat (button or form), none for a phone call');
+  assert.ok(!JSON.stringify(queue(live.window)).includes('Local%20test'), 'never the WhatsApp message');
+  // Not on the thank-you page (its link holds the visitor's message), never in a preview.
+  for (const [host, pathname] of [['agatha-felix.com', thanksPath], ['localhost', '/raporsekolah/']]) {
+    const off = tracking(host, pathname, {}, withOpenAI);
+    for (const fn of off.loads) fn();
+    off.click(wa, '_blank', { 'data-wa': 'hero' });
+    assert.equal(off.window.oaiq, undefined, host + pathname);
+    assert.equal(sdk(off).length, 0, host + pathname);
+  }
+  assert.match(read('dist/index.html'), /"openaiPixelId":"VaTmStM36AKmtEDsVX11jV"/);
+});
+test('no form field carries an autocomplete token the OpenAI pixel reads (name, city, email, phone...)', () => {
+  // The pixel's "automatic advanced matching" found the rapor form's name and city by
+  // these tokens and sent them with its events (checked in a browser, 2026-11-24).
+  const tokens = /\bauto[cC]omplete=["{']+(?!off\b)[^"'}]+/g;
+  for (const file of ['index.html', 'produk-standar/index.html', 'produk-custom/index.html', 'raporsekolah/index.html', 'raporsekolah/terima-kasih.html', 'kebijakan-privasi/index.html']) {
+    assert.deepEqual(read('dist/' + file).match(tokens) || [], [], file);
+  }
+  for (const f of fs.readdirSync('project/ui_kits/website_v2').filter((f) => f.endsWith('.jsx') && f !== 'AdminHpp.jsx')) {
+    assert.deepEqual(read('project/ui_kits/website_v2/' + f).match(tokens) || [], [], f);
+  }
 });
 test('every photo path used by the page scripts exists in the build', () => {
   for (const file of fs.readdirSync('dist/js')) {

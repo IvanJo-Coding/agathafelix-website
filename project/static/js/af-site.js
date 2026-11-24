@@ -234,6 +234,32 @@
       window.addEventListener('scroll', showBar, { once: true, passive: true });
     });
   }
+  // OpenAI Ads pixel (ads in ChatGPT): page_viewed on each page and
+  // lead_created for each WhatsApp chat, with the official queue stub so calls
+  // made before the SDK arrives are kept. Its "automatic advanced matching"
+  // reads form fields by their autocomplete tokens (name, city, email, phone)
+  // and sends the values with its events, so no form here carries those tokens
+  // (checked in test.mjs). Not on the thank-you page, whose WhatsApp link holds
+  // the visitor's message.
+  var useOpenAI = production && !!config.openaiPixelId && !thankYou;
+  function noteOpenAI(name, type) {
+    if (useOpenAI) window.oaiq('measure', name, { type: type });
+  }
+  if (useOpenAI) {
+    if (typeof window.oaiq !== 'function') {
+      var oaiq = function () { oaiq.q.push(arguments); };
+      oaiq.q = [];
+      window.oaiq = oaiq;
+    }
+    window.oaiq('init', { pixelId: config.openaiPixelId, debug: false });
+    noteOpenAI('page_viewed', 'contents');
+    later.push(function () {
+      var sdk = document.createElement('script');
+      sdk.async = true;
+      sdk.src = 'https://bzrcdn.openai.com/sdk/oaiq.min.js';
+      document.head.appendChild(sdk);
+    });
+  }
   // Tags that wait for the page: started together after the load event, once
   // a frame has been painted (so never ahead of the hero text, even where the
   // first frame is late) and the browser is idle (at most 2 s later).
@@ -300,6 +326,9 @@
         window.gtag('event', 'generate_lead', lead);
       }
     }
+    // Every chat is a lead for OpenAI Ads, the rapor form's handoff included:
+    // the pixel does not run on the thank-you page, so nothing counts it twice.
+    if (whatsapp) noteOpenAI('lead_created', 'customer_action');
     if (!useClarity) return;
     window.clarity('event', whatsapp ? 'klik_whatsapp' : 'klik_telepon');
     window.clarity('set', whatsapp ? 'tombol_whatsapp' : 'tombol_telepon', name);
