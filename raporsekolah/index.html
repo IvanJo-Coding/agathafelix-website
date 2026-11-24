@@ -46,7 +46,9 @@ img{max-width:100%;display:block}
 .btn-wa{background:var(--wa);color:var(--ink);box-shadow:0 4px 0 var(--wa-deep)}
 .btn-or{background:var(--orange-deep);color:#fff;box-shadow:0 4px 0 #7E2410}
 .btn-ghost{background:transparent;color:var(--ink);box-shadow:0 4px 0 rgba(43,42,40,.25)}
+/* a:hover turns links orange-deep, the same colour as .btn-or: buttons keep their own text colour. */
 .btn:hover{transform:translateY(-2px)}
+.btn-wa:hover,.btn-ghost:hover{color:var(--ink)}.btn-or:hover{color:#fff}
 .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .btn-lg{font-size:19px;padding:17px 32px;width:100%}
 .chip{white-space:nowrap}
@@ -264,7 +266,7 @@ details p{font-size:15px;margin-top:10px;padding-left:24px}
 #akhir p{color:rgba(255,255,255,.85);font-size:18px;margin-top:14px}
 .cta-box{text-align:center;padding:70px 0}
 .cta-btns{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:26px}
-#akhir .btn-ghost{color:#fff;border-color:#fff;box-shadow:0 4px 0 rgba(255,255,255,.4)}
+#akhir .btn-ghost,#akhir .btn-ghost:hover{color:#fff;border-color:#fff;box-shadow:0 4px 0 rgba(255,255,255,.4)}
 footer{background:var(--ink);color:rgba(255,255,255,.72);font-size:14px;padding:34px 0 96px}
 footer .wrap{display:grid;gap:14px}
 footer b{color:#fff;font-family:var(--fd);font-size:17px}
@@ -315,7 +317,7 @@ footer details p{color:rgba(255,255,255,.72)}
 <div class="hero-proof">
 <div class="pricebar">
 <div><strong>50 pcs</strong><span>mulai pesan</span></div>
-<div><strong>±Rp 50rb</strong><span>harga pabrik / pcs (100 pcs)</span></div>
+<div><strong>Harga pabrik</strong><span>tanpa perantara</span></div>
 <div><strong>Gratis</strong><span>desain &amp; mockup</span></div>
 </div>
 <div class="hero-trust">
@@ -509,7 +511,7 @@ Lanjut ke WhatsApp</button>
 <li><b>Bahan TPK atau linen</b> tekstur pasir (linen khusus model press).</li>
 <li><b>Logo poly / hot print</b> emas atau silver.</li>
 <li><b>Satu desain, beberapa warna.</b> Minimal 50 pcs per warna.</li>
-<li><b>Rata-rata ±Rp50.000/pcs</b> untuk 100 pcs, sama seperti sampul raport.</li>
+<li><b>Harga sama seperti sampul raport</b>, langsung dari pabrik.</li>
 </ul>
 <a class="btn btn-wa" href="https://wa.me/6282219472613" target="_blank" rel="noopener noreferrer" data-wa="ijazah" data-msg="ijazah">Minta Harga Map Ijazah</a>
 </div>
