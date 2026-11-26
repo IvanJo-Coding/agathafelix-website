@@ -1149,6 +1149,18 @@ test('OpenAI Ads pixel: production only, after the first paint, a page view per 
   }
   assert.match(read('dist/index.html'), /"openaiPixelId":"VaTmStM36AKmtEDsVX11jV"/);
 });
+test('the privacy check keeps every tag the site loads offline, so a test run never lands in real ad data', () => {
+  // privacy-check.mjs serves the build as agatha-felix.com, so production tags run. A host
+  // left resolvable sent real page_viewed and lead_created events to OpenAI Ads (review 2026-11-26).
+  const check = read('privacy-check.mjs');
+  const rules = [...check.matchAll(/MAP (\S+) ~NOTFOUND/g)].map((m) => m[1]);
+  const blocked = (host) => rules.some((r) => (r.startsWith('*.') ? host === r.slice(2) || host.endsWith(r.slice(1)) : host === r));
+  const hosts = [...new Set([...read('project/static/js/af-site.js').matchAll(/https:\/\/([a-z0-9.-]+)\//g)].map((m) => m[1]))]
+    .filter((h) => !/(^|\.)agatha-felix\.com$/.test(h));
+  assert.ok(hosts.includes('bzrcdn.openai.com') && hosts.includes('www.clarity.ms') && hosts.includes('www.googletagmanager.com'), hosts.join(', '));
+  for (const host of [...hosts, 'bzr.openai.com', 'wa.me']) assert.ok(blocked(host), host + ' is reachable from the privacy check');
+  assert.match(check, /check\(openaiAnswered\.length === 0, 'no test page view or lead reached OpenAI Ads'/);
+});
 test('no form field carries an autocomplete token the OpenAI pixel reads (name, city, email, phone...)', () => {
   // The pixel's "automatic advanced matching" found the rapor form's name and city by
   // these tokens and sent them with its events (checked in a browser, 2026-11-24).
@@ -1478,6 +1490,12 @@ test('contrast: WhatsApp buttons use dark text, muted and deep text colours meet
   // a:hover is orange-deep, the background of .btn-or (Google Maps): the text vanished on hover (review 2026-11-24).
   assert.match(rapor, /\.btn-wa:hover,\.btn-ghost:hover\{color:var\(--ink\)\}\.btn-or:hover\{color:#fff\}/);
   assert.match(rapor, /#akhir \.btn-ghost,#akhir \.btn-ghost:hover\{color:#fff;/);
+  // Header: the active page (desktop and phone menu) and the open menu button carry white
+  // text or an icon on orange; var(--af-orange) gave 3.66:1 (review 2026-11-26).
+  assert.ok(ratio(v('af-orange-strong'), '#FFFFFF') >= 4.5);
+  const shell = read('project/ui_kits/website_v2/Shell.jsx');
+  assert.equal((shell.match(/(isActive|open) \? 'var\(--af-orange-strong\)'/g) || []).length, 3);
+  assert.doesNotMatch(shell, /(isActive|open) \? 'var\(--af-orange\)'/);
   // The thank-you page's WhatsApp button: white on WhatsApp green was 1.98:1.
   const thanks = read('project/static/raporsekolah/terima-kasih.html');
   assert.match(thanks, /\.btn\{[^}]*background:var\(--wa\);color:var\(--ink\)/);

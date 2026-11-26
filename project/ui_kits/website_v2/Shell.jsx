@@ -160,7 +160,8 @@ function HeaderV2({ active }) {
                   fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 700,
                   textDecoration: 'none',
                   color: isActive ? '#fff' : 'var(--af-ink)',
-                  background: isActive ? 'var(--af-orange)' : 'transparent',
+                  // White text needs the strong orange: 4.76:1 (var(--af-orange) is 3.66:1).
+                  background: isActive ? 'var(--af-orange-strong)' : 'transparent',
                   border: '2px solid ' + (isActive ? 'var(--af-ink)' : 'transparent'),
                   boxShadow: isActive ? 'var(--shadow-sticker)' : 'none',
                   padding: '7px 16px', borderRadius: 'var(--radius-pill)', whiteSpace: 'nowrap',
@@ -183,7 +184,7 @@ function HeaderV2({ active }) {
           style={{
             display: 'none', marginLeft: 'auto', width: 46, height: 46, flexShrink: 0,
             alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            background: open ? 'var(--af-orange)' : '#fff', color: open ? '#fff' : 'var(--af-ink)',
+            background: open ? 'var(--af-orange-strong)' : '#fff', color: open ? '#fff' : 'var(--af-ink)',
             border: '2px solid var(--af-ink)', borderRadius: 'var(--radius-sm)',
             boxShadow: '0 3px 0 var(--af-ink)',
           }}
@@ -212,7 +213,7 @@ function HeaderV2({ active }) {
                 style={{
                   fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none',
                   color: isActive ? '#fff' : 'var(--af-ink)',
-                  background: isActive ? 'var(--af-orange)' : '#fff',
+                  background: isActive ? 'var(--af-orange-strong)' : '#fff',
                   border: '2px solid var(--af-ink)', boxShadow: '0 3px 0 var(--af-ink)',
                   padding: '13px 18px', borderRadius: 'var(--radius-md)',
                 }}

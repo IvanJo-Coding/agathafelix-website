@@ -8,7 +8,7 @@
 //   node build.mjs && node privacy-check.mjs
 //
 // Needs Chrome (CHROME_PATH overrides the default path) and network access to
-// download Clarity's recorder. Nothing reaches Clarity, Google or WhatsApp:
+// download Clarity's recorder. Nothing reaches Clarity, Google, OpenAI or WhatsApp:
 // Chrome resolves their hosts to nowhere, and the Clarity requests are answered
 // locally, with each upload handed to this script instead of Microsoft.
 import { spawn } from 'node:child_process';
@@ -58,7 +58,10 @@ const chrome = spawn(CHROME, [
   '--headless=new', `--remote-debugging-port=${DEBUG_PORT}`, `--user-data-dir=${profile}`, '--no-first-run', '--window-size=1280,900',
   '--disable-features=HttpsUpgrades,HttpsFirstBalancedModeAutoEnable',
   `--host-resolver-rules=MAP agatha-felix.com 127.0.0.1:${SITE_PORT}, MAP wa.me ~NOTFOUND, MAP *.whatsapp.com ~NOTFOUND, MAP *.clarity.ms ~NOTFOUND, ` +
-    'MAP *.googletagmanager.com ~NOTFOUND, MAP *.google-analytics.com ~NOTFOUND, MAP *.googleadservices.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND',
+    'MAP *.googletagmanager.com ~NOTFOUND, MAP *.google-analytics.com ~NOTFOUND, MAP *.googleadservices.com ~NOTFOUND, MAP *.doubleclick.net ~NOTFOUND, ' +
+    // The OpenAI Ads pixel runs too (the site is served as agatha-felix.com): without this
+    // rule each run sent real page_viewed and lead_created events (review, 2026-11-26).
+    'MAP *.openai.com ~NOTFOUND',
   'about:blank',
 ], { stdio: 'ignore' });
 process.on('exit', () => {
@@ -97,6 +100,12 @@ async function evaluate(expression) {
 }
 
 handlers['Runtime.bindingCalled'] = ({ name, payload }) => { if (name === '__afUpload') uploads.push(payload); };
+// OpenAI Ads: the pixel runs here as in production. Every request it makes is
+// noted, and any that gets an answer means a test event reached real ad data.
+const openaiTried = [], openaiAnswered = [];
+const isOpenAI = (url) => { try { return /(^|\.)openai\.com$/.test(new URL(url).hostname); } catch { return false; } };
+handlers['Network.requestWillBeSent'] = ({ request }) => { if (isOpenAI(request.url)) openaiTried.push(request.url); };
+handlers['Network.responseReceived'] = ({ response }) => { if (isOpenAI(response.url)) openaiAnswered.push(response.url); };
 handlers['Fetch.requestPaused'] = ({ requestId, request }) => {
   const body = request.url.startsWith('https://www.clarity.ms/tag/') ? loader : request.url === recorderUrl ? recorder : null;
   if (body === null) return send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
@@ -112,6 +121,7 @@ await send('Target.setDiscoverTargets', { discover: true });
 await send('Runtime.enable');
 await send('Page.enable');
 await send('DOM.enable');
+await send('Network.enable');
 await send('Runtime.addBinding', { name: '__afUpload' });
 await send('Fetch.enable', { patterns: [{ urlPattern: '*clarity.ms*' }] });
 // window.open is how a WhatsApp message kept out of the page is opened; record it.
@@ -233,6 +243,10 @@ check(all.includes(WA), 'clicked WhatsApp links were recorded, so the click path
 const leaks = [...new Set((all.match(/zz(sekolah|kota|warna|nama|form)\w*/gi) || []))];
 check(leaks.length === 0, 'nothing typed reached Clarity' + (leaks.length ? ': ' + leaks.join(', ') : ''));
 check(!all.includes(LOGO_DATA), 'the uploaded logo did not reach Clarity');
+
+console.log('OpenAI Ads pixel');
+check(openaiTried.length > 0, `the pixel ran as in production (${openaiTried.length} request(s) to *.openai.com)`);
+check(openaiAnswered.length === 0, 'no test page view or lead reached OpenAI Ads' + (openaiAnswered.length ? ': ' + [...new Set(openaiAnswered)].join(', ') : ''));
 
 ws.close();
 console.log(failures.length ? `\n${failures.length} privacy check(s) failed` : '\nAll privacy checks passed');
